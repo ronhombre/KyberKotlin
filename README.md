@@ -23,13 +23,13 @@ Unfortunately, due to support for X.509 encoding, this project had to use Bouncy
 The goal for this project is to decouple from the aforementioned libraries that are not implemented in Kotlin.
 This is in order to support Kotlin Multiplatform.
 
-### Capabilities (For the pure Kotlin version)
+### Capabilities (For the pure Kotlin version | src/commonMain)
 * Encapsulation (Unsuccessful)
 * Decapsulation (Unsuccessful)
 
 NOTE: THIS VERSION IS STILL IN DEVELOPMENT. PLEASE HELP ME FIX MANY OF MY MISTAKES.
 
-### Capabilities (For the kyberJCE-based version)
+### Capabilities (For the kyberJCE-based version | src/jvmMain)
 
 * Public Key (Assymetric)
 * Private Key (Assymetric)
@@ -37,7 +37,7 @@ NOTE: THIS VERSION IS STILL IN DEVELOPMENT. PLEASE HELP ME FIX MANY OF MY MISTAK
 * Multi-participant Shared Secret Key Generation _e.g. Bob and Alice (2 participants), or Bob, Alice, and Carol (3 participants), etc._
 * Shared Secret Key (32 Bytes) _For Symmetric Encryption_
 
-### Usage (For the kyberJCE-based version)
+### Usage (For the kyberJCE-based version | src/jvmMain)
 
 ```Kotlin
 val pairGen = KyberKeyPairGenerator() //Creates a key pair generator
@@ -83,7 +83,7 @@ At the 1.0.0 release, developers should be able to use this dependency if they w
 To align with the NIST ML-KEM specification which is the designated Algorithm name for CRYSTALS-Kyber.
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
-### List of Bugs
+### List of Bugs (For the kyberJCE-based version | src/jvmMain)
 
 * Kyber variant 512 (Kyber-512) sometimes fail to create a matching Shared Secret Key.
 * Have not been tested against other implementations. So far, it has been self-tested.
