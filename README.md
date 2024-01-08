@@ -6,8 +6,9 @@ of the finalists in the NIST post-quantum cryptography project. The submission l
 aiming at different security levels. Specifically, Kyber-512 aims at security roughly equivalent to AES-128, Kyber-768 
 aims at security roughly equivalent to AES-192, and Kyber-1024 aims at security roughly equivalent to AES-256.
 
-This project is heavily based on [kyberJCE](https://github.com/fisherstevenk/kyberJCE) by Steven Fisher.
-In addition, parts of the code are based on other open-source implementations of CRYSTALS-Kyber (ML-KEM).
+This project is heavily based on [kyberJCE](https://github.com/fisherstevenk/kyberJCE) by Steven Fisher. At the moment, this is about to change. Code is now
+fully based on FIPS 203! In addition, parts of the code are based on other open-source implementations of CRYSTALS-Kyber
+(ML-KEM).
 
 ## CAUTION
 
@@ -15,14 +16,20 @@ In addition, parts of the code are based on other open-source implementations of
 
 ## Introduction
 
-This is a 100% Kotlin/JVM implementation of CRYSTALS-Kyber (ML-KEM).
+This is a 100% Kotlin/JVM implementation of ML-KEM.
 It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order to implement SHAKE and SHA3 within the library.
 Unfortunately, due to support for X.509 encoding, this project had to use Bouncy Castle's bcutil-jdk18on library.
 
 The goal for this project is to decouple from the aforementioned libraries that are not implemented in Kotlin.
 This is in order to support Kotlin Multiplatform.
 
-### Capabilities
+### Capabilities (For the pure Kotlin version)
+* Encapsulation (Unsuccessful)
+* Decapsulation (Unsuccessful)
+
+NOTE: THIS VERSION IS STILL IN DEVELOPMENT. PLEASE HELP ME FIX MANY OF MY MISTAKES.
+
+### Capabilities (For the kyberJCE-based version)
 
 * Public Key (Assymetric)
 * Private Key (Assymetric)
@@ -30,7 +37,7 @@ This is in order to support Kotlin Multiplatform.
 * Multi-participant Shared Secret Key Generation _e.g. Bob and Alice (2 participants), or Bob, Alice, and Carol (3 participants), etc._
 * Shared Secret Key (32 Bytes) _For Symmetric Encryption_
 
-### Usage
+### Usage (For the kyberJCE-based version)
 
 ```Kotlin
 val pairGen = KyberKeyPairGenerator() //Creates a key pair generator
@@ -66,11 +73,10 @@ After generating the _Shared Secret Key_, they may communicate using a Symmetric
 ### Intent
 
 The intentions of this project are pure and transparent. Its goal is to decouple from the JVM and become a self-sufficient
-Kotlin Multiplatform dependency. In other words, a PURE Kotlin implementation of CRYSTALS-Kyber (ML-KEM) in a lightweight
-format. This is a stark difference compared to Bouncy Castle that supports most Encryption Algorithms and has a large
-data footprint.
+Kotlin Multiplatform dependency. In other words, a PURE Kotlin implementation of ML-KEM in a lightweight format. This is
+a stark difference compared to Bouncy Castle that supports most Encryption Algorithms and has a large data footprint.
 
-At the 1.0.0 release, developers should be able to use this dependency if they want to support CRYSTALS-Kyber (ML-KEM).
+At the 1.0.0 release, developers should be able to use this dependency if they want to support ML-KEM.
 
 ### Goal
 
@@ -89,12 +95,27 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 * Optimize method names, attribute names, etc.
 * Clean up code.
 * Optimize code for Kotlin.
+* Add references to FIPS 203.
 
 ### Why did I create this? _From Ron (Project Creator)_
 
 I tried [kyberJCE](https://github.com/fisherstevenk/kyberJCE), the implementation of Steven Fisher. However, I encountered 
 many bugs and problems whilst trying to make it work. I found his library to be nice, but it was full of inefficiencies that I thought I could fix. So far, I have made KotlinKyber
 simple in its use. In the future, I want to use this library as a dependency for my future applications.
+
+## Changelog
+
+### v0.1.0
+
+* Preparing for transition to debasing from kyberJCE.
+* New codes directly derived from FIPS 203 ipd.
+* NTT Zetas generator.
+* Inverse EXP generator.
+* Kotlin Multiplatform capabilities.
+
+### v0.0.1
+
+* It's working a little. Based on kyberJCE.
 
 ### References
 
