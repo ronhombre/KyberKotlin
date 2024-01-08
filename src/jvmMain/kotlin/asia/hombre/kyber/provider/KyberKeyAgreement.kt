@@ -193,6 +193,8 @@ class KyberKeyAgreement : KeyAgreementSpi() {
         val subKr = ByteArray(kr.size - Kyber.Params.CPAPKE_BYTES)
         System.arraycopy(kr, Kyber.Params.CPAPKE_BYTES, subKr, 0, subKr.size)
         val cmp: ByteArray = KyberINDCPA.encrypt(buf, publicKey, subKr, paramsK)
+        this.kyberCipherText = KyberCipherText(cmp, Kyber.Params.DEFAULT_P, Kyber.Params.DEFAULT_G)
+
         val fail = KyberKeyUtil.constantTimeCompare(cipher, cmp).toByte()
         val md: MessageDigest = Kyber.getInstance().sha3_256
         val krh = md.digest(cipher)
