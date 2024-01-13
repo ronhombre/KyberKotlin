@@ -8,11 +8,8 @@ import org.kotlincrypto.hash.sha3.SHA3_512
 class KyberKeyPairGenerator {
     constructor() //TODO
 
-    fun generate(parameter: KyberParameter): KyberKEMKeyPair {
+    fun generate(parameter: KyberParameter, randomSeed: ByteArray = SecureRandom.generateSecureBytes(32), pkeSeed: ByteArray = SecureRandom.generateSecureBytes(32)): KyberKEMKeyPair {
         val sha3256 = SHA3_256()
-
-        val randomSeed = SecureRandom.generateSecureBytes(32)
-        val pkeSeed = SecureRandom.generateSecureBytes(32)
 
         val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
@@ -50,7 +47,8 @@ class KyberKeyPairGenerator {
                     noiseVector[i] = KyberMath.NTT(noiseVector[i])
                 }
 
-                val systemVector = KyberMath.vectorAddition(KyberMath.nttMatrixMultiply(matrix, secretVector), noiseVector)
+                //Transposed ? Old Kyber v3
+                val systemVector = KyberMath.vectorAddition(KyberMath.nttMatrixToVectorDot(matrix, secretVector, true), noiseVector)
 
                 val encodeSize = (1.5 * KyberConstants.N).toInt()
                 val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed

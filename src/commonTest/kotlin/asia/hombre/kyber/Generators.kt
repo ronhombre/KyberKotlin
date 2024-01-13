@@ -1,6 +1,7 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
+import asia.hombre.kyber.internal.KyberMath.Companion.int
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.measureTime
@@ -39,23 +40,9 @@ class Generators {
 
             val qInv = KyberMath.powMod(KyberConstants.Q, -1, 1 shl 16).toInt()
 
-            val tmp = ShortArray(128)
-            tmp[0] = 2285
-            for(i in 1..<128) {
-                tmp[i] = KyberMath.montgomeryReduce((tmp[i - 1].toInt() * preMont), KyberConstants.Q, qInv)
-            }
-
             val zetas = ShortArray(128)
-            for(i in 0..<128) {
-                var zeta = tmp[inverseExp[i].toInt()]
-
-                if(zeta < 0)
-                    zeta = (zeta + KyberConstants.Q).toShort()
-
-                zetas[i] = zeta
-
-                if(!verifyPrecomputed(KyberConstants.PRECOMPUTED_ZETAS_TABLE, i, zetas, i))
-                    println("Wrong value at: $i")
+            for(i in 1..128) {
+                zetas[i - 1] = KyberMath.powMod(17, (2 * KyberMath.reverseBits(i - 1).toInt()) + 1, KyberConstants.Q).toShort()
             }
 
             println("{" + zetas.joinToString(", ") + "}")
@@ -67,5 +54,25 @@ class Generators {
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun verifyPrecomputed(x: ShortArray, xIndex: Int, y: ShortArray, yIndex: Int): Boolean {
         return x[xIndex] == y[yIndex]
+    }
+
+    fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
+        var stringOutput = ""
+        var count = 0
+        for(byte in byteArray) {
+            val bits = KyberMath.bytesToBits(byteArrayOf(byte))
+            for(bit in bits) {
+                stringOutput += bit.int
+
+                count++
+
+                if(count >= bitCount) {
+                    stringOutput += joiner
+                    count = 0
+                }
+            }
+        }
+
+        return stringOutput.removeSuffix(joiner)
     }
 }

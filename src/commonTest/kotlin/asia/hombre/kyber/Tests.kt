@@ -2,37 +2,15 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
 import asia.hombre.kyber.internal.KyberMath.Companion.int
-import kotlin.test.Test
+import asia.hombre.kyber.internal.SecureRandom
+import kotlin.random.Random
+import kotlin.test.*
 
 class Tests {
-    @OptIn(ExperimentalUnsignedTypes::class)
     @Test
     fun playground() {
-        //val ub = KyberMath.reverseBits(126)
-        println("Euclid: " + KyberMath.powMod(3329, -1, 1 shl 16))
-        //println("Mod: " + inverse_mod(38, 97))
-        //println("Bit Reversed: " + ub)
-        //println("Mont 2:" + ((2285 * 17) % 3329))
-        //println("Montgomery Reduce: " + montgomeryReduce(-758 * 2226))
-
-        //val time = measureTime { generateInverseExpTable() }.inWholeMilliseconds
-        //println("Generation time: {$time}ms")
-
-        //KyberMath.ntt(KyberParameter.makeFromSet(KyberParameter.Set.ML_KEM_768), ByteArray(0))
-
-        val array = shortArrayOf(1, 2, 4, 8, 9, 8, 4095)
-        val byteEncoded = KyberMath.byteEncode(array, 12)
-        println(4095)
-        println(bytesToBitString(byteEncoded, 12, ", "))
-        println(KyberMath.byteDecode(byteEncoded, 12).joinToString(", "))
-
         val keyPairAlice = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
-        println(keyPairAlice.encapsulationKey.key.fullBytes.size)
-        println(keyPairAlice.decapsulationKey.fullBytes.size)
-
         val keyPairBob = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
-        println(keyPairBob.encapsulationKey.key.fullBytes.size)
-        println(keyPairBob.decapsulationKey.fullBytes.size)
 
         val agreementAlice = KeyAgreement(keyPairAlice)
 
@@ -45,11 +23,65 @@ class Tests {
         val secretKeyAlice = agreementAlice.decapsulate(cipherTextBob.cipherText)
         val secretKeyBob = agreementBob.decapsulate(cipherTextAlice.cipherText)
 
-        println(secretKeyAlice.joinToString(", "))
-        println(secretKeyBob.joinToString(", "))
+        println("Gen: " + cipherTextAlice.secretKey.joinToString(", "))
+        println("Rec: " + secretKeyBob.joinToString(", "))
 
-        //for(i in 0..<1000)
-            //println(bytesToBitString(SecureRandom.generateSecureBytes(32).toUByteArray(), 8, ", "))
+        println("Gen: " + cipherTextBob.secretKey.joinToString(", "))
+        println("Rec: " + secretKeyAlice.joinToString(", "))
+    }
+
+    @Test
+    fun pkeEncryptDecrypt() {
+        val keyPairAlice = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
+        val keyPairBob = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
+
+        val agreementAlice = KeyAgreement(keyPairAlice)
+        val agreementBob = KeyAgreement(keyPairBob)
+
+        val original = SecureRandom.generateSecureBytes(32)
+        val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+        val recovered = agreementBob.fromCipherText(cipher)
+
+        assertContentEquals(original, recovered, "PKE Encryption and Decryption failed!")
+    }
+
+    @Test
+    fun ntt() {
+        val vectors = generateRandom256Shorts()
+        val nttVectors = KyberMath.NTT(vectors)
+        val recoveredVectors = KyberMath.invNTT(nttVectors)
+
+        assertContentEquals(vectors, recoveredVectors, "Conversion to NTT and inversion failed!")
+    }
+
+    @Test
+    fun byteEncoding() {
+        val shorts = generateRandom256Shorts()
+        val encodedBytes = KyberMath.byteEncode(shorts, 12)
+        val decodedBytes = KyberMath.byteDecode(encodedBytes, 12)
+
+        assertContentEquals(shorts, decodedBytes, "Byte Encoding and Decoding failed!")
+    }
+
+    @Test
+    fun regenerationComparison() {
+        val randomSeed = SecureRandom.generateSecureBytes(32)
+        val pkeSeed = SecureRandom.generateSecureBytes(32)
+
+        val firstGeneration = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
+        val secondGeneration = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
+
+        assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed!")
+    }
+
+    fun generateRandom256Shorts(): ShortArray {
+        val shorts = ShortArray(256)
+        val rand = Random(24)
+
+        for(i in shorts.indices)
+            shorts[i] = KyberMath.moduloOf(rand.nextInt().toShort(), KyberConstants.Q)
+
+        return shorts
     }
 
     fun brv(x: Int): Int {
@@ -81,6 +113,23 @@ class Tests {
             }
         }
 
-        return stringOutput.removeSuffix(joiner)
+        return stringOutput.removeSuffix(joiner).reversed()
+    }
+
+    fun bitsToString(booleanArray: BooleanArray, bitCount: Int, joiner: String): String {
+        var stringOutput = ""
+        var count = 0
+        for(bit in booleanArray) {
+            stringOutput += bit.int
+
+            count++
+
+            if(count >= bitCount) {
+                stringOutput += joiner
+                count = 0
+            }
+        }
+
+        return stringOutput.removeSuffix(joiner).reversed()
     }
 }

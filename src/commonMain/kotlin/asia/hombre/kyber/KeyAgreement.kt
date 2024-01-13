@@ -26,29 +26,25 @@ class KeyAgreement {
         val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
         val randomnessVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
         val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
-        var coefficients = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
-        var nonce = 0
         for((n, i) in (0..<parameter.K).withIndex()) {
-            nonce = n
 
-            randomnessVector[i] = KyberMath.samplePolyCBD(parameter.ETA1, KyberMath.prf(parameter.ETA1, randomness, nonce.toByte()))
+            randomnessVector[i] = KyberMath.samplePolyCBD(parameter.ETA1, KyberMath.prf(parameter.ETA1, randomness, n.toByte()))
             randomnessVector[i] = KyberMath.NTT(randomnessVector[i])
 
-            noiseVector[i] = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, (nonce + parameter.K).toByte()))
+            noiseVector[i] = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, (n + parameter.K).toByte()))
 
             for(j in 0..<parameter.K) {
                 matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
             }
         }
 
-        val noiseTerm = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, (++nonce).toByte()))
+        val noiseTerm = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, ((parameter.K * 2) + 1).toByte()))
+
+        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector, false)
 
         for(i in 0..<parameter.K) {
-            val temp = Array(parameter.K) { ShortArray(KyberConstants.N) }
-            for (j in 0..<parameter.K)
-                temp[j] = KyberMath.multiplyNTTs(matrix[j][i], randomnessVector[i])
-            coefficients = KyberMath.vectorAddition(coefficients, temp)
+            coefficients[i] = KyberMath.invNTT(coefficients[i])
         }
 
         coefficients = KyberMath.vectorAddition(coefficients, noiseVector)
@@ -88,36 +84,48 @@ class KeyAgreement {
                 KyberMath.byteDecode(
                     cipherText.encodedCoefficients.copyOfRange(
                         i * 32 * parameter.DU,
-                        (i + 1) * 32 * parameter.DU
-                    ), parameter.DU
-                ), parameter.DU
+                        (i + 1) * 32 * parameter.DU),
+                    parameter.DU
+                ),
+                parameter.DU
             )
         }
 
-        val constantTerms =
-            KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
+        val constantTerms = KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
         val secretVector = KyberMath.byteDecode(keypair.decapsulationKey.key.keyBytes, 12)
 
         val trueConstantTerm = constantTerms
 
         for (i in 0..<parameter.K) {
-            val subtraction = KyberMath.invNTT(KyberMath.multiplyNTTs(secretVector, KyberMath.NTT(coefficients[i])))
+            val subtraction = KyberMath.invNTT(
+                KyberMath.multiplyNTTs(
+                    secretVector.copyOfRange(
+                        i * KyberConstants.N,
+                        (i + 1) * KyberConstants.N),
+                    KyberMath.NTT(coefficients[i])
+                )
+            )
             for (j in 0..<KyberConstants.N)
-                trueConstantTerm[j] = (trueConstantTerm[j] - subtraction[j]).toShort()
+                trueConstantTerm[j] = KyberMath.moduloOf(trueConstantTerm[j] - subtraction[j], KyberConstants.Q)
         }
 
         return KyberMath.byteEncode(KyberMath.compress(trueConstantTerm, 1), 1)
     }
 
-    fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
-        val plainText = SecureRandom.generateSecureBytes(32)
-
-        val sha3512 = SHA3_512()
-        sha3512.update(plainText)
+    fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray = SecureRandom.generateSecureBytes(32)): KyberEncapsulationResult {
+        if(kyberEncapsulationKey.key.fullBytes.size != ((384 * kyberEncapsulationKey.key.parameter.K) + 32))
+            println("Type Check failed!")
+        if(!KyberMath.byteEncode(KyberMath.byteDecode(kyberEncapsulationKey.key.keyBytes, 12), 12).contentEquals(kyberEncapsulationKey.key.keyBytes))
+            println("Modulus Check failed!")
 
         val sha3256 = SHA3_256()
 
-        sha3512.update(sha3256.digest(kyberEncapsulationKey.key.fullBytes))
+        sha3256.update(kyberEncapsulationKey.key.fullBytes)
+
+        val sha3512 = SHA3_512()
+
+        sha3512.update(plainText)
+        sha3512.update(sha3256.digest())
 
         val sharedKeyAndRandomness = sha3512.digest()
 
@@ -127,7 +135,6 @@ class KeyAgreement {
     }
 
     fun decapsulate(cipherText: KyberCipherText): ByteArray {
-        val decryptionKey = keypair.decapsulationKey.key
         val encryptionKey = keypair.decapsulationKey.encryptionKey
         val encryptionHash = keypair.decapsulationKey.hash
         val rejections = keypair.decapsulationKey.randomSeed
