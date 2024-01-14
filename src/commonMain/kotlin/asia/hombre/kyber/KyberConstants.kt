@@ -24,7 +24,6 @@ class KyberConstants {
         const val Q: Int = 3329
         const val Q_INV: Int = 62209 //Generated using KyberMath.powMod(Q, -1, 2^16)
         const val CPAPKE_BYTES = 32
-        const val POLY_BYTES = 32
         const val SECRET_KEY_LENGTH = 32
 
         val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(

@@ -19,12 +19,11 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.Companion.int
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.measureTime
 
-@Ignore
+@Ignore //Remove
 class Generators {
     @Test
     @OptIn(ExperimentalUnsignedTypes::class)

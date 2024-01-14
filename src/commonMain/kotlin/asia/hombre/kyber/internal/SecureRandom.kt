@@ -27,7 +27,6 @@ import kotlin.time.measureTime
 
 internal class SecureRandom {
     companion object {
-
         fun generateSecureBytes(range: Int): ByteArray {
             val count = ceil(range.toDouble() / 8).toInt()
             val bytes = ByteArray(range)

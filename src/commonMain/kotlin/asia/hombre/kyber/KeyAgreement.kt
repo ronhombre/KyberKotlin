@@ -18,21 +18,23 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.DecapsulationException
+import asia.hombre.kyber.exceptions.EncapsulationException
 import asia.hombre.kyber.internal.KyberMath
 import asia.hombre.kyber.internal.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
 
-class KeyAgreement {
+class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
     val parameter: KyberParameter
-    val keypair: KyberKEMKeyPair
-    constructor(kemKeyPair: KyberKEMKeyPair) {
+    val keypair: KyberKEMKeyPair = kemKeyPair
+
+    init {
         this.parameter = kemKeyPair.encapsulationKey.key.parameter
-        this.keypair = kemKeyPair
     }
 
-    fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
+    internal fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
         val decodedKey = KyberMath.byteDecode(encryptionKey.keyBytes, 12)
         val nttKeyVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
@@ -59,7 +61,7 @@ class KeyAgreement {
 
         val noiseTerm = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, ((parameter.K * 2) + 1).toByte()))
 
-        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector, false)
+        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector)
 
         for(i in 0..<parameter.K) {
             coefficients[i] = KyberMath.invNTT(coefficients[i])
@@ -94,7 +96,7 @@ class KeyAgreement {
         return KyberCipherText(parameter, encodedCoefficients, encodedTerms)
     }
 
-    fun fromCipherText(cipherText: KyberCipherText): ByteArray {
+    internal fun fromCipherText(cipherText: KyberCipherText): ByteArray {
         val coefficients = Array(cipherText.parameter.K) { ShortArray(KyberConstants.N) }
 
         for (i in 0..<parameter.K) {
@@ -112,8 +114,6 @@ class KeyAgreement {
         val constantTerms = KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
         val secretVector = KyberMath.byteDecode(keypair.decapsulationKey.key.keyBytes, 12)
 
-        val trueConstantTerm = constantTerms
-
         for (i in 0..<parameter.K) {
             val subtraction = KyberMath.invNTT(
                 KyberMath.multiplyNTTs(
@@ -124,17 +124,17 @@ class KeyAgreement {
                 )
             )
             for (j in 0..<KyberConstants.N)
-                trueConstantTerm[j] = KyberMath.moduloOf(trueConstantTerm[j] - subtraction[j], KyberConstants.Q)
+                constantTerms[j] = KyberMath.moduloOf(constantTerms[j] - subtraction[j], KyberConstants.Q)
         }
 
-        return KyberMath.byteEncode(KyberMath.compress(trueConstantTerm, 1), 1)
+        return KyberMath.byteEncode(KyberMath.compress(constantTerms, 1), 1)
     }
 
     fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray = SecureRandom.generateSecureBytes(32)): KyberEncapsulationResult {
         if(kyberEncapsulationKey.key.fullBytes.size != ((384 * kyberEncapsulationKey.key.parameter.K) + 32))
-            println("Type Check failed!")
+            throw EncapsulationException("ML-KEM variant mismatch!")
         if(!KyberMath.byteEncode(KyberMath.byteDecode(kyberEncapsulationKey.key.keyBytes, 12), 12).contentEquals(kyberEncapsulationKey.key.keyBytes))
-            println("Modulus Check failed!")
+            throw EncapsulationException("Modulus not of " + KyberConstants.Q)
 
         val sha3256 = SHA3_256()
 
@@ -153,6 +153,11 @@ class KeyAgreement {
     }
 
     fun decapsulate(cipherText: KyberCipherText): ByteArray {
+        if(cipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
+            throw DecapsulationException("ML-KEM cipher text variant mismatch!")
+        if(keypair.decapsulationKey.fullBytes.size != parameter.DECAPSULATION_KEY_LENGTH)
+            throw DecapsulationException("ML-KEM Decapsulation Key is non-standard!")
+
         val encryptionKey = keypair.decapsulationKey.encryptionKey
         val encryptionHash = keypair.decapsulationKey.hash
         val rejections = keypair.decapsulationKey.randomSeed

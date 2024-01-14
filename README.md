@@ -156,6 +156,16 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 ## Changelog
 
+### v0.2.3
+
+* Cleaned up code.
+* Added exceptions for encapsulation and decapsulation.
+
+### v0.2.2
+
+* Added parameter values for lengths of cipher, encaps key, and decaps key.
+* Added copyright notices.
+
 ### v0.2.1
 
 * Code optimizations.

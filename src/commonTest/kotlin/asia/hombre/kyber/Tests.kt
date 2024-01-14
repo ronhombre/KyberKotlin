@@ -102,18 +102,6 @@ class Tests {
         return shorts
     }
 
-    fun brv(x: Int): Int {
-        // Reverses a 7-bit number
-        val binaryString = buildString {
-            var num = x
-            repeat(7) {
-                append(num and 1)
-                num = num shr 1
-            }
-        }
-        return binaryString.toInt(2)
-    }
-
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0

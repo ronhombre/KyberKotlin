@@ -30,9 +30,6 @@ internal class KyberMath {
         val Boolean.int
             get() = (if (this) 1 else 0)
 
-        val Boolean.uint
-            get() = (if (this) 1u else 0u)
-
         fun bitsToBytes(bits: BooleanArray): ByteArray {
             val byteArray = ByteArray(ceil(bits.size / 8.0).toInt())
 
@@ -103,9 +100,7 @@ internal class KyberMath {
                     if((j + 1) == bitSize)
                         mod = KyberConstants.Q.toShort()
 
-                    shorts[i] = moduloOf(value, mod)/*
-                    if(value.toInt() != shorts[i].toInt())
-                        println(value.toString() + " | " + shorts[i].toInt())*/
+                    shorts[i] = moduloOf(value, mod)
                 }
             }
 
@@ -136,26 +131,6 @@ internal class KyberMath {
             return nttCoefficients
         }
 
-        fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
-            var stringOutput = ""
-            var count = 0
-            for(byte in byteArray) {
-                val bits = KyberMath.bytesToBits(byteArrayOf(byte))
-                for(bit in bits) {
-                    stringOutput += bit.int
-
-                    count++
-
-                    if(count >= bitCount) {
-                        stringOutput += joiner
-                        count = 0
-                    }
-                }
-            }
-
-            return stringOutput.removeSuffix(joiner).reversed()
-        }
-
         fun samplePolyCBD(eta: Int, bytes: ByteArray): ShortArray {
             val f = ShortArray(KyberConstants.N)
             val bits = bytesToBits(bytes)
@@ -167,14 +142,10 @@ internal class KyberMath {
                     x = (x + bits[(2 * i * eta) + j].int).toShort()
                     y = (y + bits[(2 * i * eta) + eta + j].int).toShort()
                 }
-                f[i] = moduloOf(x - y, KyberConstants.Q)
+                f[i] = diffOf(x, y)
             }
 
             return f
-        }
-
-        fun grabBit(x: Int, n: Int): Int {
-            return (1 shl n) and x
         }
 
         fun reverseBits(x: Int): UByte {
@@ -185,21 +156,6 @@ internal class KyberMath {
                     (((1 shl 4) and x) ushr 2) or
                     (((1 shl 5) and x) ushr 4) or
                     (((1 shl 6) and x) ushr 6)).toUByte()
-        }
-
-        fun montgomeryReduce(a: Int, b: Int, bInv: Int): Short {
-            val t = (a * bInv).toShort()
-            return ((a - (t * b)) ushr 16).toShort()
-        }
-
-        fun pow(a: Int, b: Int): Long {
-            var out = 1L
-
-            for(i in 0..<b) {
-                out *= a
-            }
-
-            return out
         }
 
         //Functionally equivalent to pow_mod(b, e, mod) in Python, except values are kept positive
@@ -217,8 +173,18 @@ internal class KyberMath {
             return c
         }
 
+
+        private fun pow(a: Int, b: Int): Long {
+            var out = 1L
+
+            for(i in 0..<b) {
+                out *= a
+            }
+
+            return out
+        }
         //Modified Extended Euclidean Algorithm
-        fun modMulInv(b: Int, e: Int, m: Int): Long {
+        private fun modMulInv(b: Int, e: Int, m: Int): Long {
             var s = 0L
             var r: Long = m.toLong()
             var oldS = 1L
@@ -249,9 +215,9 @@ internal class KyberMath {
             while(len >= 2) {
                 for(start in 0..<256 step (2 * len)) {
                     for(j in start..<(start + len)) {
-                        val t = ((KyberConstants.PRECOMPUTED_ZETAS_TABLE[k] * output[j + len]) % KyberConstants.Q)
-                        output[j + len] = moduloOf(output[j] - t, KyberConstants.Q)
-                        output[j] = moduloOf(output[j] + t, KyberConstants.Q)
+                        val t = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
+                        output[j + len] = diffOf(output[j], t)
+                        output[j] = sumOf(output[j], t)
                     }
                     k++
                 }
@@ -272,8 +238,8 @@ internal class KyberMath {
                 for(start in 0..<256 step (2 * len)) {
                     for(j in start..<(start + len)) {
                         val t = output[j]
-                        output[j] = ((t + output[j + len]) % KyberConstants.Q).toShort()
-                        output[j + len] = ((KyberConstants.PRECOMPUTED_ZETAS_TABLE[k] * (output[j + len] - t)) % KyberConstants.Q).toShort()
+                        output[j] = sumOf(t, output[j + len])
+                        output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], diffOf(output[j + len], t))
                     }
                     k--
                 }
@@ -282,20 +248,20 @@ internal class KyberMath {
             }
 
             for(i in output.indices)
-                output[i] = moduloOf(output[i].toInt() * 3303, KyberConstants.Q)
+                output[i] = productOf(output[i].toInt(), 3303)
 
             return output
         }
 
-        fun productOf(a: Short, b: Short): Short {
+        fun productOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() * b.toInt(), KyberConstants.Q)
         }
 
-        fun sumOf(a: Short, b: Short): Short {
+        fun sumOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() + b.toInt(), KyberConstants.Q)
         }
 
-        fun diffOf(a: Short, b: Short): Short {
+        fun diffOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() - b.toInt(), KyberConstants.Q)
         }
 
@@ -323,27 +289,12 @@ internal class KyberMath {
         }
 
         fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray {
-            var shake256 = SHAKE256(64 * eta)
+            val shake256 = SHAKE256(64 * eta)
 
             shake256.update(seed)
             shake256.update(byte)
 
             return shake256.digest()
-        }
-
-        fun nttMatrixMultiply(m: Array<Array<ShortArray>>, v: Array<ShortArray>): Array<ShortArray> { //TODO: Transpose option
-            val result = Array(v.size) { ShortArray(v[0].size)}
-            for(i in m.indices) {
-                if(m[i].size != v.size)
-                    throw ArithmeticException("Matrix column count does not match Vector row count!")
-                for(j in v.indices) {
-                    if(m[i][j].size != v[j].size)
-                        throw ArithmeticException("No match!") //TODO: Fix
-                    result[j] = multiplyNTTs(m[i][j], v[j])
-                }
-            }
-
-            return result
         }
 
         fun nttMatrixToVectorDot(matrix: Array<Array<ShortArray>>, vector: Array<ShortArray>, isTransposed: Boolean = false): Array<ShortArray> {
@@ -375,16 +326,6 @@ internal class KyberMath {
                 result[i] = sumOf(v1[i], v2[i])
 
             return result
-        }
-
-        fun transposeMatrix(matrix: Array<Array<ShortArray>>): Array<Array<ShortArray>> {
-            val matrixT = Array(matrix[0].size) { Array(matrix.size) { ShortArray(matrix[0][0].size) } }
-
-            for(j in matrix[0].indices)
-                for(i in matrix.indices)
-                    matrixT[j][i] = matrix[i][j]
-
-            return matrixT
         }
 
         fun moduloOf(value: Number, modulo: Number): Short {
