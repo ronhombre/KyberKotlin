@@ -50,7 +50,7 @@ class KyberKeyPairGenerator {
                 //Transposed ? Old Kyber v3
                 val systemVector = KyberMath.vectorAddition(KyberMath.nttMatrixToVectorDot(matrix, secretVector, true), noiseVector)
 
-                val encodeSize = (1.5 * KyberConstants.N).toInt()
+                val encodeSize = 3 * KyberConstants.N shr 1
                 val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed
                 val decryptionKeyBytes = ByteArray(encryptionKeyBytes.size)
 

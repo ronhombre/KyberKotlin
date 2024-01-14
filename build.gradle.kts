@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber"
-version = "0.1.0"
+version = "0.2.1"
 
 repositories {
     mavenCentral()
@@ -41,7 +41,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation("org.bouncycastle:bcutil-jdk18on:1.77")
+
             }
         }
     }

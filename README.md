@@ -18,7 +18,21 @@ two matrices.)
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
 It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order to implement SHAKE and SHA3 within the library.
 
-### Capabilities
+## Benchmarks (Tested on a Ryzen 7 5800X)
+
+| Variant | Generation | Encapsulation | Decapsulation |
+|---------|------------|---------------|---------------|
+| 512     | 12332      | 8683          | 5446.8        |
+| 768     | 16027.6    | 12783.8       | 9783.2        |
+| 1024    | 21640.4    | 18687.8       | 15753.2       |
+| ML-KEM  | (in ms)    | (in ms)       | (in ms)       |
+
+Ran with JVM 17 5 times and averaged. Lower is better.
+Code is in [Benchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/commonTest/kotlin/asia/hombre/kyber/Benchmark.kt)
+
+This benchmark is for performance tracking through the development.
+
+## Capabilities
 * Encapsulation (512, 768, 1024)
 * Decapsulation (512, 768, 1024)
 
@@ -141,6 +155,12 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.2.1
+
+* Code optimizations.
+* Benchmarks are added.
+* Reorganized Generators.
 
 ### v0.2.0
 
