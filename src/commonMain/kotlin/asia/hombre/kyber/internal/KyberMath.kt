@@ -173,7 +173,6 @@ internal class KyberMath {
             return c
         }
 
-
         private fun pow(a: Int, b: Int): Long {
             var out = 1L
 
@@ -183,6 +182,7 @@ internal class KyberMath {
 
             return out
         }
+
         //Modified Extended Euclidean Algorithm
         private fun modMulInv(b: Int, e: Int, m: Int): Long {
             var s = 0L
@@ -210,10 +210,10 @@ internal class KyberMath {
             val output = polynomials.copyOf()
 
             var k = 1
-            var len = 128
+            var len = KyberConstants.N shr 1
 
             while(len >= 2) {
-                for(start in 0..<256 step (2 * len)) {
+                for(start in 0..<KyberConstants.N step (2 * len)) {
                     for(j in start..<(start + len)) {
                         val t = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
                         output[j + len] = diffOf(output[j], t)
@@ -231,11 +231,11 @@ internal class KyberMath {
         fun invNTT(nttPolynomials: ShortArray): ShortArray {
             val output = nttPolynomials.copyOf()
 
-            var k = 127
+            var k = (KyberConstants.N shr 1) - 1
             var len = 2
 
-            while(len <= 128) {
-                for(start in 0..<256 step (2 * len)) {
+            while(len <= (KyberConstants.N shr 1)) {
+                for(start in 0..<KyberConstants.N step (2 * len)) {
                     for(j in start..<(start + len)) {
                         val t = output[j]
                         output[j] = sumOf(t, output[j + len])
@@ -266,13 +266,32 @@ internal class KyberMath {
         }
 
         fun multiplyNTTs(ntt1: ShortArray, ntt2: ShortArray): ShortArray {
-            val multipliedNtt = ShortArray(256)
+            val multipliedNtt = ShortArray(KyberConstants.N)
 
-            for(i in 0..<128) {
-                val first = 2 * i
-                val second = first + 1
-                multipliedNtt[first] = sumOf(productOf(ntt1[first], ntt2[first]), productOf(productOf(ntt1[second], ntt2[second]), KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]))
-                multipliedNtt[second] = sumOf(productOf(ntt1[first], ntt2[second]), productOf(ntt1[second], ntt2[first]))
+            for(i in 0..<(KyberConstants.N shr 1)) {
+                multipliedNtt[2 * i] = sumOf(
+                    productOf(
+                        ntt1[2 * i],
+                        ntt2[2 * i]
+                    ),
+                    productOf(
+                        productOf(
+                            ntt1[(2 * i) + 1],
+                            ntt2[(2 * i) + 1]
+                        ),
+                        KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]
+                    )
+                )
+                multipliedNtt[(2 * i) + 1] = sumOf(
+                    productOf(
+                        ntt1[2 * i],
+                        ntt2[(2 * i) + 1]
+                    ),
+                    productOf(
+                        ntt1[(2 * i) + 1],
+                        ntt2[2 * i]
+                    )
+                )
             }
 
             return multipliedNtt
@@ -289,7 +308,7 @@ internal class KyberMath {
         }
 
         fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray {
-            val shake256 = SHAKE256(64 * eta)
+            val shake256 = SHAKE256((KyberConstants.N shr 2) * eta)
 
             shake256.update(seed)
             shake256.update(byte)

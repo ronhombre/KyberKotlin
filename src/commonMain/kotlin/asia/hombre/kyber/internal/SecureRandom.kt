@@ -25,6 +25,13 @@ import kotlin.random.Random
 import kotlin.random.nextULong
 import kotlin.time.measureTime
 
+/*
+* This class is NOT AN APPROVED Secure Random Generator. Although it relies on the innate randomness of execution times,
+* as any given instruction runs differently each time to a certain point. By multiplying it with large and variable prime
+* integers, we can make a good random number. Then we can seed Kotlin's built-in Random() function and XOR the output.
+* Since XOR is a lossy process, it would be impossible to recover the initial values. However, the resistance of this
+* class from Timing Attacks is unknown. Use it with caution.
+ */
 internal class SecureRandom {
     companion object {
         fun generateSecureBytes(range: Int): ByteArray {
@@ -55,7 +62,7 @@ internal class SecureRandom {
                     countPrimes(previous)
                 }
                 nanoTimes[i] = d.inWholeNanoseconds.toULong()
-                minimum = min(d.inWholeNanoseconds.toULong(), minimum)
+                minimum = min(d.inWholeNanoseconds.toULong(), minimum) //Remove the non-random minimum execution time.
                 previous += d.inWholeMicroseconds.toInt() / 2
             }
 

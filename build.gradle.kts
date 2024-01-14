@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber"
-version = "0.2.3"
+version = "0.2.4"
 
 repositories {
     mavenCentral()
@@ -21,6 +21,12 @@ kotlin {
 
             compileTaskProvider // get the Kotlin task 'compileKotlinJvm'
             output // get the main compilation output
+        }
+
+        val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+            doFirst {
+                from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
+            }
         }
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath

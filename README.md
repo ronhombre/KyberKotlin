@@ -133,7 +133,7 @@ as a dependency for my future applications.
 ### License
 
 ```
-Copyright 2023 Ron Lauren Hombre
+Copyright 2024 Ron Lauren Hombre
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -155,6 +155,14 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.2.4
+
+* Cleaned up and formatted code.
+* Optimized minor code.
+* Made KyberParameter the central basis for the lengths of ciphertext, encaps key, and decaps key.
+* Gradle jvmJar.
+* Added warning for use of internal/SecureRandom.
 
 ### v0.2.3
 

@@ -21,10 +21,10 @@ package asia.hombre.kyber
 class KyberConstants {
     companion object {
         const val N: Int = 256
+        const val N_BYTES: Int = N shr 3
         const val Q: Int = 3329
         const val Q_INV: Int = 62209 //Generated using KyberMath.powMod(Q, -1, 2^16)
-        const val CPAPKE_BYTES = 32
-        const val SECRET_KEY_LENGTH = 32
+        const val SECRET_KEY_LENGTH = N_BYTES
 
         val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(
             1, 1729, 2580, 3289, 2642, 630, 1897, 848,

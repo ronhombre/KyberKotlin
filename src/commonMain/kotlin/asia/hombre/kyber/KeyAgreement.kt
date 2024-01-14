@@ -38,9 +38,6 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         val decodedKey = KyberMath.byteDecode(encryptionKey.keyBytes, 12)
         val nttKeyVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
-        for(i in 0..<parameter.K)
-            decodedKey.copyInto(nttKeyVector[i], 0, KyberConstants.N * i, KyberConstants.N * (i + 1))
-
         val nttSeed = encryptionKey.nttSeed
 
         val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
@@ -48,47 +45,56 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
         for((n, i) in (0..<parameter.K).withIndex()) {
+            decodedKey.copyInto(
+                nttKeyVector[i],
+                0,
+                KyberConstants.N * i,
+                KyberConstants.N * (i + 1)
+            )
 
-            randomnessVector[i] = KyberMath.samplePolyCBD(parameter.ETA1, KyberMath.prf(parameter.ETA1, randomness, n.toByte()))
+            randomnessVector[i] = KyberMath.samplePolyCBD(
+                parameter.ETA1,
+                KyberMath.prf(parameter.ETA1, randomness, n.toByte())
+            )
             randomnessVector[i] = KyberMath.NTT(randomnessVector[i])
 
-            noiseVector[i] = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, (n + parameter.K).toByte()))
+            noiseVector[i] = KyberMath.samplePolyCBD(
+                parameter.ETA2,
+                KyberMath.prf(parameter.ETA2, randomness, (n + parameter.K).toByte())
+            )
 
-            for(j in 0..<parameter.K) {
+            for(j in 0..<parameter.K)
                 matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
-            }
         }
 
-        val noiseTerm = KyberMath.samplePolyCBD(parameter.ETA2, KyberMath.prf(parameter.ETA2, randomness, ((parameter.K * 2) + 1).toByte()))
-
-        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector)
-
-        for(i in 0..<parameter.K) {
-            coefficients[i] = KyberMath.invNTT(coefficients[i])
-        }
-
-        coefficients = KyberMath.vectorAddition(coefficients, noiseVector)
+        val noiseTerm = KyberMath.samplePolyCBD(
+            parameter.ETA2,
+            KyberMath.prf(parameter.ETA2, randomness, ((parameter.K * 2) + 1).toByte())
+        )
 
         val muse = KyberMath.decompress(KyberMath.byteDecode(plainText, 1), 1)
 
-        //START << THIS PART IS BASED FROM FiloSottile/mlkem768
+        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector)
 
         var constantTerm = ShortArray(KyberConstants.N)
         for(i in 0..<parameter.K) {
+            coefficients[i] = KyberMath.invNTT(coefficients[i])
+
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
         }
+
+        coefficients = KyberMath.vectorAddition(coefficients, noiseVector)
 
         constantTerm = KyberMath.invNTT(constantTerm)
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, noiseTerm)
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, muse)
 
-        //END << THIS PART IS BASED FROM FiloSottile/mlkem768
-
-        val encodedCoefficients = ByteArray(32 * (parameter.DU * parameter.K))
-        val encodedTerms = ByteArray(32 * parameter.DV)
+        val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
+        val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
 
         for(i in 0..<parameter.K) {
-            KyberMath.byteEncode(KyberMath.compress(coefficients[i], parameter.DU), parameter.DU).copyInto(encodedCoefficients, i * 32 * parameter.DU)
+            KyberMath.byteEncode(KyberMath.compress(coefficients[i], parameter.DU), parameter.DU)
+                .copyInto(encodedCoefficients, i * KyberConstants.N_BYTES * parameter.DU)
         }
 
         KyberMath.byteEncode(KyberMath.compress(constantTerm, parameter.DV), parameter.DV).copyInto(encodedTerms)
@@ -103,8 +109,8 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
             coefficients[i] = KyberMath.decompress(
                 KyberMath.byteDecode(
                     cipherText.encodedCoefficients.copyOfRange(
-                        i * 32 * parameter.DU,
-                        (i + 1) * 32 * parameter.DU),
+                        i * KyberConstants.N_BYTES * parameter.DU,
+                        (i + 1) * KyberConstants.N_BYTES * parameter.DU),
                     parameter.DU
                 ),
                 parameter.DU
@@ -124,16 +130,21 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
                 )
             )
             for (j in 0..<KyberConstants.N)
-                constantTerms[j] = KyberMath.moduloOf(constantTerms[j] - subtraction[j], KyberConstants.Q)
+                constantTerms[j] = KyberMath.diffOf(constantTerms[j], subtraction[j])
         }
 
         return KyberMath.byteEncode(KyberMath.compress(constantTerms, 1), 1)
     }
 
-    fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray = SecureRandom.generateSecureBytes(32)): KyberEncapsulationResult {
-        if(kyberEncapsulationKey.key.fullBytes.size != ((384 * kyberEncapsulationKey.key.parameter.K) + 32))
+    fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
+        return encapsulate(kyberEncapsulationKey, SecureRandom.generateSecureBytes(KyberConstants.N_BYTES))
+    }
+
+    internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray): KyberEncapsulationResult {
+        if(kyberEncapsulationKey.key.fullBytes.size != parameter.ENCAPSULATION_KEY_LENGTH)
             throw EncapsulationException("ML-KEM variant mismatch!")
-        if(!KyberMath.byteEncode(KyberMath.byteDecode(kyberEncapsulationKey.key.keyBytes, 12), 12).contentEquals(kyberEncapsulationKey.key.keyBytes))
+        if(!KyberMath.byteEncode(KyberMath.byteDecode(kyberEncapsulationKey.key.keyBytes, 12), 12)
+            .contentEquals(kyberEncapsulationKey.key.keyBytes))
             throw EncapsulationException("Modulus not of " + KyberConstants.Q)
 
         val sha3256 = SHA3_256()
@@ -158,32 +169,32 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         if(keypair.decapsulationKey.fullBytes.size != parameter.DECAPSULATION_KEY_LENGTH)
             throw DecapsulationException("ML-KEM Decapsulation Key is non-standard!")
 
-        val encryptionKey = keypair.decapsulationKey.encryptionKey
-        val encryptionHash = keypair.decapsulationKey.hash
-        val rejections = keypair.decapsulationKey.randomSeed
-
         val recoveredPlainText = fromCipherText(cipherText)
 
         val sha3512 = SHA3_512()
 
         sha3512.update(recoveredPlainText)
-        sha3512.update(encryptionHash)
+        sha3512.update(keypair.decapsulationKey.hash)
 
-        val KprimeAndRandomprime = sha3512.digest()
+        val decapsHash = sha3512.digest()
 
-        val shake256 = SHAKE256(32)
+        val shake256 = SHAKE256(KyberConstants.SECRET_KEY_LENGTH)
 
-        shake256.update(rejections)
+        shake256.update(keypair.decapsulationKey.randomSeed)
         shake256.update(cipherText.fullBytes)
 
-        val Kbar = shake256.digest()
+        val secretKeyRejection = shake256.digest()
 
-        var Kprime = KprimeAndRandomprime.copyOfRange(0, 32)
-        val cprime = toCipherText(encryptionKey, recoveredPlainText, KprimeAndRandomprime.copyOfRange(32, 64))
+        var secretKeyCandidate = decapsHash.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH)
+        val regeneratedCipherText = toCipherText(
+            keypair.decapsulationKey.encryptionKey,
+            recoveredPlainText,
+            decapsHash.copyOfRange(32, 64)
+        )
 
-        if(!cipherText.fullBytes.contentEquals(cprime.fullBytes))
-            Kprime = Kbar
+        if(!cipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
+            secretKeyCandidate = secretKeyRejection //Implicit Rejection
 
-        return Kprime
+        return secretKeyCandidate
     }
 }

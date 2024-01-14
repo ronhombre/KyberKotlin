@@ -26,17 +26,27 @@ import org.kotlincrypto.hash.sha3.SHA3_512
 class KyberKeyPairGenerator {
     constructor() //TODO
 
-    fun generate(parameter: KyberParameter, randomSeed: ByteArray = SecureRandom.generateSecureBytes(32), pkeSeed: ByteArray = SecureRandom.generateSecureBytes(32)): KyberKEMKeyPair {
+    fun generate(parameter: KyberParameter): KyberKEMKeyPair {
+        return generate(
+            parameter,
+            SecureRandom.generateSecureBytes(KyberConstants.N_BYTES),
+            SecureRandom.generateSecureBytes(KyberConstants.N_BYTES)
+        )
+    }
+
+    internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
         val sha3256 = SHA3_256()
 
         val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
-        sha3256.update(pkeKeyPair.encryptionKey.keyBytes)
-        sha3256.update(pkeKeyPair.encryptionKey.nttSeed)
+        sha3256.update(pkeKeyPair.encryptionKey.fullBytes)
 
         val hash = sha3256.digest().copyOfRange(0, 32)
 
-        return KyberKEMKeyPair(KyberEncapsulationKey(pkeKeyPair.encryptionKey), KyberDecapsulationKey(pkeKeyPair.decryptionKey, pkeKeyPair.encryptionKey, hash, randomSeed))
+        return KyberKEMKeyPair(
+            KyberEncapsulationKey(pkeKeyPair.encryptionKey),
+            KyberDecapsulationKey(pkeKeyPair.decryptionKey, pkeKeyPair.encryptionKey, hash, randomSeed)
+        )
     }
 
     internal class PKEGenerator {
@@ -46,8 +56,8 @@ class KyberKeyPairGenerator {
 
                 val seeds = sha3512.digest(byteArray)
 
-                val nttSeed = seeds.copyOfRange(0, KyberConstants.CPAPKE_BYTES)
-                val cbdSeed = seeds.copyOfRange(KyberConstants.CPAPKE_BYTES, KyberConstants.CPAPKE_BYTES * 2)
+                val nttSeed = seeds.copyOfRange(0, 32)
+                val cbdSeed = seeds.copyOfRange(32, 64)
 
                 val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
                 val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
@@ -58,26 +68,40 @@ class KyberKeyPairGenerator {
                         matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
                     }
 
-                    secretVector[i] = KyberMath.samplePolyCBD(parameter.ETA1, KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte()))
+                    secretVector[i] = KyberMath.samplePolyCBD(
+                        parameter.ETA1,
+                        KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte())
+                    )
                     secretVector[i] = KyberMath.NTT(secretVector[i])
 
-                    noiseVector[i] = KyberMath.samplePolyCBD(parameter.ETA1, KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte()))
+                    noiseVector[i] = KyberMath.samplePolyCBD(
+                        parameter.ETA1,
+                        KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte())
+                    )
                     noiseVector[i] = KyberMath.NTT(noiseVector[i])
                 }
 
                 //Transposed ? Old Kyber v3
-                val systemVector = KyberMath.vectorAddition(KyberMath.nttMatrixToVectorDot(matrix, secretVector, true), noiseVector)
+                val systemVector = KyberMath.vectorAddition(
+                    KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
+                    noiseVector
+                )
 
                 val encodeSize = 3 * KyberConstants.N shr 1
                 val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed
                 val decryptionKeyBytes = ByteArray(encryptionKeyBytes.size)
 
                 for(i in 0..<parameter.K) {
-                    KyberMath.byteEncode(systemVector[i], 12).copyInto(encryptionKeyBytes, i * encodeSize)
-                    KyberMath.byteEncode(secretVector[i], 12).copyInto(decryptionKeyBytes, i * encodeSize)
+                    KyberMath.byteEncode(systemVector[i], 12)
+                        .copyInto(encryptionKeyBytes, i * encodeSize)
+                    KyberMath.byteEncode(secretVector[i], 12)
+                        .copyInto(decryptionKeyBytes, i * encodeSize)
                 }
 
-                return KyberPKEKeyPair(KyberEncryptionKey(parameter, encryptionKeyBytes, nttSeed), KyberDecryptionKey(parameter, decryptionKeyBytes))
+                return KyberPKEKeyPair(
+                    KyberEncryptionKey(parameter, encryptionKeyBytes, nttSeed),
+                    KyberDecryptionKey(parameter, decryptionKeyBytes)
+                )
             }
         }
     }

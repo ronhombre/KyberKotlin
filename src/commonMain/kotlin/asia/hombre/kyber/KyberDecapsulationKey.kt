@@ -25,7 +25,7 @@ class KyberDecapsulationKey(
     val randomSeed: ByteArray) : KyberKEMKey {
         val fullBytes: ByteArray
             get() {
-                val output = ByteArray(key.keyBytes.size + encryptionKey.fullBytes.size + hash.size + randomSeed.size)
+                val output = ByteArray(key.parameter.DECAPSULATION_KEY_LENGTH)
 
                 key.keyBytes.copyInto(output)
                 encryptionKey.fullBytes.copyInto(output, key.keyBytes.size)

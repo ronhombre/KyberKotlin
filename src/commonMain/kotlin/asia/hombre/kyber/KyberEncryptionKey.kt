@@ -24,7 +24,7 @@ class KyberEncryptionKey(
     val nttSeed: ByteArray) : KyberPKEKey {
         val fullBytes: ByteArray
             get() {
-                val output = ByteArray(keyBytes.size + nttSeed.size)
+                val output = ByteArray(parameter.ENCAPSULATION_KEY_LENGTH)
 
                 keyBytes.copyInto(output)
                 nttSeed.copyInto(output, keyBytes.size)
