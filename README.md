@@ -1,4 +1,10 @@
 # KyberKotlin _implements ML-KEM (CRYSTALS-Kyber)_
+_**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
+
+![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
+![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 
 [Kyber](https://pq-crystals.org/kyber/index.shtml) is an IND-CCA2-secure key encapsulation mechanism (KEM), whose
 security is based on the hardness of solving the learning-with-errors (LWE) problem over module lattices. Kyber is one 
@@ -9,14 +15,18 @@ aims at security roughly equivalent to AES-192, and Kyber-1024 aims at security 
 This project is semi-fully based on FIPS 203! (Some seemingly unintended changes were reverted i.e. transposition of
 two matrices.)
 
-## CAUTION
-
-**_THIS PROJECT IS IN OPTIMIZATION PHASE. TESTED ON JAVA 17!_**
-
 ## Introduction
 
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
 It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order to implement SHAKE and SHA3 within the library.
+
+### Intent
+
+The intentions of this project are pure and transparent. Its goal is to decouple from the JVM and become a self-sufficient
+Kotlin Multiplatform dependency. In other words, a PURE Kotlin implementation of ML-KEM in a lightweight format. This is
+a stark difference compared to Bouncy Castle that supports most Encryption Algorithms and has a large data footprint.
+
+At the 1.0.0 release, developers should be able to use this dependency if they want to support ML-KEM.
 
 ## Benchmarks (Tested on a Ryzen 7 5800X)
 
@@ -33,12 +43,35 @@ Code is in [Benchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/s
 This benchmark is for performance tracking through the development.
 
 ## Capabilities
+* Key Generation (512, 768, 1024)
 * Encapsulation (512, 768, 1024)
 * Decapsulation (512, 768, 1024)
 
-NOTE: THIS VERSION IS STILL IN DEVELOPMENT.
+## JVM Installation
 
-### Usage
+### Maven with Gradle Kotlin DSL
+
+```Kotlin
+dependencies {
+    implementation("asia.hombre:kyber:0.2.4")
+}
+```
+
+### JAR with Gradle Kotlin DSL
+
+Get a jar from [releases](https://github.com/ronhombre/KyberKotlin/releases) and copy it into `libs/` of your JVM project.
+
+```Kotlin
+dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+}
+```
+
+[More](https://central.sonatype.com/artifact/asia.hombre/kyber/overview) installation methods
+
+## Usage
+
+### With JVM
 
 ```Kotlin
 import asia.hombre.kyber.KeyAgreement
@@ -79,44 +112,6 @@ In this example, **Bob** and **Alice** creates an **Agreement** that an eavesdro
 if it is intercepted. After generating the _Shared Secret Key_, they may communicate using a Symmetric Encryption
 algorithm _i.e. AES_.
 
-### Intent
-
-The intentions of this project are pure and transparent. Its goal is to decouple from the JVM and become a self-sufficient
-Kotlin Multiplatform dependency. In other words, a PURE Kotlin implementation of ML-KEM in a lightweight format. This is
-a stark difference compared to Bouncy Castle that supports most Encryption Algorithms and has a large data footprint.
-
-At the 1.0.0 release, developers should be able to use this dependency if they want to support ML-KEM.
-
-### Goal
-
-To align with the NIST ML-KEM specification which is the designated Algorithm name for CRYSTALS-Kyber.
-_**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
-
-### TODO List
-
-* More unit tests (Please help).
-* Optimize method names, attribute names, etc.
-* Clean up code.
-* Optimize code for Kotlin.
-* Add references to FIPS 203.
-* Add classes for jvmMain.
-
-### Why did I create this? _From Ron (Project Creator)_
-
-I tried [kyberJCE](https://github.com/fisherstevenk/kyberJCE), the implementation of Steven Fisher. However, I encountered 
-many bugs and problems whilst trying to make it work. I found his library to be nice, but it was full of inefficiencies
-that I thought I could fix. So far, I have made KyberKotlin simple in its use. In the future, I want to use this library
-as a dependency for my future applications.
-
-## Special Thanks
-
-* IAmDerek for guiding me in NTT.
-* grhkm for helping me with implementing NTT.
-* versusdkp for providing me a link for intermediates for testing.
-* FiloSottile's mlkem768 which gave me clues to fix bugs in my implementation.
-* Steven Fisher's kyberJCE which helped me run my first tests and use one of its algorithms.
-* and others from CryptoHack community!
-
 ### References
 
 * [NIST FIPS 203 ipd](https://csrc.nist.gov/pubs/fips/203/ipd)
@@ -129,6 +124,15 @@ as a dependency for my future applications.
 * [Montgomery Algorithm](https://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777282-X/S0025-5718-1985-0777282-X.pdf)
 * [Kyber-K2SO (Go)](https://github.com/symbolicsoft/kyber-k2so)
 * [Kyber on ARM64](https://eprint.iacr.org/2021/561.pdf) _Explains the mysterious Qinv value 62209_
+
+### Special Thanks
+
+* IAmDerek for guiding me in NTT.
+* grhkm for helping me with implementing NTT.
+* versusdkp for providing me a link for intermediates for testing.
+* FiloSottile's mlkem768 which gave me clues to fix bugs in my implementation.
+* Steven Fisher's kyberJCE which helped me run my first tests and use one of its algorithms.
+* and others from CryptoHack community!
 
 ### License
 
