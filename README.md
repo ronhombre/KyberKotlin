@@ -1,7 +1,8 @@
 # KyberKotlin _implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
-![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
+[![Maven Central](https://img.shields.io/maven-central/v/asia.hombre/kyber.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22asia.hombre%22)
+[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 ![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
@@ -28,16 +29,16 @@ a stark difference compared to Bouncy Castle that supports most Encryption Algor
 
 At the 1.0.0 release, developers should be able to use this dependency if they want to support ML-KEM.
 
-## Benchmarks (Tested on a Ryzen 7 5800X)
+## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
 | Variant | Generation | Encapsulation | Decapsulation |
 |---------|------------|---------------|---------------|
-| 512     | 12332      | 8683          | 5446.8        |
-| 768     | 16027.6    | 12783.8       | 9783.2        |
-| 1024    | 21640.4    | 18687.8       | 15753.2       |
+| 512     | 8042.8     | 8520          | 9204.6        |
+| 768     | 13159      | 14381.6       | 15751.4       |
+| 1024    | 20845.8    | 22421.6       | 24343.6       |
 | ML-KEM  | (in ms)    | (in ms)       | (in ms)       |
 
-Ran with JVM 17 5 times and averaged. Lower is better.
+Ran with JVM 1.8 5 times and averaged. Lower is better.
 Code is in [Benchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/commonTest/kotlin/asia/hombre/kyber/Benchmark.kt)
 
 This benchmark is for performance tracking through the development.
@@ -53,7 +54,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.2.4")
+    implementation("asia.hombre:kyber:0.2.5")
 }
 ```
 
@@ -74,22 +75,22 @@ dependencies {
 ### With JVM
 
 ```Kotlin
-import asia.hombre.kyber.KeyAgreement
-import asia.hombre.kyber.KyberKeyPairGenerator
+import asia.hombre.kyber.KyberAgreement
+import asia.hombre.kyber.KyberKeyGenerator
 import asia.hombre.kyber.KyberParameter
 
 //Generate keys
 //This would be done in their own systems
-val keyPairAlice = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
-val keyPairBob = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
+val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
+val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-val agreementAlice = KeyAgreement(keyPairAlice)
+val agreementAlice = KyberAgreement(keyPairAlice)
 
 //Bob sends his encapsulation key to Alice
 //Alice uses it to encapsulate a Secret Key
 val cipherTextAlice = agreementAlice.encapsulate(keyPairBob.encapsulationKey)
 
-val agreementBob = KeyAgreement(keyPairBob)
+val agreementBob = KyberAgreement(keyPairBob)
 
 //Alice sends the Cipher Text to Bob
 //Bob decapsulates the Cipher Text
@@ -159,6 +160,15 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.2.5
+* Use native SecureRandom() for JVM.
+* Added JVM-specific Benchmarks.
+* Made Key Generation static. No need to instantiate.
+* Compiled with Java 1.8.
+* Made KeyAgreement.kt and KyberKeyPairGenerator.kt internal.
+* Added KDocs for KeyAgreement.
+* Updated benchmarks.
 
 ### v0.2.4
 

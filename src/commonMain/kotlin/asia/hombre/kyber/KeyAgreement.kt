@@ -26,7 +26,13 @@ import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
 
-class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
+/**
+ * A Key Agreement for encapsulating and decapsulating.
+ * @param kemKeyPair
+ * @constructor Creates a Key Agreement for encapsulating and decapsulating.
+ * @author Ron Lauren Hombre
+ */
+internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
     val parameter: KyberParameter
     val keypair: KyberKEMKeyPair = kemKeyPair
 
@@ -34,6 +40,13 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         this.parameter = kemKeyPair.encapsulationKey.key.parameter
     }
 
+    /**
+     * Internal function to generate a Cipher Text. Synonymous to K.PKE.Encrypt() in FIPS 203.
+     * @param encryptionKey Encryption Key of the second party.
+     * @param plainText Plain Text
+     * @param randomness Random 32 Bytes
+     * @return KyberCipherText The Cipher Text to send to the second party.
+     */
     internal fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
         val decodedKey = KyberMath.byteDecode(encryptionKey.keyBytes, 12)
         val nttKeyVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
@@ -102,6 +115,11 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         return KyberCipherText(parameter, encodedCoefficients, encodedTerms)
     }
 
+    /**
+     * Internal function to decrypt a Cipher Text. Synonymous to K.PKE.Decrypt() in FIPS 203.
+     * @param cipherText Cipher Text from the second party.
+     * @return ByteArray The original Plain Text.
+     */
     internal fun fromCipherText(cipherText: KyberCipherText): ByteArray {
         val coefficients = Array(cipherText.parameter.K) { ShortArray(KyberConstants.N) }
 
@@ -136,10 +154,21 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         return KyberMath.byteEncode(KyberMath.compress(constantTerms, 1), 1)
     }
 
+    /**
+     * Encapsulation function for non-testing use case
+     * @param kyberEncapsulationKey Encapsulation Key of the second party.
+     * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
+     */
     fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
         return encapsulate(kyberEncapsulationKey, SecureRandom.generateSecureBytes(KyberConstants.N_BYTES))
     }
 
+    /**
+     * Internal Encapsulation function that could be used for testing purposes. Synonymous to ML-KEM.Encaps() in FIPS 203.
+     * @param kyberEncapsulationKey Encapsulation Key of the second party.
+     * @param plainText The Plain Text to use.
+     * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
+     */
     internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray): KyberEncapsulationResult {
         if(kyberEncapsulationKey.key.fullBytes.size != parameter.ENCAPSULATION_KEY_LENGTH)
             throw EncapsulationException("ML-KEM variant mismatch!")
@@ -163,6 +192,11 @@ class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         return KyberEncapsulationResult(sharedKeyAndRandomness.copyOfRange(0, 32), cipherText)
     }
 
+    /**
+     * Decapsulation function to recover the Secret Keys from the Cipher Text. Synonymous to ML-KEM.Decaps() in FIPS 203.
+     * @param cipherText The Cipher Text from the second party.
+     * @return ByteArray The Secret Key
+     */
     fun decapsulate(cipherText: KyberCipherText): ByteArray {
         if(cipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
             throw DecapsulationException("ML-KEM cipher text variant mismatch!")

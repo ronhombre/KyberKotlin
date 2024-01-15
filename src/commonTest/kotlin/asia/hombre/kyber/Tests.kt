@@ -27,8 +27,8 @@ import kotlin.test.*
 class Tests {
     @Test
     fun playground() {
-        val keyPairAlice = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
-        val keyPairBob = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
+        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+        val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
 
         val agreementAlice = KeyAgreement(keyPairAlice)
 
@@ -50,8 +50,8 @@ class Tests {
 
     @Test
     fun pkeEncryptDecrypt() {
-        val keyPairAlice = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
-        val keyPairBob = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512)
+        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+        val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
 
         val agreementAlice = KeyAgreement(keyPairAlice)
         val agreementBob = KeyAgreement(keyPairBob)
@@ -86,8 +86,8 @@ class Tests {
         val randomSeed = SecureRandom.generateSecureBytes(32)
         val pkeSeed = SecureRandom.generateSecureBytes(32)
 
-        val firstGeneration = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
-        val secondGeneration = KyberKeyPairGenerator().generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
+        val firstGeneration = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
+        val secondGeneration = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
 
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed!")
     }

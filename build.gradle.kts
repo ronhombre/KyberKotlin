@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber"
-version = "0.2.4"
+version = "0.2.5"
 
 val projectName = project.group.toString().split(".").last()
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -27,7 +27,7 @@ kotlin {
         val main by compilations.getting {
             compilerOptions.configure {
                 // Set up the Kotlin compiler options for the 'main' compilation:
-                jvmTarget.set(JvmTarget.JVM_17)
+                jvmTarget.set(JvmTarget.JVM_1_8)
             }
 
             compileTaskProvider // get the Kotlin task 'compileKotlinJvm'
@@ -63,7 +63,7 @@ kotlin {
             doFirst {
                 from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
                 //Clean mavenDir
-                delete(file("./maven"))
+                delete(file(mavenDir))
             }
             doLast {
                 //Create mavenDir

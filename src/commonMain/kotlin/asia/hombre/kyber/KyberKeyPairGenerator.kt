@@ -23,85 +23,86 @@ import asia.hombre.kyber.internal.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 
-class KyberKeyPairGenerator {
-    constructor() //TODO
+internal class KyberKeyPairGenerator {
 
-    fun generate(parameter: KyberParameter): KyberKEMKeyPair {
-        return generate(
-            parameter,
-            SecureRandom.generateSecureBytes(KyberConstants.N_BYTES),
-            SecureRandom.generateSecureBytes(KyberConstants.N_BYTES)
-        )
-    }
+    companion object {
+        fun generate(parameter: KyberParameter): KyberKEMKeyPair {
+            return generate(
+                parameter,
+                SecureRandom.generateSecureBytes(KyberConstants.N_BYTES),
+                SecureRandom.generateSecureBytes(KyberConstants.N_BYTES)
+            )
+        }
 
-    internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
-        val sha3256 = SHA3_256()
+        internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
+            val sha3256 = SHA3_256()
 
-        val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
+            val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
-        sha3256.update(pkeKeyPair.encryptionKey.fullBytes)
+            sha3256.update(pkeKeyPair.encryptionKey.fullBytes)
 
-        val hash = sha3256.digest().copyOfRange(0, 32)
+            val hash = sha3256.digest().copyOfRange(0, 32)
 
-        return KyberKEMKeyPair(
-            KyberEncapsulationKey(pkeKeyPair.encryptionKey),
-            KyberDecapsulationKey(pkeKeyPair.decryptionKey, pkeKeyPair.encryptionKey, hash, randomSeed)
-        )
-    }
+            return KyberKEMKeyPair(
+                KyberEncapsulationKey(pkeKeyPair.encryptionKey),
+                KyberDecapsulationKey(pkeKeyPair.decryptionKey, pkeKeyPair.encryptionKey, hash, randomSeed)
+            )
+        }
 
-    internal class PKEGenerator {
-        companion object {
-            fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
-                val sha3512 = SHA3_512()
+        internal class PKEGenerator {
+            companion object {
+                fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
+                    val sha3512 = SHA3_512()
 
-                val seeds = sha3512.digest(byteArray)
+                    val seeds = sha3512.digest(byteArray)
 
-                val nttSeed = seeds.copyOfRange(0, 32)
-                val cbdSeed = seeds.copyOfRange(32, 64)
+                    val nttSeed = seeds.copyOfRange(0, 32)
+                    val cbdSeed = seeds.copyOfRange(32, 64)
 
-                val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
-                val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
-                val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
+                    val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
+                    val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
+                    val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
-                for((nonce, i) in (0..<parameter.K).withIndex()) {
-                    for(j in 0..<parameter.K) {
-                        matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
+                    for((nonce, i) in (0..<parameter.K).withIndex()) {
+                        for(j in 0..<parameter.K) {
+                            matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
+                        }
+
+                        secretVector[i] = KyberMath.samplePolyCBD(
+                            parameter.ETA1,
+                            KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte())
+                        )
+                        secretVector[i] = KyberMath.NTT(secretVector[i])
+
+                        noiseVector[i] = KyberMath.samplePolyCBD(
+                            parameter.ETA1,
+                            KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte())
+                        )
+                        noiseVector[i] = KyberMath.NTT(noiseVector[i])
                     }
 
-                    secretVector[i] = KyberMath.samplePolyCBD(
-                        parameter.ETA1,
-                        KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte())
+                    //Transposed ? Old Kyber v3
+                    val systemVector = KyberMath.vectorAddition(
+                        KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
+                        noiseVector
                     )
-                    secretVector[i] = KyberMath.NTT(secretVector[i])
 
-                    noiseVector[i] = KyberMath.samplePolyCBD(
-                        parameter.ETA1,
-                        KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte())
+                    val encodeSize = 3 * KyberConstants.N shr 1
+                    val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed
+                    val decryptionKeyBytes = ByteArray(encryptionKeyBytes.size)
+
+                    for(i in 0..<parameter.K) {
+                        KyberMath.byteEncode(systemVector[i], 12)
+                            .copyInto(encryptionKeyBytes, i * encodeSize)
+                        KyberMath.byteEncode(secretVector[i], 12)
+                            .copyInto(decryptionKeyBytes, i * encodeSize)
+                    }
+
+                    return KyberPKEKeyPair(
+                        KyberEncryptionKey(parameter, encryptionKeyBytes, nttSeed),
+                        KyberDecryptionKey(parameter, decryptionKeyBytes)
                     )
-                    noiseVector[i] = KyberMath.NTT(noiseVector[i])
                 }
-
-                //Transposed ? Old Kyber v3
-                val systemVector = KyberMath.vectorAddition(
-                    KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
-                    noiseVector
-                )
-
-                val encodeSize = 3 * KyberConstants.N shr 1
-                val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed
-                val decryptionKeyBytes = ByteArray(encryptionKeyBytes.size)
-
-                for(i in 0..<parameter.K) {
-                    KyberMath.byteEncode(systemVector[i], 12)
-                        .copyInto(encryptionKeyBytes, i * encodeSize)
-                    KyberMath.byteEncode(secretVector[i], 12)
-                        .copyInto(decryptionKeyBytes, i * encodeSize)
-                }
-
-                return KyberPKEKeyPair(
-                    KyberEncryptionKey(parameter, encryptionKeyBytes, nttSeed),
-                    KyberDecryptionKey(parameter, decryptionKeyBytes)
-                )
             }
         }
     }
