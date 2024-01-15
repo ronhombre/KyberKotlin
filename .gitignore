@@ -40,3 +40,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Maven Publish ###
+/maven/
+/.gnupg/
+/.env
+gradle.properties
