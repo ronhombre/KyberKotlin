@@ -1,22 +1,31 @@
 import org.jetbrains.kotlin.daemon.common.toHexString
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.security.MessageDigest
 
 plugins {
-    kotlin("multiplatform") version "1.9.21"
-    id("org.jetbrains.dokka") version "1.9.10"
-    signing
+    kotlin("multiplatform") version "1.9.21" //Kotlin Multiplatform
+    id("org.jetbrains.dokka") version "1.9.10"  //KDocs
+    signing //GPG
 }
 
-group = "asia.hombre.kyber"
+group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
 version = "0.2.6"
 
-val projectName = project.group.toString().split(".").last()
+val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
+
 val mavenDir = "./maven"
-val mavenDeep = "$mavenDir/" + (project.group.toString().replace(".", "/")) + "/" + version
+val mavenBundlingDir = "$mavenDir/bundling"
+val mavenDeep = "$mavenBundlingDir/" + (project.group.toString().replace(".", "/")) + "/" + version
+
+val jarFileName = baseProjectName.plus(".jar")
+val pomFileName = baseProjectName.plus(".pom")
+val javadocsFileName = baseProjectName.plus("-javadoc.jar")
+val sourcesFileName = baseProjectName.plus("-sources.jar")
+val mavenBundleFileName = baseProjectName.plus("-bundle.zip")
 
 repositories {
     mavenCentral()
@@ -34,15 +43,48 @@ kotlin {
             output // get the main compilation output
         }
 
-        val generateSourcesJar = tasks.create<Jar>("generateSourcesJar") {
-            archiveFileName.set("$baseProjectName-sources.jar")
+        tasks.register<Jar>("generateSourcesJar") {
+            archiveFileName.set(sourcesFileName)
             from(sourceSets.commonMain.get().kotlin.asFileTree)
             from(sourceSets.jvmMain.get().kotlin.asFileTree)
         }
 
-        val bundleMaven = tasks.create<Zip>("bundleMaven") {
+        //Separated as its own task
+        tasks.register("cleanMaven") {
+            //Clean mavenBundlingDir and keep the old generated bundles
+            delete(file(mavenBundlingDir))
+            //Create mavenDir upto the deepest dir
+            Files.createDirectories(file(mavenDeep).toPath())
+        }
+
+        tasks.register<Zip>("bundleMaven") {
+            dependsOn("cleanMaven", "generateSourcesJar", "jvmJar")
+
             doFirst {
-                val files = fileTree(mavenDir)
+                //Copy pom.xml and emptyjavadocs.zip then rename them
+                copy {
+                    from(".")
+                    include("pom.xml", "emptyjavadocs.zip")
+                    into(mavenDeep)
+                    rename("pom.xml", pomFileName)
+                    //Javadocs is required by Maven in order to publish. They allow "fake" or "empty" Javadocs.
+                    rename("emptyjavadocs.zip", javadocsFileName)
+                }
+                //Copy jar build and sources
+                copy {
+                    from(libsDirectory.get())
+                    include(jarFileName, sourcesFileName)
+                    into(mavenDeep)
+                }
+                //Sign
+                signing {
+                    sign(file("$mavenDeep/$pomFileName"))
+                    sign(file("$mavenDeep/$jarFileName"))
+                    sign(file("$mavenDeep/$sourcesFileName"))
+                    sign(file("$mavenDeep/$javadocsFileName"))
+                }
+
+                val files = fileTree(mavenBundlingDir)
                 for(file in files) {
                     if(file.name.endsWith(".asc")) continue //Ignore GPG Signature File
                     saveHash(file, sha1(file), ".sha1")
@@ -51,47 +93,26 @@ kotlin {
                     saveHash(file, sha512(file), ".sha512")
                 }
             }
-            from(mavenDir)
+            //Grab everything from mavenBundlingDir
+            from(mavenBundlingDir)
+            //Include the deepest contents
             include("/*".repeat(project.group.toString().split(".").size + 2).removePrefix("/"))
-            exclude("*.zip")
+            //Save to mavenDir
             destinationDirectory.set(file(mavenDir))
-            archiveFileName.set("$baseProjectName-bundle.zip")
+            //Set archive name
+            archiveFileName.set(mavenBundleFileName)
         }
 
         val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
-            archiveFileName.set(baseProjectName.plus(".jar"))
+            archiveFileName.set(jarFileName)
+
             doFirst {
                 from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
-                //Clean mavenDir
-                delete(file(mavenDir))
+                //Uncomment to list jvm configurations
+                /*println(configurations.names.toList().filter {
+                    it.contains("jvm") &&!(it.contains("test") || it.contains("Test"))
+                }.joinToString("\n"))*/
             }
-            doLast {
-                //Create mavenDir
-                Files.createDirectories(file(mavenDeep).toPath())
-                //Copy pom.xml
-                copy {
-                    from(".")
-                    include("pom.xml", "emptyjavadocs.zip")
-                    into(mavenDeep)
-                    rename("pom.xml", baseProjectName.plus(".pom"))
-                    rename("emptyjavadocs.zip", "$baseProjectName-javadoc.jar")
-                }
-                //Copy jar build
-                copy {
-                    from(destinationDirectory)
-                    include(archiveFileName.get(), "$baseProjectName-sources.jar")
-                    into(mavenDeep)
-                }
-                //Sign
-                signing {
-                    sign(file("$mavenDeep/" + baseProjectName.plus(".pom")))
-                    sign(file("$mavenDeep/" + archiveFileName.get()))
-                    sign(file("$mavenDeep/$baseProjectName-sources.jar"))
-                    sign(file("$mavenDeep/$baseProjectName-javadoc.jar"))
-                }
-            }
-            dependsOn("generateSourcesJar")
-            finalizedBy("bundleMaven")
         }
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
