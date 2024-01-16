@@ -22,6 +22,7 @@ import java.security.SecureRandom
 
 class KyberKeyGenerator {
     companion object {
+        @JvmStatic
         fun generate(parameter: KyberParameter): KyberKEMKeyPair {
             val randomSeed = ByteArray(KyberConstants.N_BYTES)
             val pkeSeed = ByteArray(KyberConstants.N_BYTES)

@@ -18,6 +18,6 @@
 
 package asia.hombre.kyber
 
-interface KyberKEMKey {
+sealed interface KyberKEMKey {
     val key: KyberPKEKey
 }

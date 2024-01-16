@@ -54,7 +54,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.2.5")
+    implementation("asia.hombre:kyber:0.2.6")
 }
 ```
 
@@ -74,6 +74,7 @@ dependencies {
 
 ### With JVM
 
+Kotlin
 ```Kotlin
 import asia.hombre.kyber.KyberAgreement
 import asia.hombre.kyber.KyberKeyGenerator
@@ -106,7 +107,47 @@ println("Rec: " + secretKeyBob.joinToString(", "))
 //Alice's Secret Key
 //[91, 119, -51, 71, -106, 30, -66, 47, 53, -7, -119, -38, -78, 61, -27, 44, -15, -47, -115, -92, -26, -120, 124, -17, -121, 83, 0, -57, -71, 118, 2, -31]
 
-//bobSecretKey == aliceSecretKey
+//secretKeyBob == cipherTextAlice.secretKey
+```
+
+Java
+
+```Java
+import asia.hombre.kyber.KyberKeyGenerator;
+import asia.hombre.kyber.KyberKEMKeyPair;
+import asia.hombre.kyber.KyberParameter;
+import asia.hombre.kyber.KyberAgreement;
+import asia.hombre.kyber.KyberEncapsulationResult;
+
+//Generate keys
+//This would be done in their own systems
+KyberKEMKeyPair keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
+KyberKEMKeyPair keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
+
+KyberAgreement agreementAlice = new KyberAgreement(keyPairAlice);
+
+//Bob sends his encapsulation key to Alice
+//Alice uses it to encapsulate a Secret Key
+KyberEncapsulationResult encapsResult = agreementAlice.encapsulate(keyPairBob.getEncapsulationKey());
+
+KyberAgreement agreementBob = new KyberAgreement(keyPairBob);
+
+//Alice sends the Cipher Text to Bob
+//Bob decapsulates the Cipher Text
+byte[] decapsSecretKey = agreementBob.decapsulate(encapsResult.getCipherText());
+
+//Alice generated the Secret Key
+System.out.println(Arrays.toString(encapsResult.getSecretKey()));
+//Bob decapsulated the same Secret Key
+System.out.println(Arrays.toString(decapsSecretKey));
+
+//Bob's Secret Key
+//[91, 119, -51, 71, -106, 30, -66, 47, 53, -7, -119, -38, -78, 61, -27, 44, -15, -47, -115, -92, -26, -120, 124, -17, -121, 83, 0, -57, -71, 118, 2, -31]
+//Alice's Secret Key
+//[91, 119, -51, 71, -106, 30, -66, 47, 53, -7, -119, -38, -78, 61, -27, 44, -15, -47, -115, -92, -26, -120, 124, -17, -121, 83, 0, -57, -71, 118, 2, -31]
+
+
+//encapsResult.getSecretKey() == decapsSecretKey
 ```
 
 In this example, **Bob** and **Alice** creates an **Agreement** that an eavesdropper would not be able to comprehend even
@@ -160,6 +201,11 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.2.6
+* Improved library encapsulation. Hidden internal functions.
+* Sealed interfaces.
+* Properly set constant values as Inlines.
 
 ### v0.2.5
 * Use native SecureRandom() for JVM.

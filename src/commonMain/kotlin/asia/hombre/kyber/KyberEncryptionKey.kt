@@ -18,11 +18,14 @@
 
 package asia.hombre.kyber
 
+import kotlin.jvm.JvmName
+
 class KyberEncryptionKey(
     override val parameter: KyberParameter,
     override val keyBytes: ByteArray,
     val nttSeed: ByteArray) : KyberPKEKey {
         val fullBytes: ByteArray
+            @JvmName("getFullBytes")
             get() {
                 val output = ByteArray(parameter.ENCAPSULATION_KEY_LENGTH)
 

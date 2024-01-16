@@ -19,17 +19,19 @@
 package asia.hombre.kyber.internal
 
 import asia.hombre.kyber.KyberConstants
-import org.kotlincrypto.endians.LittleEndian
-import org.kotlincrypto.endians.LittleEndian.Companion.toLittleEndian
 import org.kotlincrypto.hash.sha3.SHAKE128
 import org.kotlincrypto.hash.sha3.SHAKE256
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.*
 
 internal class KyberMath {
-    companion object {
+
+    internal companion object {
+        @get:JvmSynthetic
         val Boolean.int
             get() = (if (this) 1 else 0)
 
+        @JvmSynthetic
         fun bitsToBytes(bits: BooleanArray): ByteArray {
             val byteArray = ByteArray(ceil(bits.size / 8.0).toInt())
 
@@ -41,6 +43,7 @@ internal class KyberMath {
             return byteArray
         }
 
+        @JvmSynthetic
         fun bytesToBits(bytes: ByteArray): BooleanArray {
             val bitArray = BooleanArray(bytes.size * 8)
 
@@ -55,6 +58,7 @@ internal class KyberMath {
             return bitArray
         }
 
+        @JvmSynthetic
         fun compress(shorts: ShortArray, bitSize: Int): ShortArray {
             val compressed = ShortArray(shorts.size)
 
@@ -64,6 +68,7 @@ internal class KyberMath {
             return compressed
         }
 
+        @JvmSynthetic
         fun decompress(shorts: ShortArray, bitSize: Int): ShortArray {
             val decompressed = ShortArray(shorts.size)
 
@@ -73,6 +78,7 @@ internal class KyberMath {
             return decompressed
         }
 
+        @JvmSynthetic
         fun byteEncode(shorts: ShortArray, bitSize: Int): ByteArray {
             if(bitSize > UShort.SIZE_BITS)
                 throw ArithmeticException("There are not enough bits to encode! Bit Size: $bitSize is too big!")
@@ -89,6 +95,7 @@ internal class KyberMath {
             return bitsToBytes(bits)
         }
 
+        @JvmSynthetic
         fun byteDecode(byteArray: ByteArray, bitSize: Int): ShortArray {
             val bits = bytesToBits(byteArray)
             val shorts = ShortArray(bits.size / bitSize)
@@ -107,6 +114,7 @@ internal class KyberMath {
             return shorts
         }
 
+        @JvmSynthetic
         fun sampleNTT(bytes: ByteArray): ShortArray {
             val nttCoefficients = ShortArray(KyberConstants.N)
 
@@ -131,6 +139,7 @@ internal class KyberMath {
             return nttCoefficients
         }
 
+        @JvmSynthetic
         fun samplePolyCBD(eta: Int, bytes: ByteArray): ShortArray {
             val f = ShortArray(KyberConstants.N)
             val bits = bytesToBits(bytes)
@@ -148,6 +157,7 @@ internal class KyberMath {
             return f
         }
 
+        @JvmSynthetic
         fun reverseBits(x: Int): UByte {
             return (((1 and x) shl 6) or
                     (((1 shl 1) and x) shl 4) or
@@ -159,6 +169,7 @@ internal class KyberMath {
         }
 
         //Functionally equivalent to pow_mod(b, e, mod) in Python, except values are kept positive
+        @JvmSynthetic
         fun powMod(b: Int, e: Int, m: Int): Long {
             if(e == 0) //b^0 = 1
                 return 1L
@@ -173,6 +184,7 @@ internal class KyberMath {
             return c
         }
 
+        @JvmSynthetic
         private fun pow(a: Int, b: Int): Long {
             var out = 1L
 
@@ -184,6 +196,7 @@ internal class KyberMath {
         }
 
         //Modified Extended Euclidean Algorithm
+        @JvmSynthetic
         private fun modMulInv(b: Int, e: Int, m: Int): Long {
             var s = 0L
             var r: Long = m.toLong()
@@ -206,6 +219,7 @@ internal class KyberMath {
             return oldS
         }
 
+        @JvmSynthetic
         fun NTT(polynomials: ShortArray): ShortArray {
             val output = polynomials.copyOf()
 
@@ -228,6 +242,7 @@ internal class KyberMath {
             return output
         }
 
+        @JvmSynthetic
         fun invNTT(nttPolynomials: ShortArray): ShortArray {
             val output = nttPolynomials.copyOf()
 
@@ -253,18 +268,22 @@ internal class KyberMath {
             return output
         }
 
+        @JvmSynthetic
         fun productOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() * b.toInt(), KyberConstants.Q)
         }
 
+        @JvmSynthetic
         fun sumOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() + b.toInt(), KyberConstants.Q)
         }
 
+        @JvmSynthetic
         fun diffOf(a: Number, b: Number): Short {
             return moduloOf(a.toInt() - b.toInt(), KyberConstants.Q)
         }
 
+        @JvmSynthetic
         fun multiplyNTTs(ntt1: ShortArray, ntt2: ShortArray): ShortArray {
             val multipliedNtt = ShortArray(KyberConstants.N)
 
@@ -297,6 +316,7 @@ internal class KyberMath {
             return multipliedNtt
         }
 
+        @JvmSynthetic
         fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): ByteArray {
             val shake128 = SHAKE128(672)
 
@@ -307,6 +327,7 @@ internal class KyberMath {
             return shake128.digest()
         }
 
+        @JvmSynthetic
         fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray {
             val shake256 = SHAKE256((KyberConstants.N shr 2) * eta)
 
@@ -316,6 +337,7 @@ internal class KyberMath {
             return shake256.digest()
         }
 
+        @JvmSynthetic
         fun nttMatrixToVectorDot(matrix: Array<Array<ShortArray>>, vector: Array<ShortArray>, isTransposed: Boolean = false): Array<ShortArray> {
             val result = Array(vector.size) { ShortArray(KyberConstants.N) }
 
@@ -329,6 +351,7 @@ internal class KyberMath {
             return result
         }
 
+        @JvmSynthetic
         fun vectorAddition(v1: Array<ShortArray>, v2: Array<ShortArray>): Array<ShortArray> {
             val result = Array(v1.size) { ShortArray(v2[0].size) }
 
@@ -338,6 +361,7 @@ internal class KyberMath {
             return result
         }
 
+        @JvmSynthetic
         fun vectorToVectorAdd(v1: ShortArray, v2: ShortArray): ShortArray {
             val result = ShortArray(v1.size)
 
@@ -347,6 +371,7 @@ internal class KyberMath {
             return result
         }
 
+        @JvmSynthetic
         fun moduloOf(value: Number, modulo: Number): Short {
             val shortedValue = value.toInt()
             val shortedModulo = modulo.toShort()

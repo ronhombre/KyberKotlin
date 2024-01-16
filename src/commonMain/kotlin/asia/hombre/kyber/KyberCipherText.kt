@@ -18,8 +18,11 @@
 
 package asia.hombre.kyber
 
+import kotlin.jvm.JvmName
+
 class KyberCipherText(val parameter: KyberParameter, val encodedCoefficients: ByteArray, val encodedTerms: ByteArray) {
     val fullBytes: ByteArray
+        @JvmName("getFullBytes")
         get() {
             val output = ByteArray(parameter.CIPHERTEXT_LENGTH)
 

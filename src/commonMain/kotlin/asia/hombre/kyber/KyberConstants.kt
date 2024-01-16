@@ -18,6 +18,8 @@
 
 package asia.hombre.kyber
 
+import kotlin.jvm.JvmField
+
 class KyberConstants {
     companion object {
         const val N: Int = 256
@@ -26,6 +28,7 @@ class KyberConstants {
         const val Q_INV: Int = 62209 //Generated using KyberMath.powMod(Q, -1, 2^16)
         const val SECRET_KEY_LENGTH = N_BYTES
 
+        @JvmField
         val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(
             1, 1729, 2580, 3289, 2642, 630, 1897, 848,
             1062, 1919, 193, 797, 2786, 3260, 569, 1746,
@@ -45,6 +48,7 @@ class KyberConstants {
             1722, 1212, 1874, 1029, 2110, 2935, 885, 2154
         ) //Generated using Generators.generateZetas() test method
 
+        @JvmField
         val PRECOMPUTED_GAMMAS_TABLE = shortArrayOf(
             17, 3312, 2761, 568, 583, 2746, 2649, 680,
             1637, 1692, 723, 2606, 2288, 1041, 1100, 2229,

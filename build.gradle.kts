@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber"
-version = "0.2.5"
+version = "0.2.6"
 
 val projectName = project.group.toString().split(".").last()
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -111,6 +111,11 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            dependencies {
+
+            }
+        }
+        val jsMain by getting {
             dependencies {
 
             }

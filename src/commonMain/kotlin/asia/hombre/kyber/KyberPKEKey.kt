@@ -18,7 +18,7 @@
 
 package asia.hombre.kyber
 
-interface KyberPKEKey {
+sealed interface KyberPKEKey {
     val parameter: KyberParameter
     val keyBytes: ByteArray
 }

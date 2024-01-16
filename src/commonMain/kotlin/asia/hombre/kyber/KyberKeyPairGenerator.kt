@@ -22,10 +22,12 @@ import asia.hombre.kyber.internal.KyberMath
 import asia.hombre.kyber.internal.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
+import kotlin.jvm.JvmSynthetic
 
 internal class KyberKeyPairGenerator {
 
     companion object {
+        @JvmSynthetic
         fun generate(parameter: KyberParameter): KyberKEMKeyPair {
             return generate(
                 parameter,
@@ -34,6 +36,7 @@ internal class KyberKeyPairGenerator {
             )
         }
 
+        @JvmSynthetic
         internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
             val sha3256 = SHA3_256()
 
@@ -51,6 +54,7 @@ internal class KyberKeyPairGenerator {
 
         internal class PKEGenerator {
             companion object {
+                @JvmSynthetic
                 fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
                     val sha3512 = SHA3_512()
 
