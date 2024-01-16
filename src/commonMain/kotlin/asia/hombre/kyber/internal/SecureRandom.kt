@@ -26,11 +26,11 @@ import kotlin.random.nextULong
 import kotlin.time.measureTime
 
 /*
-* This class is NOT AN APPROVED Secure Random Generator. Although it relies on the innate randomness of execution times,
-* as any given instruction runs differently each time to a certain point. By multiplying it with large and variable prime
-* integers, we can make a good random number. Then we can seed Kotlin's built-in Random() function and XOR the output.
-* Since XOR is a lossy process, it would be impossible to recover the initial values. However, the resistance of this
-* class from Timing Attacks is unknown. Use it with caution.
+* This class is NOT AN APPROVED CSPRNG Secure Random Generator. Although it relies on the innate randomness of execution
+* times, as any given instruction runs differently each time to a certain point. By multiplying it with large and
+* variable prime integers, we can make a good random number. Then we can seed Kotlin's built-in Random() function and
+* XOR the output. Since XOR is a lossy process, it would be impossible to recover the initial values. However, the
+* resistance of this class from Timing Attacks is unknown. Use it with caution.
  */
 internal class SecureRandom {
     companion object {
@@ -90,6 +90,7 @@ internal class SecureRandom {
 
         private fun countPrimes(upTo: Int): Int {
             var counter = 1 //Include 2
+            var randomizer = 1 //Mess up the branch prediction
 
             for(i in (3).rangeTo(upTo) step 2) {
                 counter++
@@ -99,6 +100,13 @@ internal class SecureRandom {
                         counter--
                         break
                     }
+                    /**
+                     * Although Random is not a CSPRNG, it brings in enough "randomness" to mess up the branch prediction.
+                     * This grabs the innate randomness of branch prediction and adds to the time of running countPrimes().
+                     * Randomness over Speed
+                     */
+                    if(test.toInt() % (Random.nextInt(4) + 1) == 0)
+                        randomizer++
                 }
             }
 

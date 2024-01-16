@@ -19,7 +19,6 @@
 package asia.hombre.kyber.tests
 
 import asia.hombre.kyber.*
-import asia.hombre.kyber.KeyAgreement
 import org.junit.Test
 import java.nio.file.Files
 import java.security.SecureRandom
@@ -31,6 +30,7 @@ class JVMTest {
         val bytes = ByteArray(1024 * 1024)
         SecureRandom.getInstanceStrong().nextBytes(bytes)
         Files.write(Path("./randomjvm.bin"), bytes)
+        Files.write(Path("./random.bin"), asia.hombre.kyber.internal.SecureRandom.generateSecureBytes(1024 * 1024))
     }
 
     @Test
