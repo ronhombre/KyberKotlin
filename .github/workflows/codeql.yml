@@ -76,8 +76,8 @@ jobs:
       #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
       - run: |
-          echo "Run, Build Application using script"
-          ./runtests.sh
+          echo "Run Tests"
+          ./gradlew :cleanJvmTest :jvmTest --tests "asia.hombre.kyber.Tests"
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
