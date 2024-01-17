@@ -54,7 +54,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.2.6")
+    implementation("asia.hombre:kyber:0.3.0-standard")
 }
 ```
 
@@ -201,6 +201,16 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.3.0-standard
+
+* Convert KyberEncryptionKey, KyberDecryptionKey, KyberEncapsulationKey, KyberDecapsulationKey, and KyberCipherText to HEX, BASE64, and BYTES vice-versa.
+* Reverted SecureRandom update. #4d08b5f4
+* Added tests for conversions.
+* KyberEncryptionKey, KyberDecryptionKey, KyberEncapsulationKey, KyberDecapsulationKey, and KyberCipherText all have the fullbytes attribute or getFullBytes() for Java.
+* Moved interfaces to their own folder to clean up src directory.
+* New KyberParameter fields.
+* The standard branch is now a version.
 
 ### v0.2.6
 * Improved library encapsulation. Hidden internal functions.

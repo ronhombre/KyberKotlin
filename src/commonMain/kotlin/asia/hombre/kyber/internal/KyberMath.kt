@@ -378,5 +378,17 @@ internal class KyberMath {
             return if(shortedValue < 0) (shortedModulo - (abs(shortedValue) % shortedModulo)).toShort()
             else (shortedValue % shortedModulo).toShort()
         }
+
+        @JvmSynthetic
+        fun decodeHex(string: String): ByteArray {
+            var hexString = string
+
+            if(string.length % 2 == 1)
+                hexString += '0' //Append a 0 if the hex is not even to fit into a byte.
+
+            return hexString.chunked(2)
+                .map { it.toInt(16).toByte() }
+                .toByteArray()
+        }
     }
 }

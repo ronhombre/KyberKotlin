@@ -91,15 +91,14 @@ internal class KyberKeyPairGenerator {
                         noiseVector
                     )
 
-                    val encodeSize = 3 * KyberConstants.N shr 1
-                    val encryptionKeyBytes = ByteArray(encodeSize * parameter.K) //Excluded nttSeed
-                    val decryptionKeyBytes = ByteArray(encryptionKeyBytes.size)
+                    val encryptionKeyBytes = ByteArray(parameter.ENCRYPTION_KEY_LENGTH - KyberConstants.N_BYTES) //Excluded nttSeed
+                    val decryptionKeyBytes = ByteArray(parameter.DECRYPTION_KEY_LENGTH)
 
                     for(i in 0..<parameter.K) {
                         KyberMath.byteEncode(systemVector[i], 12)
-                            .copyInto(encryptionKeyBytes, i * encodeSize)
+                            .copyInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
                         KyberMath.byteEncode(secretVector[i], 12)
-                            .copyInto(decryptionKeyBytes, i * encodeSize)
+                            .copyInto(decryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
                     }
 
                     return KyberPKEKeyPair(

@@ -19,6 +19,7 @@
 package asia.hombre.kyber.tests
 
 import asia.hombre.kyber.*
+import org.junit.Ignore
 import org.junit.Test
 import java.nio.file.Files
 import java.security.SecureRandom
@@ -27,8 +28,15 @@ import kotlin.io.path.Path
 class JVMTest {
     @Test
     fun jvmPlayground() {
+
+    }
+
+    @Ignore //Remove
+    @Test
+    fun jvmCompareSecureRandom() {
         val bytes = ByteArray(1024 * 1024)
         SecureRandom.getInstanceStrong().nextBytes(bytes)
+        //Visualize through binvis.io
         Files.write(Path("./randomjvm.bin"), bytes)
         Files.write(Path("./random.bin"), asia.hombre.kyber.internal.SecureRandom.generateSecureBytes(1024 * 1024))
     }

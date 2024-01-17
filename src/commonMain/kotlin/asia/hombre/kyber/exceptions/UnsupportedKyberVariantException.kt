@@ -16,9 +16,6 @@
  * limitations under the License.
  */
 
-package asia.hombre.kyber
+package asia.hombre.kyber.exceptions
 
-sealed interface KyberPKEKey {
-    val parameter: KyberParameter
-    val keyBytes: ByteArray
-}
+class UnsupportedKyberVariantException(override val message: String): Exception("This variant is not yet supported! Reason: $message")

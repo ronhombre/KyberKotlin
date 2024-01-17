@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
-package asia.hombre.kyber
+package asia.hombre.kyber.interfaces
 
-class KyberEncapsulationResult(val secretKey: ByteArray, val cipherText: KyberCipherText)
+internal interface KyberKEMKey: Convertible {
+    val key: KyberPKEKey
+}

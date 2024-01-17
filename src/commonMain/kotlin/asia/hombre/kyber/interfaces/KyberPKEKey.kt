@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 
-package asia.hombre.kyber
+package asia.hombre.kyber.interfaces
 
-sealed interface KyberKEMKey {
-    val key: KyberPKEKey
+import asia.hombre.kyber.KyberParameter
+
+internal interface KyberPKEKey: Convertible {
+    val parameter: KyberParameter
+    val keyBytes: ByteArray
 }

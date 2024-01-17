@@ -27,6 +27,7 @@ class KyberConstants {
         const val Q: Int = 3329
         const val Q_INV: Int = 62209 //Generated using KyberMath.powMod(Q, -1, 2^16)
         const val SECRET_KEY_LENGTH = N_BYTES
+        const val ENCODE_SIZE = 3 * N shr 1 //Sums up to 384
 
         @JvmField
         val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(

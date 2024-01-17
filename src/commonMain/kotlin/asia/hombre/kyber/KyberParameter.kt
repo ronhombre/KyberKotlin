@@ -18,7 +18,9 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int, val DV: Int) {
     ML_KEM_512(2, 3, 2, 10, 4),
@@ -29,8 +31,69 @@ enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int,
     val CIPHERTEXT_LENGTH: Int = KyberConstants.N_BYTES * ((DU * K) + DV)
 
     @JvmField
-    val ENCAPSULATION_KEY_LENGTH: Int = (3 * KyberConstants.N * K shr 1) + KyberConstants.SECRET_KEY_LENGTH
+    val DECRYPTION_KEY_LENGTH: Int = KyberConstants.ENCODE_SIZE * K
 
     @JvmField
-    val DECAPSULATION_KEY_LENGTH: Int = (2 * ENCAPSULATION_KEY_LENGTH) + KyberConstants.N_BYTES
+    val ENCRYPTION_KEY_LENGTH: Int = DECRYPTION_KEY_LENGTH + KyberConstants.N_BYTES
+
+    @JvmField
+    val ENCAPSULATION_KEY_LENGTH: Int = ENCRYPTION_KEY_LENGTH
+
+    @JvmField
+    val DECAPSULATION_KEY_LENGTH: Int = ENCAPSULATION_KEY_LENGTH + DECRYPTION_KEY_LENGTH + (2 * KyberConstants.N_BYTES)
+
+    companion object {
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun findByCipherTextSize(size: Int): KyberParameter {
+            return when(size) {
+                ML_KEM_512.CIPHERTEXT_LENGTH -> ML_KEM_512
+                ML_KEM_768.CIPHERTEXT_LENGTH -> ML_KEM_768
+                ML_KEM_1024.CIPHERTEXT_LENGTH -> ML_KEM_1024
+                else -> throw UnsupportedKyberVariantException("Cipher Text size is either bigger or smaller than expected.")
+            }
+        }
+
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun findByEncryptionKeySize(size: Int): KyberParameter {
+            return when(size) {
+                ML_KEM_512.ENCAPSULATION_KEY_LENGTH -> ML_KEM_512
+                ML_KEM_768.ENCAPSULATION_KEY_LENGTH -> ML_KEM_768
+                ML_KEM_1024.ENCAPSULATION_KEY_LENGTH -> ML_KEM_1024
+                else -> {
+                    println(size)
+                    throw UnsupportedKyberVariantException("Encryption/Encapsulation Key size is either bigger or smaller than expected.")
+                }
+            }
+        }
+
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun findByEncapsulationKeySize(size: Int): KyberParameter {
+            return findByEncryptionKeySize(size)
+        }
+
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun findByDecryptionKeySize(size: Int): KyberParameter {
+            return when(size) {
+                ML_KEM_512.DECRYPTION_KEY_LENGTH -> ML_KEM_512
+                ML_KEM_768.DECRYPTION_KEY_LENGTH -> ML_KEM_768
+                ML_KEM_1024.DECRYPTION_KEY_LENGTH -> ML_KEM_1024
+                else -> throw UnsupportedKyberVariantException("Decryption Key size is either bigger or smaller than expected.")
+            }
+        }
+
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun findByDecapsulationKeySize(size: Int): KyberParameter {
+            return when(size) {
+                ML_KEM_512.DECAPSULATION_KEY_LENGTH -> ML_KEM_512
+                ML_KEM_768.DECAPSULATION_KEY_LENGTH -> ML_KEM_768
+                ML_KEM_1024.DECAPSULATION_KEY_LENGTH -> ML_KEM_1024
+                else -> throw UnsupportedKyberVariantException("Decapsulation Key size is either bigger or smaller than expected.")
+            }
+        }
+    }
 }
