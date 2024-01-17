@@ -204,6 +204,10 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 ## Changelog
 
+### v0.3.1-standard
+
+* Branchless code where it mattered.
+
 ### v0.3.0-standard
 
 * Convert KyberEncryptionKey, KyberDecryptionKey, KyberEncapsulationKey, KyberDecapsulationKey, and KyberCipherText to HEX, BASE64, and BYTES vice-versa.
