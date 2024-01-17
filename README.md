@@ -47,6 +47,7 @@ This benchmark is for performance tracking through the development.
 * Key Generation (512, 768, 1024)
 * Encapsulation (512, 768, 1024)
 * Decapsulation (512, 768, 1024)
+* Convert to or from HEX, BASE64, and BYTES.
 
 ## JVM Installation
 
