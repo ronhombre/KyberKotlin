@@ -56,7 +56,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.3.0-standard")
+    implementation("asia.hombre:kyber:0.3.1-standard")
 }
 ```
 
@@ -203,6 +203,10 @@ Thus, the APACHE LICENSE v2.0 has been chosen.
 
 
 ## Changelog
+
+### v0.3.1-standard
+
+* Branchless code where it mattered.
 
 ### v0.3.0-standard
 
