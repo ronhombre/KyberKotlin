@@ -375,8 +375,8 @@ internal class KyberMath {
         fun moduloOf(value: Number, modulo: Number): Short {
             val shortedValue = value.toInt()
             val shortedModulo = modulo.toShort()
-            return if(shortedValue < 0) (shortedModulo - (abs(shortedValue) % shortedModulo)).toShort()
-            else (shortedValue % shortedModulo).toShort()
+            val isNegative = shortedValue < 0
+            return (((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)).toShort()
         }
 
         @JvmSynthetic
