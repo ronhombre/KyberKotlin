@@ -22,6 +22,8 @@ two matrices.)
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
 It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order to implement SHAKE and SHA3 within the library.
 
+**For more information like building, contribution, documentation, etc., read the [Wiki](https://github.com/ronhombre/KyberKotlin/wiki).**
+
 ### Intent
 
 The intentions of this project are pure and transparent. Its goal is to decouple from the JVM and become a self-sufficient
