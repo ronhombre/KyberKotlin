@@ -43,7 +43,7 @@
     <packaging>jar</packaging>
 
     <scm>
-        <tag>v0.3.0-standard</tag>
+        <tag>v0.4.0</tag>
         <connection>scm:git:https://github.com/ronhombre/KyberKotlin.git</connection>
         <url>https://github.com/ronhombre/KyberKotlin.git</url>
     </scm>
