@@ -65,6 +65,8 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
                 KyberConstants.N * (i + 1)
             )
 
+            nttKeyVector[i] = KyberMath.vectorToMontVector(nttKeyVector[i])
+
             randomnessVector[i] = KyberMath.samplePolyCBD(
                 parameter.ETA1,
                 KyberMath.prf(parameter.ETA1, randomness, n.toByte())
@@ -76,8 +78,9 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
                 KyberMath.prf(parameter.ETA2, randomness, (n + parameter.K).toByte())
             )
 
-            for(j in 0..<parameter.K)
+            for(j in 0..<parameter.K) {
                 matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
+            }
         }
 
         val noiseTerm = KyberMath.samplePolyCBD(
@@ -85,18 +88,17 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
             KyberMath.prf(parameter.ETA2, randomness, ((parameter.K * 2) + 1).toByte())
         )
 
-        val muse = KyberMath.decompress(KyberMath.byteDecode(plainText, 1), 1)
+        val muse = KyberMath.singleDecompress(KyberMath.singleByteDecode(plainText))
 
-        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector)
+        val coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector)
 
         var constantTerm = ShortArray(KyberConstants.N)
         for(i in 0..<parameter.K) {
             coefficients[i] = KyberMath.invNTT(coefficients[i])
+            coefficients[i] = KyberMath.vectorToVectorAdd(coefficients[i], noiseVector[i])
 
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
         }
-
-        coefficients = KyberMath.vectorAddition(coefficients, noiseVector)
 
         constantTerm = KyberMath.invNTT(constantTerm)
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, noiseTerm)
@@ -106,11 +108,11 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
 
         for(i in 0..<parameter.K) {
-            KyberMath.byteEncode(KyberMath.compress(coefficients[i], parameter.DU), parameter.DU)
+            KyberMath.byteEncode(KyberMath.compress(KyberMath.montVectorToVector(coefficients[i]), parameter.DU), parameter.DU)
                 .copyInto(encodedCoefficients, i * KyberConstants.N_BYTES * parameter.DU)
         }
 
-        KyberMath.byteEncode(KyberMath.compress(constantTerm, parameter.DV), parameter.DV).copyInto(encodedTerms)
+        KyberMath.byteEncode(KyberMath.compress(KyberMath.montVectorToVector(constantTerm), parameter.DV), parameter.DV).copyInto(encodedTerms)
 
         return KyberCipherText(parameter, encodedCoefficients, encodedTerms)
     }
@@ -133,23 +135,28 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
                 ),
                 parameter.DU
             )
+            coefficients[i] = KyberMath.vectorToMontVector(coefficients[i])
         }
 
-        val constantTerms = KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
+        var constantTerms = KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
+        constantTerms = KyberMath.vectorToMontVector(constantTerms)
+
         val secretVector = KyberMath.byteDecode(keypair.decapsulationKey.key.keyBytes, 12)
 
         for (i in 0..<parameter.K) {
             val subtraction = KyberMath.invNTT(
                 KyberMath.multiplyNTTs(
-                    secretVector.copyOfRange(
+                    KyberMath.vectorToMontVector(secretVector.copyOfRange(
                         i * KyberConstants.N,
-                        (i + 1) * KyberConstants.N),
+                        (i + 1) * KyberConstants.N)),
                     KyberMath.NTT(coefficients[i])
                 )
             )
             for (j in 0..<KyberConstants.N)
                 constantTerms[j] = KyberMath.diffOf(constantTerms[j], subtraction[j])
         }
+
+        constantTerms = KyberMath.montVectorToVector(constantTerms)
 
         return KyberMath.byteEncode(KyberMath.compress(constantTerms, 1), 1)
     }

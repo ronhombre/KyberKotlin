@@ -95,9 +95,9 @@ internal class KyberKeyPairGenerator {
                     val decryptionKeyBytes = ByteArray(parameter.DECRYPTION_KEY_LENGTH)
 
                     for(i in 0..<parameter.K) {
-                        KyberMath.byteEncode(systemVector[i], 12)
+                        KyberMath.byteEncode(KyberMath.montVectorToVector(systemVector[i]), 12)
                             .copyInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
-                        KyberMath.byteEncode(secretVector[i], 12)
+                        KyberMath.byteEncode(KyberMath.montVectorToVector(secretVector[i]), 12)
                             .copyInto(decryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
                     }
 

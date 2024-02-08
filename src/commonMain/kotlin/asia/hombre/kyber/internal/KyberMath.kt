@@ -29,7 +29,7 @@ internal class KyberMath {
     internal companion object {
         @get:JvmSynthetic
         val Boolean.int
-            get() = (if (this) 1 else 0)
+            get() = this.compareTo(false)
 
         @JvmSynthetic
         fun bitsToBytes(bits: BooleanArray): ByteArray {
@@ -79,6 +79,17 @@ internal class KyberMath {
         }
 
         @JvmSynthetic
+        fun singleDecompress(shorts: ShortArray): ShortArray {
+            val decompressed = ShortArray(shorts.size)
+            val decompressConstant = 1665
+
+            for (i in shorts.indices)
+                decompressed[i] = toMontgomeryForm((shorts[i] * decompressConstant).toShort())
+
+            return decompressed
+        }
+
+        @JvmSynthetic
         fun byteEncode(shorts: ShortArray, bitSize: Int): ByteArray {
             if(bitSize > UShort.SIZE_BITS)
                 throw ArithmeticException("There are not enough bits to encode! Bit Size: $bitSize is too big!")
@@ -86,7 +97,7 @@ internal class KyberMath {
             val bits = BooleanArray(shorts.size * bitSize)
 
             for(i in shorts.indices) {
-                shorts[i] = moduloOf(shorts[i], KyberConstants.Q)
+                shorts[i] = barrettReduce(shorts[i])
                 for(j in 0..<bitSize) {
                     bits[(i * bitSize) + j] = ((shorts[i].toInt() ushr j) and 1) == 1
                 }
@@ -102,14 +113,23 @@ internal class KyberMath {
             for(i in shorts.indices) {
                 for(j in 0..<(bitSize)) {
                     val value = shorts[i].toInt() or (bits[(i * bitSize) + j].int shl j)
-                    var mod = pow(2, bitSize + 1).toShort()
 
                     if((j + 1) == bitSize)
-                        mod = KyberConstants.Q.toShort()
-
-                    shorts[i] = moduloOf(value, mod)
+                        shorts[i] = barrettReduce(value.toShort())
+                    else
+                        shorts[i] = (((1 shl (bitSize + 2)) - 1) and value).toShort()
                 }
             }
+
+            return shorts
+        }
+
+        @JvmSynthetic
+        fun singleByteDecode(byteArray: ByteArray): ShortArray {
+            val bits = bytesToBits(byteArray)
+            val shorts = ShortArray(bits.size)
+            for(i in shorts.indices)
+                shorts[i] = bits[i].int.toShort()
 
             return shorts
         }
@@ -125,11 +145,11 @@ internal class KyberMath {
                 val d2 = ((bytes[i + 1].toInt() and 0xFF) shr 4 or ((bytes[i + 2].toInt() and 0xFF) shl 4) and 0xFFF)
 
                 if(d1 < KyberConstants.Q) {
-                    nttCoefficients[j] = d1.toShort()
+                    nttCoefficients[j] = toMontgomeryForm(d1.toShort())
                     j++
                 }
                 if(d2 < KyberConstants.Q && j < KyberConstants.N) {
-                    nttCoefficients[j] = d2.toShort()
+                    nttCoefficients[j] = toMontgomeryForm(d2.toShort())
                     j++
                 }
 
@@ -151,7 +171,7 @@ internal class KyberMath {
                     x = (x + bits[(2 * i * eta) + j].int).toShort()
                     y = (y + bits[(2 * i * eta) + eta + j].int).toShort()
                 }
-                f[i] = diffOf(x, y)
+                f[i] = toMontgomeryForm(diffOf(x, y))
             }
 
             return f
@@ -263,24 +283,24 @@ internal class KyberMath {
             }
 
             for(i in output.indices)
-                output[i] = productOf(output[i].toInt(), 3303)
+                output[i] = productOf(output[i], 512) // toMontgomeryForm(3303) = 512
 
             return output
         }
 
         @JvmSynthetic
-        fun productOf(a: Number, b: Number): Short {
-            return moduloOf(a.toInt() * b.toInt(), KyberConstants.Q)
+        fun productOf(a: Short, b: Short): Short {
+            return montgomeryReduce(a * b)
         }
 
         @JvmSynthetic
-        fun sumOf(a: Number, b: Number): Short {
-            return moduloOf(a.toInt() + b.toInt(), KyberConstants.Q)
+        fun sumOf(a: Short, b: Short): Short {
+            return barrettReduce((a + b).toShort())
         }
 
         @JvmSynthetic
-        fun diffOf(a: Number, b: Number): Short {
-            return moduloOf(a.toInt() - b.toInt(), KyberConstants.Q)
+        fun diffOf(a: Short, b: Short): Short {
+            return barrettReduce((a - b).toShort())
         }
 
         @JvmSynthetic
@@ -372,11 +392,43 @@ internal class KyberMath {
         }
 
         @JvmSynthetic
-        fun moduloOf(value: Number, modulo: Number): Short {
-            val shortedValue = value.toInt()
-            val shortedModulo = modulo.toShort()
-            val isNegative = shortedValue < 0
-            return (((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)).toShort()
+        fun montVectorToVector(v1: ShortArray): ShortArray {
+            val result = ShortArray(v1.size)
+
+            for(i in v1.indices)
+                result[i] = montgomeryReduce(v1[i].toInt())
+
+            return result
+        }
+
+        @JvmSynthetic
+        fun vectorToMontVector(v1: ShortArray): ShortArray {
+            val result = ShortArray(v1.size)
+
+            for(i in v1.indices)
+                result[i] = toMontgomeryForm(v1[i])
+
+            return result
+        }
+
+        @JvmSynthetic
+        fun barrettReduce(a: Short): Short {
+            val q = (a.toInt() * KyberConstants.BARRETT_APPROX) shr 26
+
+            return (a - (q * KyberConstants.Q)).toShort()
+        }
+
+        @JvmSynthetic
+        fun montgomeryReduce(t: Int): Short {
+            val m = (t * KyberConstants.Q_INV) and 0xFFFF//((KyberConstants.MONT_R shl 1) - 1) //mod MONT_R
+            val u = (t + m * KyberConstants.Q) ushr 16
+            return (u - (KyberConstants.Q * ((u >= KyberConstants.Q).int))).toShort()
+        }
+
+        @JvmSynthetic
+        fun toMontgomeryForm(a: Short): Short {
+            //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
+            return montgomeryReduce(a * KyberConstants.MONT_R2)
         }
 
         @JvmSynthetic

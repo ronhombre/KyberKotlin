@@ -23,7 +23,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.measureTime
 
-@Ignore //Remove
+@Ignore //Comment
 class Generators {
     @Test
     @OptIn(ExperimentalUnsignedTypes::class)
@@ -50,6 +50,7 @@ class Generators {
             zetas[0] = 1
             for(i in 1..<128) {
                 zetas[i] = KyberMath.powMod(17, KyberMath.reverseBits(i).toInt(), KyberConstants.Q).toShort()
+                zetas[i] = KyberMath.toMontgomeryForm(zetas[i]) //Comment this line if you want the standard form.
             }
 
             println("{" + zetas.joinToString(", ") + "}")
@@ -66,6 +67,7 @@ class Generators {
             val gammas = ShortArray(128)
             for(i in 1..128) {
                 gammas[i - 1] = KyberMath.powMod(17, (2 * KyberMath.reverseBits(i - 1).toInt()) + 1, KyberConstants.Q).toShort()
+                gammas[i - 1] = KyberMath.toMontgomeryForm(gammas[i - 1]) //Comment this line if you want the standard form.
             }
 
             println("{" + gammas.joinToString(", ") + "}")
