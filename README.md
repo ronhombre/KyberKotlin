@@ -34,13 +34,13 @@ At the 1.0.0 release, developers should be able to use this dependency if they w
 
 | Variant | Generation | Encapsulation | Decapsulation |
 |---------|------------|---------------|---------------|
-| 512     | 8042.8     | 8520          | 9204.6        |
-| 768     | 13159      | 14381.6       | 15751.4       |
-| 1024    | 20845.8    | 22421.6       | 24343.6       |
+| 512     | 8332.875   | 8937.9375     | 9935.6875     |
+| 768     | 13552.8125 | 15049.125     | 16883.9375    |
+| 1024    | 21254.8125 | 23226.3125    | 26006.0       |
 | ML-KEM  | (in ms)    | (in ms)       | (in ms)       |
 
-Ran with JVM 1.8 5 times and averaged. Lower is better.
-Code is in [Benchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/commonTest/kotlin/asia/hombre/kyber/Benchmark.kt)
+JVM: 1.8, Count: 10000, Iterations: 5 (Average)
+Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
 This benchmark is for performance tracking through the development.
 
@@ -200,76 +200,3 @@ limitations under the License.
 
 Although CRYSTALS-Kyber is Public Domain, this implementation is created through Hard Work by its Contributors.
 Thus, the APACHE LICENSE v2.0 has been chosen.
-
-
-## Changelog
-
-### v0.3.1-standard
-
-* Branchless code where it mattered.
-
-### v0.3.0-standard
-
-* Convert KyberEncryptionKey, KyberDecryptionKey, KyberEncapsulationKey, KyberDecapsulationKey, and KyberCipherText to HEX, BASE64, and BYTES vice-versa.
-* Reverted SecureRandom update. #4d08b5f4
-* Added tests for conversions.
-* KyberEncryptionKey, KyberDecryptionKey, KyberEncapsulationKey, KyberDecapsulationKey, and KyberCipherText all have the fullbytes attribute or getFullBytes() for Java.
-* Moved interfaces to their own folder to clean up src directory.
-* New KyberParameter fields.
-* The standard branch is now a version.
-
-### v0.2.6
-* Improved library encapsulation. Hidden internal functions.
-* Sealed interfaces.
-* Properly set constant values as Inlines.
-
-### v0.2.5
-* Use native SecureRandom() for JVM.
-* Added JVM-specific Benchmarks.
-* Made Key Generation static. No need to instantiate.
-* Compiled with Java 1.8.
-* Made KeyAgreement.kt and KyberKeyPairGenerator.kt internal.
-* Added KDocs for KeyAgreement.
-* Updated benchmarks.
-
-### v0.2.4
-
-* Cleaned up and formatted code.
-* Optimized minor code.
-* Made KyberParameter the central basis for the lengths of ciphertext, encaps key, and decaps key.
-* Gradle jvmJar.
-* Added warning for use of internal/SecureRandom.
-
-### v0.2.3
-
-* Cleaned up code.
-* Added exceptions for encapsulation and decapsulation.
-
-### v0.2.2
-
-* Added parameter values for lengths of cipher, encaps key, and decaps key.
-* Added copyright notices.
-
-### v0.2.1
-
-* Code optimizations.
-* Benchmarks are added.
-* Reorganized Generators.
-
-### v0.2.0
-
-* Encapsulation and Decapsulation succeeds.
-* New test cases for algorithms.
-* Removed old code based from kyberJCE.
-
-### v0.1.0
-
-* Preparing for transition to debasing from kyberJCE.
-* New codes directly derived from FIPS 203 ipd.
-* NTT Zetas generator.
-* Inverse EXP generator.
-* Kotlin Multiplatform capabilities.
-
-### v0.0.1
-
-* It's working a little. Based on kyberJCE.

@@ -22,10 +22,79 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.measureTime
 
-@Ignore //Remove
+//@Ignore //Comment
 class Benchmark {
+
     @Test
-    fun generateKeys512() {
+    fun fullBenchmark() {
+        val results = DoubleArray(9)
+
+        for(i in 0..<5) {
+            results[0] += generateKeys512().toDouble()
+            if(i > 0)
+                results[0] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[1] += encapsulation512().toDouble()
+            if(i > 0)
+                results[1] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[2] += decapsulation512().toDouble()
+            if(i > 0)
+                results[2] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[3] += generateKeys768().toDouble()
+            if(i > 0)
+                results[3] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[4] += encapsulation768().toDouble()
+            if(i > 0)
+                results[4] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[5] += decapsulation768().toDouble()
+            if(i > 0)
+                results[5] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[6] += generateKeys1024().toDouble()
+            if(i > 0)
+                results[6] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[7] += encapsulation1024().toDouble()
+            if(i > 0)
+                results[7] /= 2.0
+        }
+
+        for(i in 0..<5) {
+            results[8] += decapsulation1024().toDouble()
+            if(i > 0)
+                results[8] /= 2.0
+        }
+
+        val finalResult =
+            "| Variant | Generation | Encapsulation | Decapsulation |\n" +
+            "|---------|------------|---------------|---------------|\n" +
+            "| 512     | " + results[0] + " |  " + results[1] + "  |  " + results[2] + "  |\n" +
+            "| 768     | " + results[3] + " |  " + results[4] + "  |  " + results[5] + "  |\n" +
+            "| 1024    | " + results[6] + " |  " + results[7] + "  |  " + results[8] + "  |\n" +
+            "| ML-KEM  | (in ms)    | (in ms)       | (in ms)       |"
+
+        println(finalResult)
+    }
+
+    fun generateKeys512(): Long {
         println("Benchmarking Key Generation(10000) for 512...")
 
         val time = measureTime {
@@ -35,10 +104,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun generateKeys768() {
+    fun generateKeys768(): Long {
         println("Benchmarking Key Generation(10000) for 768...")
 
         val time = measureTime {
@@ -48,10 +118,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun generateKeys1024() {
+    fun generateKeys1024(): Long {
         println("Benchmarking Key Generation(10000) for 1024")
 
         val time = measureTime {
@@ -61,10 +132,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun encapsulation512() {
+    fun encapsulation512(): Long {
         println("Benchmarking Encapsulation(10000) for 512...")
 
         val time = measureTime {
@@ -78,10 +150,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun encapsulation768() {
+    fun encapsulation768(): Long {
         println("Benchmarking Encapsulation(10000) for 768...")
 
         val time = measureTime {
@@ -95,10 +168,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun encapsulation1024() {
+    fun encapsulation1024(): Long {
         println("Benchmarking Encapsulation(10000) for 1024...")
 
         val time = measureTime {
@@ -112,10 +186,11 @@ class Benchmark {
         }.inWholeMilliseconds
 
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun decapsulation512() {
+    fun decapsulation512(): Long {
         println("Benchmarking Decapsulation(10000) for 512...")
 
         var success = 0
@@ -141,10 +216,11 @@ class Benchmark {
 
         println("$failure / " + (success + failure) + " failures.")
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun decapsulation768() {
+    fun decapsulation768(): Long {
         println("Benchmarking Decapsulation(10000) for 768...")
 
         var success = 0
@@ -170,10 +246,11 @@ class Benchmark {
 
         println("$failure / " + (success + failure) + " failures.")
         println("Done after: " + time + "ms")
+
+        return time
     }
 
-    @Test
-    fun decapsulation1024() {
+    fun decapsulation1024(): Long {
         println("Benchmarking Decapsulation(10000) for 1024...")
 
         var success = 0
@@ -199,5 +276,7 @@ class Benchmark {
 
         println("$failure / " + (success + failure) + " failures.")
         println("Done after: " + time + "ms")
+
+        return time
     }
 }
