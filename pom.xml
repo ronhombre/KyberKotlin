@@ -39,7 +39,7 @@
 
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>0.3.0-standard</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <scm>
