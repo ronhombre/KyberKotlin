@@ -153,7 +153,7 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
                 )
             )
             for (j in 0..<KyberConstants.N)
-                constantTerms[j] = KyberMath.diffOf(constantTerms[j], subtraction[j])
+                constantTerms[j] = KyberMath.barrettReduce((constantTerms[j] - subtraction[j]).toShort())
         }
 
         constantTerms = KyberMath.montVectorToVector(constantTerms)

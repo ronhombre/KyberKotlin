@@ -26,6 +26,7 @@ class KyberConstants {
         const val N_BYTES: Int = N shr 3
         const val Q: Int = 3329
         const val Q_INV: Int = -62209 //Generated using KyberMath.powMod(Q, -1, 2^16) and negated
+        const val Q_HALF: Int = 1665 //round(Q/2)
         const val BARRETT_APPROX: Short = 20159 //(((1L shl 26) + (Q / 2)) / Q).toShort()
         //const val MONT_R: Int = 1 shl 16
         const val MONT_R2: Short = 1353 //MONT_R.toLong() shl 16 <- mod Q = 1353 //Basically R^2 mod Q

@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.0"
+version = "0.4.1"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -76,21 +76,21 @@ kotlin {
                     include(jarFileName, sourcesFileName)
                     into(mavenDeep)
                 }
+
+                val files = fileTree(mavenBundlingDir)
+                for(file in files) {
+                    println(file.path)
+                    saveHash(file, sha1(file), ".sha1")
+                    saveHash(file, md5(file), ".md5")
+                    saveHash(file, sha256(file), ".sha256")
+                    saveHash(file, sha512(file), ".sha512")
+                }
                 //Sign
                 signing {
                     sign(file("$mavenDeep/$pomFileName"))
                     sign(file("$mavenDeep/$jarFileName"))
                     sign(file("$mavenDeep/$sourcesFileName"))
                     sign(file("$mavenDeep/$javadocsFileName"))
-                }
-
-                val files = fileTree(mavenBundlingDir)
-                for(file in files) {
-                    if(file.name.endsWith(".asc")) continue //Ignore GPG Signature File
-                    saveHash(file, sha1(file), ".sha1")
-                    saveHash(file, md5(file), ".md5")
-                    saveHash(file, sha256(file), ".sha256")
-                    saveHash(file, sha512(file), ".sha512")
                 }
             }
             //Grab everything from mavenBundlingDir
@@ -152,7 +152,7 @@ fun saveHash(file: File, hash: String, suffix: String) {
 //Required for Maven
 fun sha1(file: File): String {
     val inStream = FileInputStream(file)
-    val sha1 = MessageDigest.getInstance("SHA1").digest(inStream.readBytes())
+    val sha1 = MessageDigest.getInstance("SHA-1").digest(inStream.readBytes())
     inStream.close()
     return sha1.toHexString()
 }
@@ -168,15 +168,15 @@ fun md5(file: File): String {
 //Optional. Why not?
 fun sha256(file: File): String {
     val inStream = FileInputStream(file)
-    val sha1 = MessageDigest.getInstance("SHA256").digest(inStream.readBytes())
+    val sha256 = MessageDigest.getInstance("SHA-256").digest(inStream.readBytes())
     inStream.close()
-    return sha1.toHexString()
+    return sha256.toHexString()
 }
 
 //Optional. Why not?
 fun sha512(file: File): String {
     val inStream = FileInputStream(file)
-    val sha1 = MessageDigest.getInstance("SHA512").digest(inStream.readBytes())
+    val sha512 = MessageDigest.getInstance("SHA-512").digest(inStream.readBytes())
     inStream.close()
-    return sha1.toHexString()
+    return sha512.toHexString()
 }

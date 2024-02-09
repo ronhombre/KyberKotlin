@@ -258,47 +258,53 @@ class Tests {
 
     @Test
     fun pkeEncryptDecrypt512() {
-        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
-        val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+        for(i in 1..1000) {
+            val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+            val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
 
-        val agreementAlice = KeyAgreement(keyPairAlice)
-        val agreementBob = KeyAgreement(keyPairBob)
+            val agreementAlice = KeyAgreement(keyPairAlice)
+            val agreementBob = KeyAgreement(keyPairBob)
 
-        val original = SecureRandom.generateSecureBytes(32)
-        val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-        val recovered = agreementBob.fromCipherText(cipher)
+            val original = SecureRandom.generateSecureBytes(32)
+            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = agreementBob.fromCipherText(cipher)
 
-        assertContentEquals(original, recovered, "PKE Encryption and Decryption for 512 failed!")
+            assertContentEquals(original, recovered, "PKE Encryption and Decryption for 512 failed at attempt $i!")
+        }
     }
 
     @Test
     fun pkeEncryptDecrypt768() {
-        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
-        val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
+        for(i in 1..1000) {
+            val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
+            val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
 
-        val agreementAlice = KeyAgreement(keyPairAlice)
-        val agreementBob = KeyAgreement(keyPairBob)
+            val agreementAlice = KeyAgreement(keyPairAlice)
+            val agreementBob = KeyAgreement(keyPairBob)
 
-        val original = SecureRandom.generateSecureBytes(32)
-        val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-        val recovered = agreementBob.fromCipherText(cipher)
+            val original = SecureRandom.generateSecureBytes(32)
+            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = agreementBob.fromCipherText(cipher)
 
-        assertContentEquals(original, recovered, "PKE Encryption and Decryption for 768 failed!")
+            assertContentEquals(original, recovered, "PKE Encryption and Decryption for 768 failed at attempt $i!")
+        }
     }
 
     @Test
     fun pkeEncryptDecrypt1024() {
-        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
-        val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
+        for(i in 1..1000) {
+            val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
+            val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
 
-        val agreementAlice = KeyAgreement(keyPairAlice)
-        val agreementBob = KeyAgreement(keyPairBob)
+            val agreementAlice = KeyAgreement(keyPairAlice)
+            val agreementBob = KeyAgreement(keyPairBob)
 
-        val original = SecureRandom.generateSecureBytes(32)
-        val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-        val recovered = agreementBob.fromCipherText(cipher)
+            val original = SecureRandom.generateSecureBytes(32)
+            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = agreementBob.fromCipherText(cipher)
 
-        assertContentEquals(original, recovered, "PKE Encryption and Decryption for 1024 failed!")
+            assertContentEquals(original, recovered, "PKE Encryption and Decryption for 1024 failed at attempt $i!")
+        }
     }
 
     @Test
@@ -317,6 +323,15 @@ class Tests {
         val decodedBytes = KyberMath.byteDecode(encodedBytes, 12)
 
         assertContentEquals(shorts, decodedBytes, "Byte Encoding and Decoding failed!")
+    }
+
+    @Test
+    fun byteToBits() {
+        val bytes = generateRandom32Bytes()
+        val bits = KyberMath.bytesToBits(bytes)
+        val recoveredBytes = KyberMath.bitsToBytes(bits)
+
+        assertContentEquals(bytes, recoveredBytes, "Byte to Bits failed!")
     }
 
     @Test
@@ -360,6 +375,16 @@ class Tests {
             shorts[i] = moduloOf(rand.nextInt().toShort(), KyberConstants.Q)
 
         return shorts
+    }
+
+    fun generateRandom32Bytes(seed: Int = 314): ByteArray {
+        val bytes = ByteArray(32)
+        val rand = Random(seed)
+
+        for(i in bytes.indices)
+            bytes[i] = rand.nextBytes(1)[0]
+
+        return bytes
     }
 
     fun moduloOf(value: Number, modulo: Number): Short {

@@ -32,14 +32,15 @@ At the 1.0.0 release, developers should be able to use this dependency if they w
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation             | Encapsulation           | Decapsulation          |
-|---------|------------------------|-------------------------|------------------------|
-| 512     | 7163.0625 (16% Faster) | 6653.625   (34% Faster) | 6078.9375 (63% Faster) |
-| 768     | 11638.5   (16% Faster) | 11762.25   (28% Faster) | 11216.75  (51% Faster) |
-| 1024    | 18380.625 (16% Faster) | 18536.9375 (25% Faster) | 18167.25  (43% Faster) |
-| ML-KEM  | (in ms)                | (in ms)                 | (in ms)                |
+| Variant | Generation              | Encapsulation           | Decapsulation           |
+|---------|-------------------------|-------------------------|-------------------------|
+| 512     | 6931.0     (20% Faster) | 6322.9375  (41% Faster) | 5661.6875  (75% Faster) |
+| 768     | 11219.125  (21% Faster) | 11154.8125 (35% Faster) | 10524.4375 (60% Faster) |
+| 1024    | 17731.0625 (20% Faster) | 17875.625  (30% Faster) | 17177.625  (51% Faster) |
+| ML-KEM  | (in ms)                 | (in ms)                 | (in ms)                 |
 
-JVM: 1.8, Count: 10000, Iterations: 5 (Average)
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch.
+
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
 This benchmark is for performance tracking through the development.
@@ -58,7 +59,7 @@ This master branch is faster than the standard branch due to optimizations.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.0")
+    implementation("asia.hombre:kyber:0.4.1")
 }
 ```
 
