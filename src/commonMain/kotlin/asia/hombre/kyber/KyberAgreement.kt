@@ -21,7 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.DecapsulationException
 import asia.hombre.kyber.exceptions.EncapsulationException
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.SecureRandom
+import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
@@ -32,7 +32,7 @@ import org.kotlincrypto.hash.sha3.SHAKE256
  * @constructor Creates a Key Agreement for encapsulating and decapsulating.
  * @author Ron Lauren Hombre
  */
-internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
+class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     val parameter: KyberParameter
     val keypair: KyberKEMKeyPair = kemKeyPair
 
@@ -167,7 +167,7 @@ internal class KeyAgreement(kemKeyPair: KyberKEMKeyPair) {
      * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
      */
     internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
-        return encapsulate(kyberEncapsulationKey, SecureRandom.generateSecureBytes(KyberConstants.N_BYTES))
+        return encapsulate(kyberEncapsulationKey, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
     }
 
     /**

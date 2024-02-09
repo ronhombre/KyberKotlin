@@ -19,20 +19,21 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.SecureRandom
+import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import kotlin.jvm.JvmSynthetic
 
-internal class KyberKeyPairGenerator {
+class KyberKeyGenerator {
 
     companion object {
         @JvmSynthetic
         fun generate(parameter: KyberParameter): KyberKEMKeyPair {
+            val secureRandom = SecureRandom()
             return generate(
                 parameter,
-                SecureRandom.generateSecureBytes(KyberConstants.N_BYTES),
-                SecureRandom.generateSecureBytes(KyberConstants.N_BYTES)
+                secureRandom.nextBytesOf(KyberConstants.N_BYTES),
+                secureRandom.nextBytesOf(KyberConstants.N_BYTES)
             )
         }
 

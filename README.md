@@ -34,9 +34,9 @@ At the 1.0.0 release, developers should be able to use this dependency if they w
 
 | Variant | Generation              | Encapsulation           | Decapsulation           |
 |---------|-------------------------|-------------------------|-------------------------|
-| 512     | 6931.0     (20% Faster) | 6322.9375  (41% Faster) | 5661.6875  (75% Faster) |
-| 768     | 11219.125  (21% Faster) | 11154.8125 (35% Faster) | 10524.4375 (60% Faster) |
-| 1024    | 17731.0625 (20% Faster) | 17875.625  (30% Faster) | 17177.625  (51% Faster) |
+| 512     | 5975.0     (39% Faster) | 5643.5625  (58% Faster) | 5705.3125  (74% Faster) |
+| 768     | 10271.125  (32% Faster) | 10455.9375 (44% Faster) | 10681.1875 (58% Faster) |
+| 1024    | 16849.625  (26% Faster) | 17178.4375 (35% Faster) | 17501.5    (49% Faster) |
 | ML-KEM  | (in ms)                 | (in ms)                 | (in ms)                 |
 
 JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch.
@@ -59,7 +59,7 @@ This master branch is faster than the standard branch due to optimizations.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.1")
+    implementation("asia.hombre:kyber:0.4.2")
 }
 ```
 

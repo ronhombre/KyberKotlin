@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.1"
+version = "0.4.2"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -79,7 +79,6 @@ kotlin {
 
                 val files = fileTree(mavenBundlingDir)
                 for(file in files) {
-                    println(file.path)
                     saveHash(file, sha1(file), ".sha1")
                     saveHash(file, md5(file), ".md5")
                     saveHash(file, sha256(file), ".sha256")
@@ -124,6 +123,7 @@ kotlin {
                 implementation("org.kotlincrypto.hash:sha3:0.4.0")
                 implementation("org.kotlincrypto.sponges:keccak:0.2.0")
                 implementation("org.kotlincrypto.endians:endians:0.2.0")
+                implementation("org.kotlincrypto:secure-random:0.2.0")
             }
         }
         val commonTest by getting {

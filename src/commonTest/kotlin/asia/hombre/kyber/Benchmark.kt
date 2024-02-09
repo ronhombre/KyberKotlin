@@ -18,7 +18,6 @@
 
 package asia.hombre.kyber
 
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.measureTime
 
@@ -99,7 +98,7 @@ class Benchmark {
 
         val time = measureTime {
             for(i in 0..<10_000) {
-                KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+                KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             }
         }.inWholeMilliseconds
 
@@ -113,7 +112,7 @@ class Benchmark {
 
         val time = measureTime {
             for(i in 0..<10_000) {
-                KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
+                KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             }
         }.inWholeMilliseconds
 
@@ -127,7 +126,7 @@ class Benchmark {
 
         val time = measureTime {
             for(i in 0..<10_000) {
-                KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
+                KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             }
         }.inWholeMilliseconds
 
@@ -140,10 +139,10 @@ class Benchmark {
         println("Benchmarking Encapsulation(10000) for 512...")
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             for(i in 0..<10_000) {
-                val agreementAlice = KeyAgreement(alice)
+                val agreementAlice = KyberAgreement(alice)
 
                 agreementAlice.encapsulate(bob.encapsulationKey)
             }
@@ -158,10 +157,10 @@ class Benchmark {
         println("Benchmarking Encapsulation(10000) for 768...")
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             for(i in 0..<10_000) {
-                val agreementAlice = KeyAgreement(alice)
+                val agreementAlice = KyberAgreement(alice)
 
                 agreementAlice.encapsulate(bob.encapsulationKey)
             }
@@ -176,10 +175,10 @@ class Benchmark {
         println("Benchmarking Encapsulation(10000) for 1024...")
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             for(i in 0..<10_000) {
-                val agreementAlice = KeyAgreement(alice)
+                val agreementAlice = KyberAgreement(alice)
 
                 agreementAlice.encapsulate(bob.encapsulationKey)
             }
@@ -197,13 +196,13 @@ class Benchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-            val agreementAlice = KeyAgreement(alice)
+            val agreementAlice = KyberAgreement(alice)
             val result = agreementAlice.encapsulate(bob.encapsulationKey)
             for(i in 0..<10_000) {
-                val agreementBob = KeyAgreement(bob)
+                val agreementBob = KyberAgreement(bob)
 
                 val secret = agreementBob.decapsulate(result.cipherText)
 
@@ -227,13 +226,13 @@ class Benchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_768)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
-            val agreementAlice = KeyAgreement(alice)
+            val agreementAlice = KyberAgreement(alice)
             val result = agreementAlice.encapsulate(bob.encapsulationKey)
             for(i in 0..<10_000) {
-                val agreementBob = KeyAgreement(bob)
+                val agreementBob = KyberAgreement(bob)
 
                 val secret = agreementBob.decapsulate(result.cipherText)
 
@@ -257,13 +256,13 @@ class Benchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
-            val bob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_1024)
+            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
+            val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
-            val agreementAlice = KeyAgreement(alice)
+            val agreementAlice = KyberAgreement(alice)
             val result = agreementAlice.encapsulate(bob.encapsulationKey)
             for(i in 0..<10_000) {
-                val agreementBob = KeyAgreement(bob)
+                val agreementBob = KyberAgreement(bob)
 
                 val secret = agreementBob.decapsulate(result.cipherText)
 
