@@ -166,7 +166,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
      * @param kyberEncapsulationKey Encapsulation Key of the second party.
      * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
      */
-    internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
+    fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
         return encapsulate(kyberEncapsulationKey, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
     }
 
@@ -204,7 +204,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
      * @param cipherText The Cipher Text from the second party.
      * @return ByteArray The Secret Key
      */
-    internal fun decapsulate(cipherText: KyberCipherText): ByteArray {
+    fun decapsulate(cipherText: KyberCipherText): ByteArray {
         if(cipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
             throw DecapsulationException("ML-KEM cipher text variant mismatch!")
         if(keypair.decapsulationKey.fullBytes.size != parameter.DECAPSULATION_KEY_LENGTH)
