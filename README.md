@@ -59,7 +59,7 @@ This master branch is faster than the standard branch due to optimizations.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.2")
+    implementation("asia.hombre:kyber:0.4.3")
 }
 ```
 
@@ -190,7 +190,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
        
        and included as LICENSE.txt in this Project.
 
