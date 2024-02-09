@@ -28,6 +28,7 @@ class JVMBenchmark {
     @Test
     fun fullBenchmark() {
         val results = DoubleArray(9)
+        val comparingResults = doubleArrayOf(8333.0, 8938.0, 9936.0, 13553.0, 15049.0, 16884.0, 21255.0, 23226.0, 26006.0)
 
         for(i in 0..<5) {
             results[0] += generateKeys512().toDouble()
@@ -86,9 +87,9 @@ class JVMBenchmark {
         val finalResult =
             "| Variant | Generation | Encapsulation | Decapsulation |\n" +
                     "|---------|------------|---------------|---------------|\n" +
-                    "| 512     | " + results[0] + " |  " + results[1] + "  |  " + results[2] + "  |\n" +
-                    "| 768     | " + results[3] + " |  " + results[4] + "  |  " + results[5] + "  |\n" +
-                    "| 1024    | " + results[6] + " |  " + results[7] + "  |  " + results[8] + "  |\n" +
+                    "| 512     | " + results[0] + "(" + (comparingResults[0] / results[0]) + "% Faster) |  " + results[1] + "(" + (comparingResults[1] / results[1]) + "% Faster)  |  " + results[2] + "(" + (comparingResults[2] / results[2]) + "% Faster)  |\n" +
+                    "| 768     | " + results[3] + "(" + (comparingResults[3] / results[3]) + "% Faster) |  " + results[4] + "(" + (comparingResults[4] / results[4]) + "% Faster)  |  " + results[5] + "(" + (comparingResults[5] / results[5]) + "% Faster)  |\n" +
+                    "| 1024    | " + results[6] + "(" + (comparingResults[6] / results[6]) + "% Faster) |  " + results[7] + "(" + (comparingResults[7] / results[7]) + "% Faster)  |  " + results[8] + "(" + (comparingResults[8] / results[8]) + "% Faster)  |\n" +
                     "| ML-KEM  | (in ms)    | (in ms)       | (in ms)       |"
 
         println(finalResult)

@@ -98,7 +98,7 @@ class JVMTest {
         SecureRandom.getInstanceStrong().nextBytes(bytes)
         //Visualize through binvis.io
         Files.write(Path("./randomjvm.bin"), bytes)
-        Files.write(Path("./random.bin"), asia.hombre.kyber.internal.SecureRandom.generateSecureBytes(1024 * 1024))
+        Files.write(Path("./random.bin"), org.kotlincrypto.SecureRandom().nextBytesOf(1024 * 1024))
     }
 
     @Test
