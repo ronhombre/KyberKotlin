@@ -25,11 +25,7 @@ It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order t
 
 ### Intent
 
-The intentions of this project are pure and transparent. Its goal is to decouple from the JVM and become a self-sufficient
-Kotlin Multiplatform dependency. In other words, a PURE Kotlin implementation of ML-KEM in a lightweight format. This is
-a stark difference compared to Bouncy Castle that supports most Encryption Algorithms and has a large data footprint.
-
-At the 1.0.0 release, developers should be able to use this dependency if they want to support ML-KEM.
+At the 1.0.0 release, developers from various platforms should be able to use this dependency if they want to support ML-KEM.
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
