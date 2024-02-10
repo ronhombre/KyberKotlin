@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.daemon.common.toHexString
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 import java.io.FileInputStream
 import java.nio.file.Files
@@ -103,20 +104,25 @@ kotlin {
             archiveFileName.set(mavenBundleFileName)
         }
 
-        tasks.register<Jar>("jvmFullJar") {
+        val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
             doFirst {
-                from(sourceSets["jvmMain"].kotlin)
+                from(sourceSets.commonMain.get().kotlin)
             }
         }
 
-        val jvmFullJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+        tasks.register<Jar>("jvmFullJar") {
             archiveFileName.set(jarFullFileName)
 
-            doFirst {
-                from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
-            }
+            val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
+
+            // Include runtime dependencies by expanding them into the JAR
+            from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) },
+                jvmMainCompilation.output.allOutputs)
+
+            // Set a duplicate strategy (optional)
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
