@@ -48,7 +48,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
          * @param randomness Random 32 Bytes
          * @return KyberCipherText The Cipher Text to send to the second party.
          */
-        private fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
+        internal fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
             val parameter = encryptionKey.parameter
             val decodedKey = KyberMath.byteDecode(encryptionKey.keyBytes, 12)
             val nttKeyVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
@@ -135,7 +135,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
          * @param cipherText Cipher Text from the second party.
          * @return ByteArray The original Plain Text.
          */
-        private fun fromCipherText(decapsulationKey: KyberDecapsulationKey, cipherText: KyberCipherText): ByteArray {
+        internal fun fromCipherText(decapsulationKey: KyberDecapsulationKey, cipherText: KyberCipherText): ByteArray {
             val parameter = cipherText.parameter
             val coefficients = Array(cipherText.parameter.K) { ShortArray(KyberConstants.N) }
 
