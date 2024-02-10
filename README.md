@@ -59,7 +59,7 @@ This master branch is faster than the standard branch due to optimizations.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.5")
+    implementation("asia.hombre:kyber:0.4.7")
 }
 ```
 
