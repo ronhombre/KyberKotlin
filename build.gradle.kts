@@ -129,6 +129,11 @@ kotlin {
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
     }
     js().nodejs()
+    mingwX64("windows") {
+        binaries {
+            sharedLib {  }
+        }
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {

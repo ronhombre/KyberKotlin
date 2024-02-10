@@ -259,15 +259,11 @@ class Tests {
     @Test
     fun pkeEncryptDecrypt512() {
         for(i in 1..1000) {
-            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-            val agreementAlice = KyberAgreement(keyPairAlice)
-            val agreementBob = KyberAgreement(keyPairBob)
-
             val original = SecureRandom().nextBytesOf(32)
-            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = agreementBob.fromCipherText(cipher)
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = KyberAgreement.decapsulate(keyPairBob.decapsulationKey, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 512 failed at attempt $i!")
         }
@@ -276,15 +272,11 @@ class Tests {
     @Test
     fun pkeEncryptDecrypt768() {
         for(i in 1..1000) {
-            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
-            val agreementAlice = KyberAgreement(keyPairAlice)
-            val agreementBob = KyberAgreement(keyPairBob)
-
             val original = SecureRandom().nextBytesOf(32)
-            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = agreementBob.fromCipherText(cipher)
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = KyberAgreement.decapsulate(keyPairBob.decapsulationKey, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 768 failed at attempt $i!")
         }
@@ -293,15 +285,11 @@ class Tests {
     @Test
     fun pkeEncryptDecrypt1024() {
         for(i in 1..1000) {
-            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
-            val agreementAlice = KyberAgreement(keyPairAlice)
-            val agreementBob = KyberAgreement(keyPairBob)
-
             val original = SecureRandom().nextBytesOf(32)
-            val cipher = agreementAlice.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = agreementBob.fromCipherText(cipher)
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val recovered = KyberAgreement.decapsulate(keyPairBob.decapsulationKey, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 1024 failed at attempt $i!")
         }

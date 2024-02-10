@@ -75,6 +75,12 @@ dependencies {
 
 [More](https://central.sonatype.com/artifact/asia.hombre/kyber/overview) installation methods
 
+## Native C# Installation
+
+### DLL Import
+
+Get it from [releases](https://github.com/ronhombre/KyberKotlin/releases) and copy it into your C# project.
+
 ## Usage
 
 ### With JVM
@@ -158,6 +164,73 @@ System.out.println(Arrays.toString(decapsSecretKey));
 In this example, **Bob** and **Alice** creates an **Agreement** that an eavesdropper would not be able to comprehend even
 if it is intercepted. After generating the _Shared Secret Key_, they may communicate using a Symmetric Encryption
 algorithm _i.e. AES_.
+
+### With Native C#
+
+```csharp
+using System.Runtime.InteropServices;
+
+//Use absolute path if relative does not work.
+const string dllName = "KyberKotlin.dll";
+
+//Declare methods from the DLL.
+[DllImport(dllName, EntryPoint = "generateKeyPair")]
+static extern IntPtr generateKeyPair(int parameterId);
+
+[DllImport(dllName, EntryPoint = "getEncapsulationKeySize")]
+static extern int getEncapsulationKeySize(int parameterId);
+
+[DllImport(dllName, EntryPoint = "getDecapsulationKeySize")]
+static extern int getDecapsulationKeySize(int parameterId);
+
+[DllImport(dllName, EntryPoint = "getCipherTextSize")]
+static extern int getCipherTextSize(int parameterId);
+
+[DllImport(dllName, EntryPoint = "getSecretKeySize")]
+static extern int getSecretKeySize();
+
+[DllImport(dllName, EntryPoint = "encapsulate")]
+static extern IntPtr encapsulate(byte[] encapsulationKey, int parameterId);
+
+[DllImport(dllName, EntryPoint = "decapsulate")]
+static extern IntPtr decapsulate(byte[] decapsulationKey, byte[] cipherText, int parameterId);
+
+//Get sizes
+int encapsulationKeySize = getEncapsulationKeySize(0); //0 = 512, 1 = 768, 2 = 1024
+int decapsulationKeySize = getDecapsulationKeySize(0);
+int cipherTextSize = getCipherTextSize(0);
+
+//Generate Key Pair
+IntPtr keysPtr = generateKeyPair(0);
+
+byte[] encapsulationKey = new byte[encapsulationKeySize];
+byte[] decapsulationKey = new byte[decapsulationKeySize];
+
+Marshal.Copy(keysPtr, encapsulationKey, 0, encapsulationKey.Length);
+Marshal.Copy(keysPtr + encapsulationKey.Length, decapsulationKey, 0, decapsulationKey.Length);
+
+//Send encapsulation key to Bob
+//Bob encapsulates using it
+IntPtr cipherPtr = encapsulate(encapsulationKey, 0);
+
+//Bob receives the Secret Key
+byte[] secretKey = new byte[getSecretKeySize()];
+byte[] cipherText = new byte[cipherTextSize];
+
+Marshal.Copy(cipherPtr, secretKey, 0, secretKey.Length);
+Marshal.Copy(cipherPtr + secretKey.Length, cipherText, 0, cipherText.Length);
+
+//Bob sends the Cipher Text to Alice
+//Alice uses it to get a copy of the Secret Key
+IntPtr secretKeyPtr = decapsulate(decapsulationKey, cipherText, 0);
+
+//Alice's Copy of the Secret Key
+byte[] secretKey2 = new byte[getSecretKeySize()];
+
+Marshal.Copy(secretKeyPtr, secretKey2, 0, secretKey2.Length);
+
+Console.WriteLine("End!");
+```
 
 ### References
 
