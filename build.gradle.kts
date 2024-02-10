@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.6"
+version = "0.4.7"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -107,9 +107,9 @@ kotlin {
         val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
-            doFirst {
-                from(sourceSets.commonMain.get().kotlin)
-            }
+            val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
+
+            from(jvmMainCompilation.output.allOutputs)
         }
 
         tasks.register<Jar>("jvmFullJar") {

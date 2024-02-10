@@ -39,11 +39,11 @@
 
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>0.4.6</version>
+    <version>0.4.7</version>
     <packaging>jar</packaging>
 
     <scm>
-        <tag>v0.4.6</tag>
+        <tag>v0.4.7</tag>
         <connection>scm:git:https://github.com/ronhombre/KyberKotlin.git</connection>
         <url>https://github.com/ronhombre/KyberKotlin.git</url>
     </scm>
