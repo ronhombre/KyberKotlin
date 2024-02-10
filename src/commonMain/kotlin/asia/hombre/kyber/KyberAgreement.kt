@@ -98,11 +98,20 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
             coefficients[i] = KyberMath.vectorToVectorAdd(coefficients[i], noiseVector[i])
 
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
+
+            //Security Features
+            for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].lastIndex)
+            noiseVector[i].fill(0, 0, noiseVector[i].lastIndex)
+            nttKeyVector[i].fill(0, 0, nttKeyVector[i].lastIndex)
+            randomnessVector[i].fill(0, 0, randomnessVector[i].lastIndex)
         }
 
         constantTerm = KyberMath.invNTT(constantTerm)
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, noiseTerm)
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, muse)
+
+        //Security Feature
+        muse.fill(0, 0, muse.lastIndex)
 
         val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)

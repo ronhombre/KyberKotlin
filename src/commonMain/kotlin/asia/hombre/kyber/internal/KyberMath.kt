@@ -149,6 +149,8 @@ internal class KyberMath {
                 i += 3
             }
 
+            bytes.fill(0, 0, bytes.lastIndex) //Security Feature
+
             return nttCoefficients
         }
 
@@ -156,6 +158,8 @@ internal class KyberMath {
         fun samplePolyCBD(eta: Int, bytes: ByteArray): ShortArray {
             val f = ShortArray(KyberConstants.N)
             val bits = bytesToBits(bytes)
+
+            bytes.fill(0, 0, bytes.lastIndex) //Security Feature
 
             for(i in 0..<KyberConstants.N) {
                 var x = 0

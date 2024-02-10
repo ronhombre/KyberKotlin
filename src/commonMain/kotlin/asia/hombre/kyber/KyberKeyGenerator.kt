@@ -61,17 +61,22 @@ class KyberKeyGenerator {
 
                     val seeds = sha3512.digest(byteArray)
 
+                    //Security Features
+                    sha3512.reset()
+                    byteArray.fill(Byte.MIN_VALUE, 0, byteArray.lastIndex)
+
                     val nttSeed = seeds.copyOfRange(0, 32)
                     val cbdSeed = seeds.copyOfRange(32, 64)
+
+                    seeds.fill(0, 0, seeds.lastIndex) //Security Feature
 
                     val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
                     val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
                     val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
 
                     for((nonce, i) in (0..<parameter.K).withIndex()) {
-                        for(j in 0..<parameter.K) {
+                        for(j in 0..<parameter.K)
                             matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
-                        }
 
                         secretVector[i] = KyberMath.samplePolyCBD(
                             parameter.ETA1,
@@ -86,6 +91,8 @@ class KyberKeyGenerator {
                         noiseVector[i] = KyberMath.NTT(noiseVector[i])
                     }
 
+                    cbdSeed.fill(Byte.MIN_VALUE, 0, cbdSeed.lastIndex) //Security Feature
+
                     //Transposed ? Old Kyber v3
                     val systemVector = KyberMath.vectorAddition(
                         KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
@@ -96,6 +103,10 @@ class KyberKeyGenerator {
                     val decryptionKeyBytes = ByteArray(parameter.DECRYPTION_KEY_LENGTH)
 
                     for(i in 0..<parameter.K) {
+                        //Security Features
+                        for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].lastIndex)
+                        noiseVector[i].fill(0, 0, noiseVector[i].lastIndex)
+
                         KyberMath.byteEncode(KyberMath.montVectorToVector(systemVector[i]), 12)
                             .copyInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
                         KyberMath.byteEncode(KyberMath.montVectorToVector(secretVector[i]), 12)
