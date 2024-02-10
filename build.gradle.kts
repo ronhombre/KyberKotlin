@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.5"
+version = "0.4.6"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -22,6 +22,7 @@ val mavenBundlingDir = "$mavenDir/bundling"
 val mavenDeep = "$mavenBundlingDir/" + (project.group.toString().replace(".", "/")) + "/" + version
 
 val jarFileName = baseProjectName.plus(".jar")
+val jarFullFileName = baseProjectName.plus("-full.jar")
 val pomFileName = baseProjectName.plus(".pom")
 val javadocsFileName = baseProjectName.plus("-javadoc.jar")
 val sourcesFileName = baseProjectName.plus("-sources.jar")
@@ -102,15 +103,19 @@ kotlin {
             archiveFileName.set(mavenBundleFileName)
         }
 
-        val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+        tasks.register<Jar>("jvmFullJar") {
             archiveFileName.set(jarFileName)
 
             doFirst {
+                from(sourceSets["jvmMain"].kotlin)
+            }
+        }
+
+        val jvmFullJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+            archiveFileName.set(jarFullFileName)
+
+            doFirst {
                 from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
-                //Uncomment to list jvm configurations
-                /*println(configurations.names.toList().filter {
-                    it.contains("jvm") &&!(it.contains("test") || it.contains("Test"))
-                }.joinToString("\n"))*/
             }
         }
 

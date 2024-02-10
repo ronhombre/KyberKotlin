@@ -339,8 +339,8 @@ class Tests {
         val randomSeed = SecureRandom().nextBytesOf(32)
         val pkeSeed = SecureRandom().nextBytesOf(32)
 
-        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
-        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed)
+        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed.copyOf())
+        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed.copyOf())
 
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed for 512!")
     }
@@ -350,8 +350,8 @@ class Tests {
         val randomSeed = SecureRandom().nextBytesOf(32)
         val pkeSeed = SecureRandom().nextBytesOf(32)
 
-        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed)
-        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed)
+        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed.copyOf())
+        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed.copyOf())
 
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed for 768!")
     }
@@ -361,8 +361,8 @@ class Tests {
         val randomSeed = SecureRandom().nextBytesOf(32)
         val pkeSeed = SecureRandom().nextBytesOf(32)
 
-        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed)
-        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed)
+        val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed.copyOf())
+        val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed.copyOf())
 
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed for 1024!")
     }
