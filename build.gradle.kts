@@ -88,6 +88,7 @@ kotlin {
                 }
                 //Sign
                 signing {
+                    useGpgCmd()
                     sign(file("$mavenDeep/$pomFileName"))
                     sign(file("$mavenDeep/$jarFileName"))
                     sign(file("$mavenDeep/$sourcesFileName"))
