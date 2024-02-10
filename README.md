@@ -7,6 +7,7 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 ![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
 
 [Kyber](https://pq-crystals.org/kyber/index.shtml) is an IND-CCA2-secure key encapsulation mechanism (KEM), whose
 security is based on the hardness of solving the learning-with-errors (LWE) problem over module lattices. Kyber is one 
@@ -52,6 +53,10 @@ This master branch is faster than the standard branch due to optimizations.
 * Encapsulation (512, 768, 1024)
 * Decapsulation (512, 768, 1024)
 * Convert to or from HEX, BASE64, and BYTES.
+
+## Supported & Tested Platforms
+* JVM (Java, Kotlin)
+* Native (C#)
 
 ## JVM Installation
 
