@@ -61,10 +61,7 @@ enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int,
                 ML_KEM_512.ENCAPSULATION_KEY_LENGTH -> ML_KEM_512
                 ML_KEM_768.ENCAPSULATION_KEY_LENGTH -> ML_KEM_768
                 ML_KEM_1024.ENCAPSULATION_KEY_LENGTH -> ML_KEM_1024
-                else -> {
-                    println(size)
-                    throw UnsupportedKyberVariantException("Encryption/Encapsulation Key size is either bigger or smaller than expected.")
-                }
+                else -> throw UnsupportedKyberVariantException("Encryption/Encapsulation Key size is either bigger or smaller than expected.")
             }
         }
 

@@ -39,8 +39,6 @@ fun generateKeyPair(parameterId: Int): CPointer<ByteVar> {
         keys.encapsulationKey.fullBytes.copyInto(bytes, 0)
         keys.decapsulationKey.fullBytes.copyInto(bytes, keys.encapsulationKey.fullBytes.size)
 
-        println(bytes.size)
-
         val result = allocArray<ByteVar>(bytes.size)
 
         bytes.forEachIndexed { index, byte ->
