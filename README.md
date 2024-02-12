@@ -21,7 +21,9 @@ two matrices.)
 ## Introduction
 
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
-It uses a Kotlin [hash](https://github.com/KotlinCrypto/hash) library in order to implement SHAKE and SHA3 within the library.
+It depends on Kotlin [sha3](https://github.com/KotlinCrypto/hash), [keccak](https://github.com/KotlinCrypto/sponges),
+and [secure-random](https://github.com/KotlinCrypto/secure-random) libraries in order to implement SHA3, SHAKE, and
+Secure Random within the library.
 
 ### Intent
 
@@ -60,7 +62,7 @@ This master branch is faster than the standard branch due to optimizations.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.7")
+    implementation("asia.hombre:kyber:0.4.8")
 }
 ```
 
