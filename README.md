@@ -25,6 +25,9 @@ It depends on Kotlin [sha3](https://github.com/KotlinCrypto/hash), [keccak](http
 and [secure-random](https://github.com/KotlinCrypto/secure-random) libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
+> [!WARNING]
+> KyberKotlin is in **ALPHA**. At this stage, we are confident it can withstand production. However, it has not been battle-tested yet. Mock tests are on the way.
+
 ### Intent
 
 At the 1.0.0 release, developers from various platforms should be able to use this dependency if they want to support ML-KEM.
@@ -44,7 +47,8 @@ Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/maste
 
 This benchmark is for performance tracking through the development.
 
-This master branch is faster than the standard branch due to optimizations.
+> [!NOTE]
+> This master branch is faster than the standard branch due to optimizations.
 
 ## Capabilities
 * Key Generation (512, 768, 1024)
@@ -172,6 +176,9 @@ if it is intercepted. After generating the _Shared Secret Key_, they may communi
 algorithm _i.e. AES_.
 
 ### With Native C#
+
+> [!CAUTION]
+> Native is in BETA. No one is confident it will work reliably.
 
 ```csharp
 using System.Runtime.InteropServices;
