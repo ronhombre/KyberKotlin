@@ -33,6 +33,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
       - name: Build KDocs with Dokka
         run: ./gradlew dokkaHtml
       - name: Upload artifact
