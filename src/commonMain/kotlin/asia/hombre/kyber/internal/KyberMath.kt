@@ -419,11 +419,15 @@ internal class KyberMath {
         }
 
         @JvmSynthetic
+        @Throws(IllegalArgumentException::class)
         fun decodeHex(string: String): ByteArray {
             var hexString = string
 
             if(string.length % 2 == 1)
                 hexString += '0' //Append a 0 if the hex is not even to fit into a byte.
+
+            if(string.contains(Regex("[^A-Fa-f0-9]")))
+                throw IllegalArgumentException("String cannot contain characters that is not hex characters.")
 
             return hexString.chunked(2)
                 .map { it.toInt(16).toByte() }

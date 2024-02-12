@@ -18,4 +18,7 @@
 
 package asia.hombre.kyber.exceptions
 
+/**
+ * When Decapsulation fails for some reason.
+ */
 class DecapsulationException(override val message: String): RuntimeException("Decapsulation failed! Reason: $message")

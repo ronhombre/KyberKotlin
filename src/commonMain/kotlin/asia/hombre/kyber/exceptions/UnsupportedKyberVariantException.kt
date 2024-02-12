@@ -18,4 +18,7 @@
 
 package asia.hombre.kyber.exceptions
 
+/**
+ * When an unsupported ML-KEM variant was attempted to be used.
+ */
 class UnsupportedKyberVariantException(override val message: String): Exception("This variant is not yet supported! Reason: $message")

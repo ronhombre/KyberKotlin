@@ -18,4 +18,7 @@
 
 package asia.hombre.kyber.exceptions
 
+/**
+ * When Encapsulation fails for some reason.
+ */
 class EncapsulationException(override val message: String): RuntimeException("Encapsulation failed! Reason: $message")

@@ -18,6 +18,9 @@
 
 package asia.hombre.kyber.interfaces
 
+/**
+ * ML-KEM key.
+ */
 internal interface KyberKEMKey: Convertible {
     val key: KyberPKEKey
 }

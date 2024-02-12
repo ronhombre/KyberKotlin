@@ -20,19 +20,63 @@ package asia.hombre.kyber
 
 import kotlin.jvm.JvmField
 
+/**
+ * Constants for ML-KEM.
+ *
+ * This class contains precomputed values for optimization purposes.
+ *
+ * @author Ron Lauren Hombre
+ */
 class KyberConstants {
     companion object {
+        /**
+         * Number of polynomials.
+         */
         const val N: Int = 256
+
+        /**
+         * The byte size of the number of polynomials in bits.
+         */
         const val N_BYTES: Int = N shr 3
+
+        /**
+         * Prime Integer composed of (2^8 * 13) + 1.
+         */
         const val Q: Int = 3329
+
+        /**
+         * Negated modular inverse of Q base 2^16
+         */
         const val Q_INV: Int = -62209 //Generated using KyberMath.powMod(Q, -1, 2^16) and negated
+
+        /**
+         * Half of Q rounded to the closest whole integer.
+         */
         const val Q_HALF: Int = 1665 //round(Q/2)
+
+        /**
+         * Approximation of Q for Barrett Reduction
+         */
         const val BARRETT_APPROX: Short = 20159 //(((1L shl 26) + (Q / 2)) / Q).toShort()
         //const val MONT_R: Int = 1 shl 16
+        /**
+         * 2^16 * 2^16 mod Q for Montgomery Reduction.
+         */
         const val MONT_R2: Short = 1353 //MONT_R.toLong() shl 16 <- mod Q = 1353 //Basically R^2 mod Q
+
+        /**
+         * The length of the Secret Key in bytes.
+         */
         const val SECRET_KEY_LENGTH: Int = N_BYTES
+
+        /**
+         * Encoding size for encoding coefficients and terms.
+         */
         const val ENCODE_SIZE: Int = 3 * N shr 1 //Sums up to 384
 
+        /**
+         * Pre-generated Zeta values according to the formula 17^bitReverse(n) mod Q and converted to Montgomery Form.
+         */
         @JvmField
         val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(
             1, 2571, 2970, 1812, 1493, 1422, 287, 202,
@@ -69,6 +113,9 @@ class KyberConstants {
             1722, 1212, 1874, 1029, 2110, 2935, 885, 2154*/
         ) //Generated using Generators.generateZetas() test method
 
+        /**
+         * Pre-generated Zeta values according to the formula 17^(2 * bitReverse(n)) mod Q and converted to Montgomery Form.
+         */
         @JvmField
         val PRECOMPUTED_GAMMAS_TABLE = shortArrayOf(
             2226, 1103, 430, 2899, 555, 2774, 843, 2486,

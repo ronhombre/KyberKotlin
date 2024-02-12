@@ -18,4 +18,14 @@
 
 package asia.hombre.kyber
 
-class KyberEncapsulationResult(val secretKey: ByteArray, val cipherText: KyberCipherText)
+/**
+ * A class for ML-KEM Encapsulation Results.
+ *
+ * This class contains the Secret Key and the Cipher Text.
+ *
+ * @param secretKey [ByteArray]
+ * @param cipherText [KyberCipherText]
+ * @constructor Stores the Secret Key and the Cipher Text.
+ * @author Ron Lauren Hombre
+ */
+class KyberEncapsulationResult internal constructor(val secretKey: ByteArray, val cipherText: KyberCipherText)

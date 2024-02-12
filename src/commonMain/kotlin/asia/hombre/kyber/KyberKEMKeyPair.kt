@@ -18,4 +18,14 @@
 
 package asia.hombre.kyber
 
-class KyberKEMKeyPair(val encapsulationKey: KyberEncapsulationKey, val decapsulationKey: KyberDecapsulationKey)
+/**
+ * A class for ML-KEM Encapsulation and Decapsulation Key Pairs.
+ *
+ * This class contains the Encapsulation and Decapsulation Key.
+ *
+ * @param encapsulationKey [KyberEncapsulationKey]
+ * @param decapsulationKey [KyberDecapsulationKey]
+ * @constructor Stores the Encapsulation Key and the Decapsulation Key as a pair.
+ * @author Ron Lauren Hombre
+ */
+class KyberKEMKeyPair internal constructor(val encapsulationKey: KyberEncapsulationKey, val decapsulationKey: KyberDecapsulationKey)

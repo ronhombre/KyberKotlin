@@ -26,63 +26,139 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
-class KyberDecapsulationKey(
+/**
+ * A class for ML-KEM Decapsulation Keys.
+ *
+ * This class contains the raw bytes of the Decapsulation Key.
+ *
+ * @param key [KyberDecryptionKey]
+ * @param encryptionKey [KyberEncryptionKey]
+ * @param hash [ByteArray]
+ * @param randomSeed [ByteArray]
+ * @constructor Stores the Encryption Key, Decryption Key, Hash, and Random Seed composing the Decapsulation Key.
+ * @author Ron Lauren Hombre
+ */
+class KyberDecapsulationKey internal constructor(
     override val key: KyberDecryptionKey,
     val encryptionKey: KyberEncryptionKey,
-    val hash: ByteArray,
-    val randomSeed: ByteArray) : KyberKEMKey {
-        @get:JvmName("getFullBytes")
-        val fullBytes: ByteArray
-            get() {
-                val output = ByteArray(key.parameter.DECAPSULATION_KEY_LENGTH)
+    internal val hash: ByteArray,
+    internal val randomSeed: ByteArray) : KyberKEMKey {
 
-                key.keyBytes.copyInto(output)
-                encryptionKey.fullBytes.copyInto(output, key.keyBytes.size)
-                hash.copyInto(output, key.keyBytes.size + encryptionKey.fullBytes.size)
-                randomSeed.copyInto(output, output.size - randomSeed.size)
+    /**
+     * The [KyberParameter] of this decapsulation key.
+     */
+    val parameter = key.parameter
 
-                return output
-            }
+    /**
+     * All the bytes of the Cipher Text.
+     *
+     * @return [ByteArray]
+     */
+    @get:JvmName("getFullBytes")
+    val fullBytes: ByteArray
+        get() {
+            val output = ByteArray(key.parameter.DECAPSULATION_KEY_LENGTH)
 
-        companion object {
-            @JvmStatic
-            @Throws(UnsupportedKyberVariantException::class)
-            fun fromBytes(bytes: ByteArray): KyberDecapsulationKey {
-                val parameter = KyberParameter.findByDecapsulationKeySize(bytes.size)
+            key.keyBytes.copyInto(output)
+            encryptionKey.fullBytes.copyInto(output, key.keyBytes.size)
+            hash.copyInto(output, key.keyBytes.size + encryptionKey.fullBytes.size)
+            randomSeed.copyInto(output, output.size - randomSeed.size)
 
-                val decryptionKey = KyberDecryptionKey.fromBytes(bytes.copyOfRange(0, parameter.DECRYPTION_KEY_LENGTH))
-                val encryptionKey = KyberEncryptionKey.fromBytes(bytes.copyOfRange(parameter.DECRYPTION_KEY_LENGTH, parameter.DECRYPTION_KEY_LENGTH + parameter.ENCRYPTION_KEY_LENGTH))
-                val hash = bytes.copyOfRange(bytes.size - (2 * KyberConstants.N_BYTES), bytes.size - KyberConstants.N_BYTES)
-                val randomSeed = bytes.copyOfRange(bytes.size - KyberConstants.N_BYTES, bytes.size)
-
-                return KyberDecapsulationKey(decryptionKey, encryptionKey, hash, randomSeed)
-            }
-
-            @JvmStatic
-            @Throws(UnsupportedKyberVariantException::class)
-            fun fromHex(hexString: String): KyberDecapsulationKey {
-                return fromBytes(KyberMath.decodeHex(hexString))
-            }
-
-            @JvmStatic
-            @Throws(UnsupportedKyberVariantException::class)
-            @OptIn(ExperimentalEncodingApi::class)
-            fun fromBase64(base64String: String): KyberDecapsulationKey {
-                return fromBytes(Base64.decode(base64String))
-            }
+            return output
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
-        override fun toHex(): String {
-            return fullBytes.toHexString(HexFormat.UpperCase)
+    companion object {
+        /**
+         * Wrap raw Decapsulation Key bytes into a [KyberDecapsulationKey] object.
+         *
+         * @param bytes [ByteArray]
+         * @return [KyberDecapsulationKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decapsulation Key is not of any ML-KEM variant.
+         */
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
+        fun fromBytes(bytes: ByteArray): KyberDecapsulationKey {
+            val parameter = KyberParameter.findByDecapsulationKeySize(bytes.size)
+
+            val decryptionKey = KyberDecryptionKey.fromBytes(bytes.copyOfRange(0, parameter.DECRYPTION_KEY_LENGTH))
+            val encryptionKey = KyberEncryptionKey.fromBytes(bytes.copyOfRange(parameter.DECRYPTION_KEY_LENGTH, parameter.DECRYPTION_KEY_LENGTH + parameter.ENCRYPTION_KEY_LENGTH))
+            val hash = bytes.copyOfRange(bytes.size - (2 * KyberConstants.N_BYTES), bytes.size - KyberConstants.N_BYTES)
+            val randomSeed = bytes.copyOfRange(bytes.size - KyberConstants.N_BYTES, bytes.size)
+
+            return KyberDecapsulationKey(decryptionKey, encryptionKey, hash, randomSeed)
         }
 
+        /**
+         * Wrap raw Decapsulation Key hex values into a [KyberDecapsulationKey] object.
+         *
+         * @param hexString [String] of hex values.
+         * @return [KyberDecapsulationKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decapsulation Key is not of any ML-KEM variant.
+         * @throws IllegalArgumentException when there is a character that is not a hex value.
+         */
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
+        fun fromHex(hexString: String): KyberDecapsulationKey {
+            return fromBytes(KyberMath.decodeHex(hexString))
+        }
+
+        /**
+         * Wrap raw Base64 encoded Decapsulation Key into a [KyberDecapsulationKey] object.
+         *
+         * @param base64String [String] of valid Base64 values.
+         * @return [KyberDecapsulationKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decapsulation Key is not of any ML-KEM variant.
+         * @throws IllegalArgumentException when the Base64 is invalid.
+         */
+        @JvmStatic
+        @Throws(UnsupportedKyberVariantException::class)
         @OptIn(ExperimentalEncodingApi::class)
-        override fun toBase64(): String {
-            return Base64.encode(fullBytes)
-        }
-
-        override fun toString(): String {
-            return toHex()
+        fun fromBase64(base64String: String): KyberDecapsulationKey {
+            return fromBytes(Base64.decode(base64String))
         }
     }
+
+    /**
+     * Convert [KyberDecapsulationKey] into a string of hex values.
+     *
+     * @param format [HexFormat] of the hex string.
+     * @return [String]
+     */
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun toHex(format: HexFormat): String {
+        return fullBytes.toHexString(format)
+    }
+
+    /**
+     * Convert [KyberDecapsulationKey] into a string of hex values.
+     *
+     * Format is defaulted to [HexFormat.UpperCase].
+     *
+     * @return [String]
+     */
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun toHex(): String {
+        return toHex(HexFormat.UpperCase)
+    }
+
+    /**
+     * Convert [KyberDecapsulationKey] into Base64 encoding.
+     *
+     * @return [String]
+     */
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun toBase64(): String {
+        return Base64.encode(fullBytes)
+    }
+
+    /**
+     * Convert [KyberDecapsulationKey] into a String.
+     *
+     * This wraps [toHex], so they return the same values.
+     *
+     * @return [String]
+     */
+    override fun toString(): String {
+        return toHex()
+    }
+}

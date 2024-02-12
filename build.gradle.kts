@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.7"
+version = "0.4.8"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -51,6 +51,12 @@ kotlin {
             from(sourceSets.jvmMain.get().kotlin.asFileTree)
         }
 
+        tasks.register<Jar>("generateDocsJar") {
+            dependsOn("dokkaHtml")
+            archiveFileName.set(javadocsFileName)
+            from(files(buildDir.toPath().resolve("dokka").resolve("html")).asFileTree)
+        }
+
         //Separated as its own task
         tasks.register("cleanMaven") {
             //Clean mavenBundlingDir and keep the old generated bundles
@@ -60,22 +66,20 @@ kotlin {
         }
 
         tasks.register<Zip>("bundleMaven") {
-            dependsOn("cleanMaven", "generateSourcesJar", "jvmJar")
+            dependsOn("cleanMaven", "generateSourcesJar", "jvmJar", "generateDocsJar")
 
             doFirst {
-                //Copy pom.xml and emptyjavadocs.zip then rename them
+                //Copy pom.xml then rename it
                 copy {
                     from(".")
-                    include("pom.xml", "emptyjavadocs.zip")
+                    include("pom.xml")
                     into(mavenDeep)
                     rename("pom.xml", pomFileName)
-                    //Javadocs is required by Maven in order to publish. They allow "fake" or "empty" Javadocs.
-                    rename("emptyjavadocs.zip", javadocsFileName)
                 }
                 //Copy jar build and sources
                 copy {
                     from(libsDirectory.get())
-                    include(jarFileName, sourcesFileName)
+                    include(jarFileName, sourcesFileName, javadocsFileName)
                     into(mavenDeep)
                 }
 
@@ -89,6 +93,8 @@ kotlin {
                 //Sign
                 signing {
                     useGpgCmd()
+                    //Specify which key to use
+                    sign(configurations.getByName(runtimeElementsConfigurationName))
                     sign(file("$mavenDeep/$pomFileName"))
                     sign(file("$mavenDeep/$jarFileName"))
                     sign(file("$mavenDeep/$sourcesFileName"))

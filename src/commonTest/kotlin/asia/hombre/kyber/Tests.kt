@@ -263,7 +263,7 @@ class Tests {
 
             val original = SecureRandom().nextBytesOf(32)
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey, cipher)
+            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 512 failed at attempt $i!")
         }
@@ -276,7 +276,7 @@ class Tests {
 
             val original = SecureRandom().nextBytesOf(32)
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey, cipher)
+            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 768 failed at attempt $i!")
         }
@@ -289,7 +289,7 @@ class Tests {
 
             val original = SecureRandom().nextBytesOf(32)
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
-            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey, cipher)
+            val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 1024 failed at attempt $i!")
         }

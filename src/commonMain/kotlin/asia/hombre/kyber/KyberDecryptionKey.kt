@@ -26,42 +26,110 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
-class KyberDecryptionKey(override val parameter: KyberParameter, override val keyBytes: ByteArray) : KyberPKEKey {
+/**
+ * A class for ML-KEM Decryption Keys.
+ *
+ * This class contains the raw bytes of the Decryption Key.
+ *
+ * @param parameter [KyberParameter]
+ * @param keyBytes [ByteArray]
+ * @constructor Stores the parameter and raw bytes of the Decryption Key.
+ * @author Ron Lauren Hombre
+ */
+class KyberDecryptionKey internal constructor(override val parameter: KyberParameter, override val keyBytes: ByteArray) : KyberPKEKey {
+    /**
+     * All the bytes of the Decryption Key.
+     *
+     * @return [ByteArray]
+     */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
         get() = keyBytes
 
     companion object {
+        /**
+         * Wrap raw Decryption Key bytes into a [KyberDecryptionKey] object.
+         *
+         * @param bytes [ByteArray]
+         * @return [KyberDecryptionKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
+         */
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class)
         fun fromBytes(bytes: ByteArray): KyberDecryptionKey {
             return KyberDecryptionKey(KyberParameter.findByDecryptionKeySize(bytes.size), bytes)
         }
 
+        /**
+         * Wrap raw Decryption Key hex values into a [KyberDecryptionKey] object.
+         *
+         * @param hexString [String] of hex values.
+         * @return [KyberDecryptionKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
+         * @throws IllegalArgumentException when there is a character that is not a hex value.
+         */
         @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class)
+        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
         fun fromHex(hexString: String): KyberDecryptionKey {
             return fromBytes(KyberMath.decodeHex(hexString))
         }
 
+        /**
+         * Wrap raw Base64 encoded Decryption Key into a [KyberDecryptionKey] object.
+         *
+         * @param base64String [String] of valid Base64 values.
+         * @return [KyberDecryptionKey]
+         * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
+         * @throws IllegalArgumentException when the Base64 is invalid.
+         */
         @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class)
+        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
         @OptIn(ExperimentalEncodingApi::class)
         fun fromBase64(base64String: String): KyberDecryptionKey {
             return fromBytes(Base64.decode(base64String))
         }
     }
 
+    /**
+     * Convert [KyberDecryptionKey] into a string of hex values.
+     *
+     * @param format [HexFormat] of the hex string.
+     * @return [String]
+     */
     @OptIn(ExperimentalStdlibApi::class)
-    override fun toHex(): String {
-        return fullBytes.toHexString(HexFormat.UpperCase)
+    override fun toHex(format: HexFormat): String {
+        return fullBytes.toHexString(format)
     }
 
+    /**
+     * Convert [KyberDecryptionKey] into a string of hex values.
+     *
+     * Format is defaulted to [HexFormat.UpperCase].
+     *
+     * @return [String]
+     */
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun toHex(): String {
+        return toHex(HexFormat.UpperCase)
+    }
+
+    /**
+     * Convert [KyberDecryptionKey] into Base64 encoding.
+     *
+     * @return [String]
+     */
     @OptIn(ExperimentalEncodingApi::class)
     override fun toBase64(): String {
         return Base64.encode(fullBytes)
     }
 
+    /**
+     * Convert [KyberDecryptionKey] into a String.
+     *
+     * This wraps [toHex], so they return the same values.
+     *
+     * @return [String]
+     */
     override fun toString(): String {
         return toHex()
     }

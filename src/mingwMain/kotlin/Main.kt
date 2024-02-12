@@ -92,12 +92,6 @@ fun decapsulate(decapsulationKeyPtr: CPointer<ByteVar>, cipherTextPtr: CPointer<
 }
 
 @OptIn(ExperimentalNativeApi::class)
-@CName("testReturn")
-fun testReturn(): Int {
-    return 100
-}
-
-@OptIn(ExperimentalNativeApi::class)
 @CName("getEncapsulationKeySize")
 fun getEncapsulationKeySize(parameterId: Int): Int {
     if(parameterId > KyberParameter.entries.lastIndex) throw UnsupportedKyberVariantException("Parameter ID is not recognized.")

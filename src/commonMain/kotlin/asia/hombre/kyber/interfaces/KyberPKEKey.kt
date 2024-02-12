@@ -20,6 +20,9 @@ package asia.hombre.kyber.interfaces
 
 import asia.hombre.kyber.KyberParameter
 
+/**
+ * K-PKE key.
+ */
 internal interface KyberPKEKey: Convertible {
     val parameter: KyberParameter
     val keyBytes: ByteArray

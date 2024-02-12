@@ -18,7 +18,12 @@
 
 package asia.hombre.kyber.interfaces
 
+/**
+ * Convertable to Hex and Base64.
+ */
 internal interface Convertible {
+    @OptIn(ExperimentalStdlibApi::class)
+    fun toHex(format: HexFormat): String
     fun toHex(): String
     fun toBase64(): String
 }

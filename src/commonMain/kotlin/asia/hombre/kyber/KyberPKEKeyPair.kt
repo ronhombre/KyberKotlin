@@ -18,4 +18,14 @@
 
 package asia.hombre.kyber
 
+/**
+ * A class for K-PKE Encryption and Decryption Key Pairs.
+ *
+ * This class contains the Encryption and Decryption Key.
+ *
+ * @param encryptionKey [KyberEncryptionKey]
+ * @param decryptionKey [KyberDecryptionKey]
+ * @constructor Stores the Encryption Key and the Decryption Key as a pair.
+ * @author Ron Lauren Hombre
+ */
 class KyberPKEKeyPair(val encryptionKey: KyberEncryptionKey, val decryptionKey: KyberDecryptionKey)

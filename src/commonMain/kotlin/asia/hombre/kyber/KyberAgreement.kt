@@ -25,30 +25,38 @@ import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 /**
- * A Key Agreement for encapsulating and decapsulating.
- * @param kemKeyPair
- * @constructor Creates a Key Agreement for encapsulating and decapsulating.
+ * An agreement class for Encapsulating ML-KEM Keys and Decapsulating Cipher Texts.
+ *
+ * This class contains K-PKE.Encrypt(), K-PKE.Decrypt(), ML-KEM.Encaps(), and ML-KEM.Decaps() all according to NIST FIPS 203.
+ *
+ * @param kemKeyPair [KyberKEMKeyPair]
+ * @constructor Stores the key pair for encapsulating and decapsulating.
  * @author Ron Lauren Hombre
  */
 class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
-    val parameter: KyberParameter
-    val keypair: KyberKEMKeyPair = kemKeyPair
+    /**
+     * The [KyberParameter] of this agreement.
+     */
+    val parameter: KyberParameter = kemKeyPair.encapsulationKey.key.parameter
 
-    init {
-        this.parameter = kemKeyPair.encapsulationKey.key.parameter
-    }
+    private val keypair: KyberKEMKeyPair = kemKeyPair
 
     internal companion object {
         /**
-         * Internal function to generate a Cipher Text. Synonymous to K.PKE.Encrypt() in FIPS 203.
-         * @param encryptionKey Encryption Key of the second party.
-         * @param plainText Plain Text
-         * @param randomness Random 32 Bytes
-         * @return KyberCipherText The Cipher Text to send to the second party.
+         * Private Encryption function.
+         *
+         * This method is the K-PKE.Encrypt() specified in NIST FIPS 203.
+         *
+         * @param encryptionKey [KyberEncryptionKey] of the second party.
+         * @param plainText [ByteArray] Plain Text to encrypt.
+         * @param randomness [ByteArray] Random bytes as random source.
+         * @return [KyberCipherText] - The Cipher Text to send to the second party.
          */
-        internal fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
+        private fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
             val parameter = encryptionKey.parameter
             val decodedKey = KyberMath.byteDecode(encryptionKey.keyBytes, 12)
             val nttKeyVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
@@ -128,21 +136,24 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
             return KyberCipherText(parameter, encodedCoefficients, encodedTerms)
         }
 
-
-
         /**
-         * Internal function to decrypt a Cipher Text. Synonymous to K.PKE.Decrypt() in FIPS 203.
-         * @param cipherText Cipher Text from the second party.
-         * @return ByteArray The original Plain Text.
+         * Internal Decryption function for testing purposes.
+         *
+         * This method is the K-PKE.Decrypt() specified in NIST FIPS 203.
+         *
+         * @param decryptionKey [KyberDecryptionKey] from yourself.
+         * @param kyberCipherText [KyberCipherText] from the second party.
+         * @return [ByteArray] - The recovered Plain Text.
          */
-        internal fun fromCipherText(decapsulationKey: KyberDecapsulationKey, cipherText: KyberCipherText): ByteArray {
-            val parameter = cipherText.parameter
-            val coefficients = Array(cipherText.parameter.K) { ShortArray(KyberConstants.N) }
+        @JvmSynthetic
+        internal fun fromCipherText(decryptionKey: KyberDecryptionKey, kyberCipherText: KyberCipherText): ByteArray {
+            val parameter = kyberCipherText.parameter
+            val coefficients = Array(kyberCipherText.parameter.K) { ShortArray(KyberConstants.N) }
 
             for (i in 0..<parameter.K) {
                 coefficients[i] = KyberMath.decompress(
                     KyberMath.byteDecode(
-                        cipherText.encodedCoefficients.copyOfRange(
+                        kyberCipherText.encodedCoefficients.copyOfRange(
                             i * KyberConstants.N_BYTES * parameter.DU,
                             (i + 1) * KyberConstants.N_BYTES * parameter.DU),
                         parameter.DU
@@ -152,10 +163,10 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
                 coefficients[i] = KyberMath.vectorToMontVector(coefficients[i])
             }
 
-            var constantTerms = KyberMath.decompress(KyberMath.byteDecode(cipherText.encodedTerms, parameter.DV), parameter.DV)
+            var constantTerms = KyberMath.decompress(KyberMath.byteDecode(kyberCipherText.encodedTerms, parameter.DV), parameter.DV)
             constantTerms = KyberMath.vectorToMontVector(constantTerms)
 
-            val secretVector = KyberMath.byteDecode(decapsulationKey.key.keyBytes, 12)
+            val secretVector = KyberMath.byteDecode(decryptionKey.keyBytes, 12)
 
             for (i in 0..<parameter.K) {
                 val subtraction = KyberMath.invNTT(
@@ -176,11 +187,16 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
         }
 
         /**
-         * Internal Encapsulation function that could be used for testing purposes. Synonymous to ML-KEM.Encaps() in FIPS 203.
-         * @param kyberEncapsulationKey Encapsulation Key of the second party.
-         * @param plainText The Plain Text to use.
-         * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
+         * Internal Encapsulation function for testing purposes.
+         *
+         * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
+         *
+         * @param kyberEncapsulationKey [KyberEncapsulationKey] of the second party.
+         * @param plainText [ByteArray] The Plain Text to use.
+         * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Secret Key.
+         * @throws EncapsulationException
          */
+        @JvmSynthetic
         internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray): KyberEncapsulationResult {
             val parameter = kyberEncapsulationKey.key.parameter
             if(kyberEncapsulationKey.key.fullBytes.size != parameter.ENCAPSULATION_KEY_LENGTH)
@@ -206,18 +222,23 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
         }
 
         /**
-         * Decapsulation function to recover the Secret Keys from the Cipher Text. Synonymous to ML-KEM.Decaps() in FIPS 203.
-         * @param cipherText The Cipher Text from the second party.
-         * @return ByteArray The Secret Key
+         * Decapsulates a KyberCipherText with a KyberDecapsulationKey and recovers the Secret Key.
+         *
+         * This method is the ML-KEM.Decaps() specified in NIST FIPS 203.
+         *
+         * @param decapsulationKey [KyberDecapsulationKey] from yourself.
+         * @param kyberCipherText [KyberCipherText] received from sender.
+         * @return [ByteArray] - The generated Secret Key, which is the same one generated by the sender.
+         * @throws DecapsulationException
          */
-        fun decapsulate(decapsulationKey: KyberDecapsulationKey, cipherText: KyberCipherText): ByteArray {
+        fun decapsulate(decapsulationKey: KyberDecapsulationKey, kyberCipherText: KyberCipherText): ByteArray {
             val parameter = decapsulationKey.encryptionKey.parameter
-            if(cipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
+            if(kyberCipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
                 throw DecapsulationException("ML-KEM cipher text variant mismatch!")
             if(decapsulationKey.fullBytes.size != parameter.DECAPSULATION_KEY_LENGTH)
                 throw DecapsulationException("ML-KEM Decapsulation Key is non-standard!")
 
-            val recoveredPlainText = fromCipherText(decapsulationKey, cipherText)
+            val recoveredPlainText = fromCipherText(decapsulationKey.key, kyberCipherText)
 
             val sha3512 = SHA3_512()
 
@@ -226,21 +247,28 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
 
             val decapsHash = sha3512.digest()
 
+            //Security Feature
+            sha3512.reset()
+
             val shake256 = SHAKE256(KyberConstants.SECRET_KEY_LENGTH)
 
             shake256.update(decapsulationKey.randomSeed)
-            shake256.update(cipherText.fullBytes)
+            shake256.update(kyberCipherText.fullBytes)
 
             val secretKeyRejection = shake256.digest()
 
+            //Security Feature
+            shake256.reset()
+
             var secretKeyCandidate = decapsHash.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH)
+
             val regeneratedCipherText = toCipherText(
                 decapsulationKey.encryptionKey,
                 recoveredPlainText,
                 decapsHash.copyOfRange(32, 64)
             )
 
-            if(!cipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
+            if(!kyberCipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
                 secretKeyCandidate = secretKeyRejection //Implicit Rejection
 
             return secretKeyCandidate
@@ -248,14 +276,27 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     }
 
     /**
-     * Encapsulation function for non-testing use case
-     * @param kyberEncapsulationKey Encapsulation Key of the second party.
-     * @return KyberEncapsulationResult Contains the Cipher Text and the generated Secret Key.
+     * Encapsulates a KyberEncapsulationKey into a Cipher Text and generates a Secret Key.
+     *
+     * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
+     *
+     * @param kyberEncapsulationKey [KyberEncapsulationKey] received from sender.
+     * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Secret Key.
+     * @throws EncapsulationException
      */
     fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
         return encapsulate(kyberEncapsulationKey, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
     }
 
+    /**
+     * Decapsulates a KyberCipherText and recovers the Secret Key.
+     *
+     * This method is the ML-KEM.Decaps() specified in NIST FIPS 203.
+     *
+     * @param kyberCipherText [KyberCipherText] received from sender.
+     * @return [ByteArray] - The generated Secret Key, which is the same one generated by the sender.
+     * @throws DecapsulationException
+     */
     fun decapsulate(kyberCipherText: KyberCipherText): ByteArray {
         return Companion.decapsulate(keypair.decapsulationKey, kyberCipherText)
     }

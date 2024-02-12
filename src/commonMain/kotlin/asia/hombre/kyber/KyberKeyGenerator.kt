@@ -18,6 +18,7 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.EncapsulationException
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
@@ -25,9 +26,24 @@ import org.kotlincrypto.hash.sha3.SHA3_512
 import kotlin.jvm.JvmStatic
 import kotlin.jvm.JvmSynthetic
 
-class KyberKeyGenerator {
+/**
+ * A generator class for ML-KEM Keys.
+ *
+ * This class contains K-PKE.KeyGen() and ML-KEM.KeyGen() all according to NIST FIPS 203.
+ *
+ * @author Ron Lauren Hombre
+ */
+class KyberKeyGenerator private constructor() {
 
     companion object {
+        /**
+         * Generate ML-KEM keys.
+         *
+         * This method is the ML-KEM.KeyGen() specified in NIST FIPS 203.
+         *
+         * @param parameter [KyberParameter] of the keys to be generated.
+         * @return [KyberKEMKeyPair] - Contains the Encapsulation and Decapsulation Key.
+         */
         @JvmStatic
         fun generate(parameter: KyberParameter): KyberKEMKeyPair {
             val secureRandom = SecureRandom()
@@ -38,6 +54,16 @@ class KyberKeyGenerator {
             )
         }
 
+        /**
+         * Internal Generate function for ML-KEM keys for testing purposes.
+         *
+         * This method is the ML-KEM.KeyGen() specified in NIST FIPS 203.
+         *
+         * @param parameter [KyberParameter] of the keys to be generated.
+         * @param randomSeed [ByteArray]
+         * @param pkeSeed [ByteArray]
+         * @return [KyberKEMKeyPair] - Contains the Encapsulation and Decapsulation Key.
+         */
         @JvmSynthetic
         internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
             val sha3256 = SHA3_256()
@@ -54,8 +80,24 @@ class KyberKeyGenerator {
             )
         }
 
+        /**
+         * A generator class for K-PKE Keys.
+         *
+         * This subclass contains K-PKE.KeyGen() all according to NIST FIPS 203.
+         *
+         * @author Ron Lauren Hombre
+         */
         internal class PKEGenerator {
             companion object {
+                /**
+                 * Internal Generate function for K-PKE keys for testing purposes.
+                 *
+                 * This method is the K-PKE.KeyGen() specified in NIST FIPS 203.
+                 *
+                 * @param parameter [KyberParameter] of the keys to be generated.
+                 * @param byteArray Random [ByteArray] which is a seed.
+                 * @return [KyberPKEKeyPair] - Contains the Encryption and Decryption Key.
+                 */
                 @JvmSynthetic
                 fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
                     val sha3512 = SHA3_512()
