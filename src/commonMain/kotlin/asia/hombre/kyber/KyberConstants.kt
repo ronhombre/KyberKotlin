@@ -27,7 +27,7 @@ import kotlin.jvm.JvmField
  *
  * @author Ron Lauren Hombre
  */
-class KyberConstants {
+class KyberConstants private constructor() {
     companion object {
         /**
          * Number of polynomials.
