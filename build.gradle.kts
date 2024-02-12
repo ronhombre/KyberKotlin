@@ -37,12 +37,12 @@ kotlin {
     jvm {
         val main by compilations.getting {
             compilerOptions.configure {
-                // Set up the Kotlin compiler options for the 'main' compilation:
+                //Set up the Kotlin compiler options for the 'main' compilation:
                 jvmTarget.set(JvmTarget.JVM_1_8)
             }
 
-            compileTaskProvider // get the Kotlin task 'compileKotlinJvm'
-            output // get the main compilation output
+            compileTaskProvider //Get the Kotlin task 'compileKotlinJvm'
+            output //Get the main compilation output
         }
 
         tasks.register<Jar>("generateSourcesJar") {
@@ -145,7 +145,7 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test") // This brings all the platform dependencies automatically
+                implementation("org.jetbrains.kotlin:kotlin-test")
             }
         }
         val jvmMain by getting {
