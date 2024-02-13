@@ -36,12 +36,12 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 | Variant | Generation              | Encapsulation           | Decapsulation           |
 |---------|-------------------------|-------------------------|-------------------------|
-| 512     | 6218.25    (34% Faster) | 5757.8125  (55% Faster) | 5736.4375  (73% Faster) |
-| 768     | 10220.375  (33% Faster) | 10442.75   (44% Faster) | 10603.75   (59% Faster) |
-| 1024    | 16700.1875 (27% Faster) | 17075.6875 (36% Faster) | 17346.6875 (50% Faster) |
+| 512     | 5907.125   (41% Faster) | 5587.875   (60% Faster) | 5689.5     (75% Faster) |
+| 768     | 10157.375  (33% Faster) | 10398.1875 (45% Faster) | 10572.0625 (60% Faster) |
+| 1024    | 16650.3125 (28% Faster) | 17075.0    (36% Faster) | 17310.25   (50% Faster) |
 | ML-KEM  | (in ms)                 | (in ms)                 | (in ms)                 |
 
-JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch.
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of Feb. 13, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
@@ -49,6 +49,17 @@ This benchmark is for performance tracking through the development.
 
 > [!NOTE]
 > This master branch is faster than the standard branch due to optimizations.
+
+### Summary
+* Variant 512 takes **0.59ms** to Generate a Keypair
+* Variant 768 takes **1ms** to Generate a Keypair
+* Variant 1024 takes **1.66ms** to Generate a Keypair
+* Variant 512 takes **0.55ms** to Encapsulate
+* Variant 768 takes **1ms** to Encapsulate
+* Variant 1024 takes **1.7ms** to Encapsulate
+* Variant 512 takes **0.56ms** to Decapsulate
+* Variant 768 takes **1ms** to Decapsulate
+* Variant 1024 takes **1.7ms** to Decapsulate
 
 ## Capabilities
 * Key Generation (512, 768, 1024)
