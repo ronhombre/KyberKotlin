@@ -25,7 +25,6 @@ import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
-import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -110,10 +109,10 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
                 constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
 
                 //Security Features
-                for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].lastIndex)
-                noiseVector[i].fill(0, 0, noiseVector[i].lastIndex)
-                nttKeyVector[i].fill(0, 0, nttKeyVector[i].lastIndex)
-                randomnessVector[i].fill(0, 0, randomnessVector[i].lastIndex)
+                for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].size)
+                noiseVector[i].fill(0, 0, noiseVector[i].size)
+                nttKeyVector[i].fill(0, 0, nttKeyVector[i].size)
+                randomnessVector[i].fill(0, 0, randomnessVector[i].size)
             }
 
             constantTerm = KyberMath.invNTT(constantTerm)
@@ -121,7 +120,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, muse)
 
             //Security Feature
-            muse.fill(0, 0, muse.lastIndex)
+            muse.fill(0, 0, muse.size)
 
             val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
             val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
@@ -204,6 +203,8 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
             if(!KyberMath.byteEncode(KyberMath.byteDecode(kyberEncapsulationKey.key.keyBytes, 12), 12)
                     .contentEquals(kyberEncapsulationKey.key.keyBytes))
                 throw EncapsulationException("Modulus not of " + KyberConstants.Q)
+            if(plainText.size != KyberConstants.N_BYTES)
+                throw EncapsulationException("Plain Text byte length is not " + KyberConstants.N_BYTES)
 
             val sha3256 = SHA3_256()
 
@@ -234,7 +235,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
         fun decapsulate(decapsulationKey: KyberDecapsulationKey, kyberCipherText: KyberCipherText): ByteArray {
             val parameter = decapsulationKey.encryptionKey.parameter
             if(kyberCipherText.fullBytes.size != parameter.CIPHERTEXT_LENGTH)
-                throw DecapsulationException("ML-KEM cipher text variant mismatch!")
+                throw DecapsulationException("ML-KEM Cipher Text variant mismatch!")
             if(decapsulationKey.fullBytes.size != parameter.DECAPSULATION_KEY_LENGTH)
                 throw DecapsulationException("ML-KEM Decapsulation Key is non-standard!")
 
@@ -247,18 +248,12 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
 
             val decapsHash = sha3512.digest()
 
-            //Security Feature
-            sha3512.reset()
-
             val shake256 = SHAKE256(KyberConstants.SECRET_KEY_LENGTH)
 
             shake256.update(decapsulationKey.randomSeed)
             shake256.update(kyberCipherText.fullBytes)
 
             val secretKeyRejection = shake256.digest()
-
-            //Security Feature
-            shake256.reset()
 
             var secretKeyCandidate = decapsHash.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH)
 
@@ -268,6 +263,9 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
                 decapsHash.copyOfRange(32, 64)
             )
 
+            //Security Feature
+            decapsHash.fill(0, 0, decapsHash.size)
+
             if(!kyberCipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
                 secretKeyCandidate = secretKeyRejection //Implicit Rejection
 
@@ -276,7 +274,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     }
 
     /**
-     * Encapsulates a KyberEncapsulationKey into a Cipher Text and generates a Secret Key.
+     * Encapsulates a [KyberEncapsulationKey] into a [KyberCipherText] and generates a Secret Key.
      *
      * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
      *
@@ -289,7 +287,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     }
 
     /**
-     * Decapsulates a KyberCipherText and recovers the Secret Key.
+     * Decapsulates a [KyberCipherText] and recovers the Secret Key.
      *
      * This method is the ML-KEM.Decaps() specified in NIST FIPS 203.
      *

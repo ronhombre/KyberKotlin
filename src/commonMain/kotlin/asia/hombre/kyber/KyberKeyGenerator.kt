@@ -105,13 +105,12 @@ class KyberKeyGenerator private constructor() {
                     val seeds = sha3512.digest(byteArray)
 
                     //Security Features
-                    sha3512.reset()
-                    byteArray.fill(Byte.MIN_VALUE, 0, byteArray.lastIndex)
+                    byteArray.fill(0, 0, byteArray.size)
 
                     val nttSeed = seeds.copyOfRange(0, 32)
                     val cbdSeed = seeds.copyOfRange(32, 64)
 
-                    seeds.fill(0, 0, seeds.lastIndex) //Security Feature
+                    seeds.fill(0, 0, seeds.size) //Security Feature
 
                     val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
                     val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
@@ -134,7 +133,7 @@ class KyberKeyGenerator private constructor() {
                         noiseVector[i] = KyberMath.NTT(noiseVector[i])
                     }
 
-                    cbdSeed.fill(Byte.MIN_VALUE, 0, cbdSeed.lastIndex) //Security Feature
+                    cbdSeed.fill(0, 0, cbdSeed.size) //Security Feature
 
                     //Transposed ? Old Kyber v3
                     val systemVector = KyberMath.vectorAddition(
@@ -147,8 +146,8 @@ class KyberKeyGenerator private constructor() {
 
                     for(i in 0..<parameter.K) {
                         //Security Features
-                        for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].lastIndex)
-                        noiseVector[i].fill(0, 0, noiseVector[i].lastIndex)
+                        for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].size)
+                        noiseVector[i].fill(0, 0, noiseVector[i].size)
 
                         KyberMath.byteEncode(KyberMath.montVectorToVector(systemVector[i]), 12)
                             .copyInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)
