@@ -46,10 +46,10 @@ class Generators {
         println("Generating Zetas...")
 
         val time = measureTime {
-            val zetas = ShortArray(128)
+            val zetas = IntArray(128)
             zetas[0] = 1
             for(i in 1..<128) {
-                zetas[i] = KyberMath.powMod(17, KyberMath.reverseBits(i).toInt(), KyberConstants.Q).toShort()
+                zetas[i] = KyberMath.powMod(17, KyberMath.reverseBits(i).toInt(), KyberConstants.Q).toInt()
                 zetas[i] = KyberMath.toMontgomeryForm(zetas[i]) //Comment this line if you want the standard form.
             }
 
@@ -64,9 +64,9 @@ class Generators {
         println("Generating Gammas...")
 
         val time = measureTime {
-            val gammas = ShortArray(128)
+            val gammas = IntArray(128)
             for(i in 1..128) {
-                gammas[i - 1] = KyberMath.powMod(17, (2 * KyberMath.reverseBits(i - 1).toInt()) + 1, KyberConstants.Q).toShort()
+                gammas[i - 1] = KyberMath.powMod(17, (2 * KyberMath.reverseBits(i - 1).toInt()) + 1, KyberConstants.Q).toInt()
                 gammas[i - 1] = KyberMath.toMontgomeryForm(gammas[i - 1]) //Comment this line if you want the standard form.
             }
 
@@ -76,7 +76,7 @@ class Generators {
         println("Generated after: " + time + "ms")
     }
 
-    private fun verifyPrecomputed(x: ShortArray, xIndex: Int, y: ShortArray, yIndex: Int): Boolean {
+    private fun verifyPrecomputed(x: IntArray, xIndex: Int, y: IntArray, yIndex: Int): Boolean {
         return x[xIndex] == y[yIndex]
     }
 }

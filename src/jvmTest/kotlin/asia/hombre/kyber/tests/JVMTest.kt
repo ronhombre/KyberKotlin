@@ -34,39 +34,6 @@ class JVMTest {
 
     }
 
-    @Test
-    fun isGreater() {
-        val Q: Short = 3329
-        var count = 0
-        var correct = 0
-        for(i in 0..<UShort.MAX_VALUE.toInt()) {
-            count++
-
-            val t1 = (i and 0b0000_1101_0000_0000) == 0b0000_1101_0000_0000
-            val t2 = (i and 0b0000_0000_1111_1111).toUShort().countLeadingZeroBits() >= 15
-            val t3 = (i and 0b0000_0010_0000_0001).toUShort().countLeadingZeroBits() >= 15
-            val t4 = (i and 0b0000_1110_0000_0000) == 0b0000_1110_0000_0000
-            val t5 = i != 0b0000_1101_0000_0000
-
-            val test = ((t1 && (t2 || t3)) || t4) && t5
-            val guess = i.toUShort().countLeadingZeroBits() < 4 || test
-            val certain = i >= Q
-
-            val buffer = ByteBuffer.allocate(UShort.SIZE_BYTES)
-            buffer.putShort(i.toShort())
-
-            if(guess == certain) correct++
-            else {
-                println(i)
-                println(bytesToBitString(buffer.array(), 4, ", "))
-                println("$certain/$t1/$t2/$t3/$t4")
-                //break
-            }
-        }
-
-        println("Ratio(Correct/Total/Ratio): $correct/$count/" + (correct/count.toDouble() * 100) + "%")
-    }
-
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0

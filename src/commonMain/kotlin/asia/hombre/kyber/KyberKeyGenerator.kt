@@ -112,9 +112,9 @@ class KyberKeyGenerator private constructor() {
 
                     seeds.fill(0, 0, seeds.size) //Security Feature
 
-                    val matrix = Array(parameter.K) { Array(parameter.K) { ShortArray(KyberConstants.N) } }
-                    val secretVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
-                    val noiseVector = Array(parameter.K) { ShortArray(KyberConstants.N) }
+                    val matrix = Array(parameter.K) { Array(parameter.K) { IntArray(KyberConstants.N) } }
+                    val secretVector = Array(parameter.K) { IntArray(KyberConstants.N) }
+                    val noiseVector = Array(parameter.K) { IntArray(KyberConstants.N) }
 
                     for((nonce, i) in (0..<parameter.K).withIndex()) {
                         for(j in 0..<parameter.K)

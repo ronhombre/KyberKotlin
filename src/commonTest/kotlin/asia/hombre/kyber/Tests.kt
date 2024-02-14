@@ -409,12 +409,12 @@ class Tests {
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed for 1024!")
     }
 
-    fun generateRandom256Shorts(seed: Int = 24): ShortArray {
-        val shorts = ShortArray(256)
+    fun generateRandom256Shorts(seed: Int = 24): IntArray {
+        val shorts = IntArray(256)
         val rand = Random(seed)
 
         for(i in shorts.indices)
-            shorts[i] = moduloOf(rand.nextInt().toShort(), KyberConstants.Q)
+            shorts[i] = moduloOf(rand.nextInt(), KyberConstants.Q)
 
         return shorts
     }
@@ -429,11 +429,11 @@ class Tests {
         return bytes
     }
 
-    fun moduloOf(value: Number, modulo: Number): Short {
+    fun moduloOf(value: Number, modulo: Number): Int {
         val shortedValue = value.toInt()
-        val shortedModulo = modulo.toShort()
+        val shortedModulo = modulo.toInt()
         val isNegative = shortedValue < 0
-        return (((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)).toShort()
+        return ((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)
     }
 
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {

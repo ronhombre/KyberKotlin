@@ -36,12 +36,12 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 | Variant | Generation              | Encapsulation           | Decapsulation           |
 |---------|-------------------------|-------------------------|-------------------------|
-| 512     | 5907.125   (41% Faster) | 5587.875   (60% Faster) | 5689.5     (75% Faster) |
-| 768     | 10157.375  (33% Faster) | 10398.1875 (45% Faster) | 10572.0625 (60% Faster) |
-| 1024    | 16650.3125 (28% Faster) | 17075.0    (36% Faster) | 17310.25   (50% Faster) |
+| 512     | 5840.625   (43% Faster) | 5529.0     (62% Faster) | 5545.1875  (79% Faster) |
+| 768     | 10098.4375 (34% Faster) | 10249.5    (47% Faster) | 10423.0625 (62% Faster) |
+| 1024    | 16513.8125 (29% Faster) | 17222.125  (35% Faster) | 17501.125  (49% Faster) |
 | ML-KEM  | (in ms)                 | (in ms)                 | (in ms)                 |
 
-JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of Feb. 13, 2024.
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of Feb. 14, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
@@ -51,15 +51,15 @@ This benchmark is for performance tracking through the development.
 > This master branch is faster than the standard branch due to optimizations.
 
 ### Summary
-* Variant 512 takes **0.59ms** to Generate a Keypair
+* Variant 512 takes **0.58ms** to Generate a Keypair
 * Variant 768 takes **1ms** to Generate a Keypair
-* Variant 1024 takes **1.66ms** to Generate a Keypair
+* Variant 1024 takes **1.65ms** to Generate a Keypair
 * Variant 512 takes **0.55ms** to Encapsulate
 * Variant 768 takes **1ms** to Encapsulate
 * Variant 1024 takes **1.7ms** to Encapsulate
-* Variant 512 takes **0.56ms** to Decapsulate
+* Variant 512 takes **0.55ms** to Decapsulate
 * Variant 768 takes **1ms** to Decapsulate
-* Variant 1024 takes **1.7ms** to Decapsulate
+* Variant 1024 takes **1.75ms** to Decapsulate
 
 ## Capabilities
 * Key Generation (512, 768, 1024)

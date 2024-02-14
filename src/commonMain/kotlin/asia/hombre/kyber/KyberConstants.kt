@@ -78,7 +78,7 @@ class KyberConstants private constructor() {
          * Pre-generated Zeta values according to the formula 17^bitReverse(n) mod Q and converted to Montgomery Form.
          */
         @JvmField
-        val PRECOMPUTED_ZETAS_TABLE = shortArrayOf(
+        val PRECOMPUTED_ZETAS_TABLE = intArrayOf(
             1, 2571, 2970, 1812, 1493, 1422, 287, 202,
             3158, 622, 1577, 182, 962, 2127, 1855, 1468,
             573, 2004, 264, 383, 2500, 1458, 1727, 3199,
@@ -117,7 +117,7 @@ class KyberConstants private constructor() {
          * Pre-generated Zeta values according to the formula 17^(2 * bitReverse(n)) mod Q and converted to Montgomery Form.
          */
         @JvmField
-        val PRECOMPUTED_GAMMAS_TABLE = shortArrayOf(
+        val PRECOMPUTED_GAMMAS_TABLE = intArrayOf(
             2226, 1103, 430, 2899, 555, 2774, 843, 2486,
             2078, 1251, 871, 2458, 1550, 1779, 105, 3224,
             422, 2907, 587, 2742, 177, 3152, 3094, 235,
