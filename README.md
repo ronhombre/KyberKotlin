@@ -8,6 +8,8 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
+![JS](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+
 
 [Kyber](https://pq-crystals.org/kyber/index.shtml) is an IND-CCA2-secure key encapsulation mechanism (KEM), whose
 security is based on the hardness of solving the learning-with-errors (LWE) problem over module lattices. Kyber is one 
@@ -69,7 +71,7 @@ This benchmark is for performance tracking through the development.
 
 ## Supported & Tested Platforms
 * JVM (Java, Kotlin)
-* Javascript (NPM)
+* Javascript (NPM) _Slower by 2-3x_
 * Native (C#)
 
 ## KDocs Documentation
