@@ -296,6 +296,60 @@ class Tests {
     }
 
     @Test
+    fun mlEncapsDecaps512() {
+        for(i in 1..1000) {
+            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
+            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
+
+            val bobAgreement = KyberAgreement(keyPairBob)
+            val aliceAgreement = KyberAgreement(keyPairAlice)
+
+            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+
+            val bobSecretKey = result.secretKey
+            val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)
+
+            assertContentEquals(bobSecretKey, aliceSecretKey, "ML Encapsulation and Decapsulation for 512 failed at attempt $i!")
+        }
+    }
+
+    @Test
+    fun mlEncapsDecaps768() {
+        for(i in 1..1000) {
+            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
+            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
+
+            val bobAgreement = KyberAgreement(keyPairBob)
+            val aliceAgreement = KyberAgreement(keyPairAlice)
+
+            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+
+            val bobSecretKey = result.secretKey
+            val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)
+
+            assertContentEquals(bobSecretKey, aliceSecretKey, "ML Encapsulation and Decapsulation for 512 failed at attempt $i!")
+        }
+    }
+
+    @Test
+    fun mlEncapsDecaps1024() {
+        for(i in 1..1000) {
+            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
+            val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
+
+            val bobAgreement = KyberAgreement(keyPairBob)
+            val aliceAgreement = KyberAgreement(keyPairAlice)
+
+            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+
+            val bobSecretKey = result.secretKey
+            val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)
+
+            assertContentEquals(bobSecretKey, aliceSecretKey, "ML Encapsulation and Decapsulation for 512 failed at attempt $i!")
+        }
+    }
+
+    @Test
     fun ntt() {
         val vectors = generateRandom256Shorts()
         val nttVectors = KyberMath.NTT(vectors)
