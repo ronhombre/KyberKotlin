@@ -18,6 +18,9 @@
 
 package asia.hombre.kyber
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
 /**
  * A class for ML-KEM Encapsulation and Decapsulation Key Pairs.
  *
@@ -28,4 +31,6 @@ package asia.hombre.kyber
  * @constructor Stores the Encapsulation Key and the Decapsulation Key as a pair.
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberKEMKeyPair internal constructor(val encapsulationKey: KyberEncapsulationKey, val decapsulationKey: KyberDecapsulationKey)

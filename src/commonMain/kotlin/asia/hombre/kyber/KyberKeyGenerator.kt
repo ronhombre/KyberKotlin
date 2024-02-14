@@ -18,11 +18,12 @@
 
 package asia.hombre.kyber
 
-import asia.hombre.kyber.exceptions.EncapsulationException
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 import kotlin.jvm.JvmStatic
 import kotlin.jvm.JvmSynthetic
 
@@ -33,6 +34,8 @@ import kotlin.jvm.JvmSynthetic
  *
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberKeyGenerator private constructor() {
 
     companion object {

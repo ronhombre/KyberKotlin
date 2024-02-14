@@ -18,6 +18,9 @@
 
 package asia.hombre.kyber
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
 /**
  * A class for ML-KEM Encapsulation Results.
  *
@@ -28,4 +31,6 @@ package asia.hombre.kyber
  * @constructor Stores the Secret Key and the Cipher Text.
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberEncapsulationResult internal constructor(val secretKey: ByteArray, val cipherText: KyberCipherText)

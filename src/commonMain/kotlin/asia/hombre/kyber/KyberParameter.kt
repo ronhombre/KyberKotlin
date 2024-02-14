@@ -19,6 +19,8 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
@@ -29,6 +31,8 @@ import kotlin.jvm.JvmStatic
  *
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int, val DV: Int) {
     /**
      * ML-KEM-512 (RBG Strength: 128, NIST Security Category: 1).

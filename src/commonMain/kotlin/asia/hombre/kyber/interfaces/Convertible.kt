@@ -18,12 +18,16 @@
 
 package asia.hombre.kyber.interfaces
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
+
 /**
  * Convertable to Hex and Base64.
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 internal interface Convertible {
-    @OptIn(ExperimentalStdlibApi::class)
-    fun toHex(format: HexFormat): String
-    fun toHex(): String
+    fun toHex(isUppercase: Boolean = true): String
     fun toBase64(): String
 }

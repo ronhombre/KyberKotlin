@@ -23,6 +23,8 @@ import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -36,6 +38,8 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the parameter and raw bytes of the Decryption Key.
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberDecryptionKey internal constructor(override val parameter: KyberParameter, override val keyBytes: ByteArray) : KyberPKEKey {
     /**
      * All the bytes of the Decryption Key.
@@ -93,24 +97,12 @@ class KyberDecryptionKey internal constructor(override val parameter: KyberParam
     /**
      * Convert [KyberDecryptionKey] into a string of hex values.
      *
-     * @param format [HexFormat] of the hex string.
+     * @param isUppercase
      * @return [String]
      */
     @OptIn(ExperimentalStdlibApi::class)
-    override fun toHex(format: HexFormat): String {
-        return fullBytes.toHexString(format)
-    }
-
-    /**
-     * Convert [KyberDecryptionKey] into a string of hex values.
-     *
-     * Format is defaulted to [HexFormat.UpperCase].
-     *
-     * @return [String]
-     */
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun toHex(): String {
-        return toHex(HexFormat.UpperCase)
+    override fun toHex(isUppercase: Boolean): String {
+        return fullBytes.toHexString(if(isUppercase) HexFormat.UpperCase else HexFormat.Default)
     }
 
     /**

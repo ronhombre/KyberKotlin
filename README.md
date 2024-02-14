@@ -69,6 +69,7 @@ This benchmark is for performance tracking through the development.
 
 ## Supported & Tested Platforms
 * JVM (Java, Kotlin)
+* Javascript (NPM)
 * Native (C#)
 
 ## KDocs Documentation
@@ -95,6 +96,11 @@ dependencies {
 ```
 
 [More](https://central.sonatype.com/artifact/asia.hombre/kyber/overview) installation methods
+
+## JS NPM Installation
+```
+npm i kyberkotlin@0.4.8
+```
 
 ## Native C# Installation
 
@@ -185,6 +191,51 @@ System.out.println(Arrays.toString(decapsSecretKey));
 In this example, **Bob** and **Alice** creates an **Agreement** that an eavesdropper would not be able to comprehend even
 if it is intercepted. After generating the _Shared Secret Key_, they may communicate using a Symmetric Encryption
 algorithm _i.e. AES_.
+
+### With Javascript
+
+```javascript
+//The "asia.hombre.kyber" at the end is required unless you want to suffer.
+const Kyber = require("kyberkotlin").asia.hombre.kyber;
+
+//Generate keypairs for both Alice and Bob.
+let aliceKeypair = Kyber.KyberKeyGenerator.Companion.generate(Kyber.KyberParameter.ML_KEM_512);
+let bobKeypair = Kyber.KyberKeyGenerator.Companion.generate(Kyber.KyberParameter.ML_KEM_512);
+
+//Wrap the Keypairs in their agreements.
+let aliceAgreement = new Kyber.KyberAgreement(aliceKeypair);
+let bobAgreement = new Kyber.KyberAgreement(bobKeypair);
+
+//Bob receives Alice's Encapsulation Key and encapsulates it and generating the Secret Key.
+let results = bobAgreement.encapsulate(aliceKeypair.encapsulationKey);
+
+let ciphertext = results.cipherText;
+let bobSecretKey = results.secretKey;
+
+//Alice receives the Cipher Text from Bob and recovers the Secret Key from it.
+let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
+
+console.log(bobSecretKey);
+console.log(aliceSecretKey);
+
+//Expected Similar Output:
+/*
+Int8Array(32) [
+-59, 95, -123, -122, -113, -91,  95,
+    -105,  5,    9,  -13,   11,  37, -58,
+    125, 63, -111,   68,  -50,  67,  54,
+    50, 59,   19,  -91,    9, -75, -69,
+    125,  8,  -74,   73
+]
+Int8Array(32) [
+-59, 95, -123, -122, -113, -91,  95,
+    -105,  5,    9,  -13,   11,  37, -58,
+    125, 63, -111,   68,  -50,  67,  54,
+    50, 59,   19,  -91,    9, -75, -69,
+    125,  8,  -74,   73
+]*/
+
+```
 
 ### With Native C#
 

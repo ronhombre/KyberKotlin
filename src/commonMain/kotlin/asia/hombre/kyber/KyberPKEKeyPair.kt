@@ -18,6 +18,9 @@
 
 package asia.hombre.kyber
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
 /**
  * A class for K-PKE Encryption and Decryption Key Pairs.
  *
@@ -28,4 +31,6 @@ package asia.hombre.kyber
  * @constructor Stores the Encryption Key and the Decryption Key as a pair.
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberPKEKeyPair(val encryptionKey: KyberEncryptionKey, val decryptionKey: KyberDecryptionKey)

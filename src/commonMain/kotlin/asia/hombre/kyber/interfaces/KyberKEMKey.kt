@@ -18,9 +18,14 @@
 
 package asia.hombre.kyber.interfaces
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
 /**
  * ML-KEM key.
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 internal interface KyberKEMKey: Convertible {
     val key: KyberPKEKey
 }

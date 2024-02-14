@@ -18,6 +18,8 @@
 
 package asia.hombre.kyber
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 import kotlin.jvm.JvmField
 
 /**
@@ -27,6 +29,8 @@ import kotlin.jvm.JvmField
  *
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberConstants private constructor() {
     companion object {
         /**

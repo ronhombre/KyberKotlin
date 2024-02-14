@@ -25,6 +25,9 @@ import org.kotlincrypto.SecureRandom
 import org.kotlincrypto.hash.sha3.SHA3_256
 import org.kotlincrypto.hash.sha3.SHA3_512
 import org.kotlincrypto.hash.sha3.SHAKE256
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -36,6 +39,8 @@ import kotlin.jvm.JvmSynthetic
  * @constructor Stores the key pair for encapsulating and decapsulating.
  * @author Ron Lauren Hombre
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     /**
      * The [KyberParameter] of this agreement.
@@ -285,6 +290,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
      * @throws EncapsulationException
      */
     @Throws(EncapsulationException::class)
+    @JsName("encapsulate")
     fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
         return encapsulate(kyberEncapsulationKey, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
     }
@@ -299,6 +305,7 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
      * @throws DecapsulationException
      */
     @Throws(DecapsulationException::class)
+    @JsName("decapsulate")
     fun decapsulate(kyberCipherText: KyberCipherText): ByteArray {
         return Companion.decapsulate(keypair.decapsulationKey, kyberCipherText)
     }

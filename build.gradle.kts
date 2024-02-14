@@ -134,7 +134,13 @@ kotlin {
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
     }
-    js().nodejs()
+    js(IR) {
+        nodejs()
+        browser {
+
+        }
+        binaries.executable()
+    }
     mingwX64("windows") {
         binaries {
             sharedLib {  }
