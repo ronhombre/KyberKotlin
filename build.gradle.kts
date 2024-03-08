@@ -7,7 +7,7 @@ import java.nio.file.Files
 import java.security.MessageDigest
 
 plugins {
-    kotlin("multiplatform") version "1.9.22" //Kotlin Multiplatform
+    kotlin("multiplatform") version "1.9.23" //Kotlin Multiplatform
     id("org.jetbrains.dokka") version "1.9.20"  //KDocs
     signing //GPG
 }
