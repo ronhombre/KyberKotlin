@@ -83,7 +83,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.9")
+    implementation("asia.hombre:kyber:0.4.10")
 }
 ```
 
@@ -101,7 +101,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm i kyberkotlin@0.4.9
+npm i kyberkotlin
 ```
 
 ## Native C# Installation

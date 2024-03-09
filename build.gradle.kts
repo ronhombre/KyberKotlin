@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.9"
+version = "0.4.10"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
