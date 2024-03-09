@@ -36,7 +36,7 @@ import kotlin.jvm.JvmSynthetic
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberKeyGenerator private constructor() {
+sealed class KyberKeyGenerator private constructor() {
 
     companion object {
         /**

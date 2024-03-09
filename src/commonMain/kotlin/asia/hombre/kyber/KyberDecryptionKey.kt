@@ -40,7 +40,7 @@ import kotlin.jvm.JvmStatic
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberDecryptionKey internal constructor(override val parameter: KyberParameter, override val keyBytes: ByteArray) : KyberPKEKey {
+class KyberDecryptionKey internal constructor(override val parameter: KyberParameter, internal val keyBytes: ByteArray) : KyberPKEKey {
     /**
      * All the bytes of the Decryption Key.
      *

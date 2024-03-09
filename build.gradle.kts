@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.4.8"
+version = "0.4.9"
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -169,6 +169,20 @@ kotlin {
             dependencies {
 
             }
+        }
+    }
+}
+
+tasks.dokkaHtml.configure {
+    dokkaSourceSets {
+        named("commonMain") {
+            // Adjust visibility to include internal and private members
+            perPackageOption {
+                matchingRegex.set(".*") // Match all packages
+                includeNonPublic.set(false)
+            }
+            // Optionally, report undocumented members
+            reportUndocumented.set(true)
         }
     }
 }

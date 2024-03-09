@@ -41,7 +41,7 @@ import kotlin.jvm.JvmSynthetic
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
+sealed class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
     /**
      * The [KyberParameter] of this agreement.
      */

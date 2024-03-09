@@ -29,5 +29,4 @@ import kotlin.js.JsExport
 @JsExport
 internal interface KyberPKEKey: Convertible {
     val parameter: KyberParameter
-    val keyBytes: ByteArray
 }

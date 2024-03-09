@@ -43,7 +43,7 @@ import kotlin.jvm.JvmStatic
 @JsExport
 class KyberEncryptionKey internal constructor(
     override val parameter: KyberParameter,
-    override val keyBytes: ByteArray,
+    internal val keyBytes: ByteArray,
     internal val nttSeed: ByteArray) : KyberPKEKey {
 
     /**

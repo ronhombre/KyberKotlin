@@ -20,6 +20,7 @@ package asia.hombre.kyber
 
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
+import kotlin.jvm.JvmName
 
 /**
  * A class for ML-KEM Encapsulation Results.
@@ -33,4 +34,9 @@ import kotlin.js.JsExport
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberEncapsulationResult internal constructor(val secretKey: ByteArray, val cipherText: KyberCipherText)
+class KyberEncapsulationResult internal constructor(
+    @get:JvmName("getSecretKey")
+    val secretKey: ByteArray,
+    @get:JvmName("getCipherText")
+    val cipherText: KyberCipherText
+)
