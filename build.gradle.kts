@@ -201,6 +201,19 @@ tasks.dokkaHtml.configure {
         }
     }
 }
+tasks.withType<DokkaTask>().configureEach {
+    val dokkaBaseConfiguration = """
+    {
+      "footerMessage": "(c) 2024 Ron Lauren Hombre"
+    }
+    """
+    pluginsMapConfiguration.set(
+        mapOf(
+            // fully qualified plugin name to json configuration
+            "org.jetbrains.dokka.base.DokkaBase" to dokkaBaseConfiguration
+        )
+    )
+}
 
 fun saveHash(file: File, hash: String, suffix: String) {
     val filePath = file.toPath()
