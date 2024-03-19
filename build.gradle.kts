@@ -1,3 +1,4 @@
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.daemon.common.toHexString
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
@@ -14,6 +15,7 @@ plugins {
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
 version = "0.5.0"
+description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
@@ -144,8 +146,17 @@ kotlin {
         }
         binaries.executable()
 
+        tasks.register("packageNPM") {
+            val packageSourcePath = projectDir.toPath().resolve("npm.json")
+            val packagePath = projectDir.toPath().resolve("npm").resolve("package.json")
+
+            var packageFile = String(Files.readAllBytes(packageSourcePath))
+            packageFile = packageFile.replace("<VERSION>", version.toString()).replace("<DESCRIPTION>", project.description.toString())
+            Files.write(packagePath, packageFile.toByteArray())
+        }
+
         tasks.register<Copy>("bundleNPM") {
-            dependsOn("jsBrowserProductionWebpack")
+            dependsOn("jsBrowserProductionWebpack", "packageNPM")
 
             from(buildDir.resolve("js").resolve("packages").resolve(project.name).resolve("kotlin"))
             into(npmKotlinDir)

@@ -1,8 +1,8 @@
 {
   "name": "kyberkotlin",
-  "version": "0.5.0",
-  "description": "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin.",
-  "main": "./kotlin/KyberKotlin.js",
+  "version": "<VERSION>",
+  "description": "<DESCRIPTION>",
+  "main": "kotlin/KyberKotlin.js",
   "scripts": {
     "test": "node test.js"
   },
