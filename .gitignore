@@ -47,3 +47,4 @@ bin/
 /.env
 gradle.properties
 /.idea/
+/npm/kotlin/

@@ -1,0 +1,12 @@
+{
+  "name": "kyberkotlin",
+  "version": "0.5.0",
+  "description": "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin.",
+  "main": "./kotlin/KyberKotlin.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [],
+  "author": "Ron Lauren Hombre",
+  "license": "APACHE-2.0"
+}

@@ -20,7 +20,6 @@ package asia.hombre.kyber.interfaces
 
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
-import kotlin.js.JsName
 
 /**
  * Convertable to Hex and Base64.
