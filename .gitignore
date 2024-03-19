@@ -48,3 +48,4 @@ bin/
 gradle.properties
 /.idea/
 /npm/kotlin/
+/npm/package.json

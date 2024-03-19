@@ -6,10 +6,17 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.security.MessageDigest
+import kotlin.io.path.Path
+
+val kmm: String by properties
+val hash: String by properties
+val keccak: String by properties
+val endians: String by properties
+val random: String by properties
 
 plugins {
-    kotlin("multiplatform") version "1.9.23" //Kotlin Multiplatform
-    id("org.jetbrains.dokka") version "1.9.20"  //KDocs
+    kotlin("multiplatform") //Kotlin Multiplatform
+    id("org.jetbrains.dokka")  //KDocs
     signing //GPG
 }
 
@@ -74,13 +81,21 @@ kotlin {
             dependsOn("cleanMaven", "generateSourcesJar", "jvmJar", "generateDocsJar")
 
             doFirst {
-                //Copy pom.xml then rename it
-                copy {
-                    from(".")
-                    include("pom.xml")
-                    into(mavenDeep)
-                    rename("pom.xml", pomFileName)
-                }
+                //Copy pom.xml, put the versions, and the description into it.
+                val pomSourcePath = projectDir.toPath().resolve("pom.xml")
+                val pomPath = Path(projectDir.path + mavenDeep.removePrefix(".")).resolve(pomFileName)
+
+                var packageFile = String(Files.readAllBytes(pomSourcePath))
+                packageFile = packageFile
+                    .replace("0<!--VERSION-->", version.toString())
+                    .replace("<!--DESCRIPTION-->", project.description.toString())
+                    .replace("<!--KMM-->", kmm)
+                    .replace("<!--HASH-->", hash)
+                    .replace("<!--KECCAK-->", keccak)
+                    .replace("<!--ENDIANS-->", endians)
+                    .replace("<!--RANDOM-->", random)
+                Files.write(pomPath, packageFile.toByteArray())
+
                 //Copy jar build and sources
                 copy {
                     from(libsDirectory.get())
@@ -175,10 +190,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kotlincrypto.hash:sha3:0.5.1")
-                implementation("org.kotlincrypto.sponges:keccak:0.3.0")
-                implementation("org.kotlincrypto.endians:endians:0.3.0")
-                implementation("org.kotlincrypto:secure-random:0.3.0")
+                implementation("org.kotlincrypto.hash:sha3:$hash")
+                implementation("org.kotlincrypto.sponges:keccak:$keccak")
+                implementation("org.kotlincrypto.endians:endians:$endians")
+                implementation("org.kotlincrypto:secure-random:$random")
             }
         }
         val commonTest by getting {
@@ -215,7 +230,7 @@ tasks.dokkaHtml.configure {
 tasks.withType<DokkaTask>().configureEach {
     val dokkaBaseConfiguration = """
     {
-      "footerMessage": "(c) 2024 Ron Lauren Hombre"
+      "footerMessage": "(C) 2024 Ron Lauren Hombre"
     }
     """
     pluginsMapConfiguration.set(

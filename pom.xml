@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>KyberKotlin</name>
-    <description>ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin.</description>
+    <description><!--DESCRIPTION--></description>
     <url>https://github.com/ronhombre/KyberKotlin</url>
 
     <developers>
@@ -39,11 +39,11 @@
 
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>0.5.0</version>
+    <version>0<!--VERSION--></version>
     <packaging>jar</packaging>
 
     <scm>
-        <tag>v0.5.0</tag>
+        <tag>v0<!--VERSION--></tag>
         <connection>scm:git:https://github.com/ronhombre/KyberKotlin.git</connection>
         <url>https://github.com/ronhombre/KyberKotlin.git</url>
     </scm>
@@ -52,28 +52,28 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>1.9.23</version>
+            <version><!--KMM--></version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.kotlincrypto.hash</groupId>
             <artifactId>sha3</artifactId>
-            <version>0.5.1</version>
+            <version><!--HASH--></version>
         </dependency>
         <dependency>
             <groupId>org.kotlincrypto.sponges</groupId>
             <artifactId>keccak</artifactId>
-            <version>0.3.0</version>
+            <version><!--KECCAK--></version>
         </dependency>
         <dependency>
             <groupId>org.kotlincrypto.endians</groupId>
             <artifactId>endians</artifactId>
-            <version>0.3.0</version>
+            <version><!--ENDIANS--></version>
         </dependency>
         <dependency>
             <groupId>org.kotlincrypto</groupId>
             <artifactId>secure-random</artifactId>
-            <version>0.3.0</version>
+            <version><!--RANDOM--></version>
         </dependency>
     </dependencies>
 
