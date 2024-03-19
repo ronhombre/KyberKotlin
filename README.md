@@ -83,7 +83,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.4.10")
+    implementation("asia.hombre:kyber:0.5.0")
 }
 ```
 
