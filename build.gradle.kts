@@ -152,7 +152,7 @@ kotlin {
                 implementation("org.kotlincrypto.hash:sha3:0.4.0")
                 implementation("org.kotlincrypto.sponges:keccak:0.2.0")
                 implementation("org.kotlincrypto.endians:endians:0.2.0")
-                implementation("org.kotlincrypto:secure-random:0.2.0")
+                implementation("org.kotlincrypto:secure-random:0.3.0")
             }
         }
         val commonTest by getting {
