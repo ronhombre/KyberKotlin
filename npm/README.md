@@ -1,10 +1,17 @@
+# KyberKotlin (NPM build)
 Parent Source: [KyberKotlin](https://github.com/ronhombre/KyberKotlin)
 
-Generated from parent using `./gradlew jsBrowserProductionWebpack`
+Generated from parent KMM library using `./gradlew bundleNPM`
+
+## Installation
+`npm install kyberkotlin`
+
+## Documentation
+Visit [kyber.hombre.asia](https://kyber.hombre.asia). All **common** methods and classes are available in JS.
 
 ## Usage sample
 ```javascript
-const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("./kotlin/KyberKotlin").asia.hombre.kyber;
+const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("kyberkotlin").asia.hombre.kyber;
 
 let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
 let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);

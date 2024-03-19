@@ -22,6 +22,9 @@ val mavenDir = "./maven"
 val mavenBundlingDir = "$mavenDir/bundling"
 val mavenDeep = "$mavenBundlingDir/" + (project.group.toString().replace(".", "/")) + "/" + version
 
+val npmDir = "./npm"
+val npmKotlinDir = "$npmDir/kotlin"
+
 val jarFileName = baseProjectName.plus(".jar")
 val jarFullFileName = baseProjectName.plus("-full.jar")
 val pomFileName = baseProjectName.plus(".pom")
@@ -140,6 +143,18 @@ kotlin {
 
         }
         binaries.executable()
+
+        tasks.register<Copy>("bundleNPM") {
+            dependsOn("jsBrowserProductionWebpack")
+
+            from(buildDir.resolve("js").resolve("packages").resolve(project.name).resolve("kotlin"))
+            into(npmKotlinDir)
+
+            doFirst {
+                delete(npmKotlinDir)
+                mkdir(npmKotlinDir)
+            }
+        }
     }
     mingwX64("windows") {
         binaries {
