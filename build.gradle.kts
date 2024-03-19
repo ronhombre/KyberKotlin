@@ -150,7 +150,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.kotlincrypto.hash:sha3:0.5.1")
-                implementation("org.kotlincrypto.sponges:keccak:0.2.0")
+                implementation("org.kotlincrypto.sponges:keccak:0.3.0")
                 implementation("org.kotlincrypto.endians:endians:0.3.0")
                 implementation("org.kotlincrypto:secure-random:0.3.0")
             }
