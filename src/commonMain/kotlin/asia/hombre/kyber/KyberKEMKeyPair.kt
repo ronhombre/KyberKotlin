@@ -40,7 +40,8 @@ class KyberKEMKeyPair internal constructor(
     /**
      * The [KyberDecapsulationKey].
      */
-    val decapsulationKey: KyberDecapsulationKey): Copyable<KyberKEMKeyPair> {
+    val decapsulationKey: KyberDecapsulationKey
+): Copyable<KyberKEMKeyPair> {
 
     /**
      * Create an independent copy from an untrusted source.

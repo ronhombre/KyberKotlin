@@ -44,7 +44,10 @@ class KyberDecryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberDecryptionKey].
      */
     override val parameter: KyberParameter,
-    internal val keyBytes: ByteArray) : KyberPKEKey, Copyable<KyberDecryptionKey> {
+    keyBytes: ByteArray
+) : KyberPKEKey, Copyable<KyberDecryptionKey> {
+    internal val keyBytes: ByteArray = keyBytes.copyOf()
+
     /**
      * All the bytes of the Decryption Key.
      *

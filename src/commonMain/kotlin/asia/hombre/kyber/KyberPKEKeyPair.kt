@@ -40,7 +40,8 @@ class KyberPKEKeyPair internal constructor(
     /**
      * The [KyberDecryptionKey].
      */
-    val decryptionKey: KyberDecryptionKey): Copyable<KyberPKEKeyPair> {
+    val decryptionKey: KyberDecryptionKey
+): Copyable<KyberPKEKeyPair> {
 
     /**
      * Create an independent copy from an untrusted source.

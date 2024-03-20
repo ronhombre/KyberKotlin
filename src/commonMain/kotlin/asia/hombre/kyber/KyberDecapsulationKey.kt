@@ -48,8 +48,11 @@ class KyberDecapsulationKey internal constructor(
      * The [KyberEncryptionKey].
      */
     val encryptionKey: KyberEncryptionKey,
-    internal val hash: ByteArray,
-    internal val randomSeed: ByteArray) : KyberKEMKey, Copyable<KyberDecapsulationKey> {
+    hash: ByteArray,
+    randomSeed: ByteArray
+) : KyberKEMKey, Copyable<KyberDecapsulationKey> {
+    internal val hash: ByteArray = hash.copyOf()
+    internal val randomSeed: ByteArray = randomSeed.copyOf()
 
     /**
      * The [KyberParameter] associated with this [KyberDecapsulationKey].

@@ -39,13 +39,16 @@ import kotlin.jvm.JvmStatic
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberCipherText internal constructor(
+class KyberCipherText internal constructor( //TODO: Copy parameter variables
     /**
      * The [KyberParameter] associated with this [KyberCipherText].
      */
     val parameter: KyberParameter,
-    internal val encodedCoefficients: ByteArray,
-    internal val encodedTerms: ByteArray): Convertible, Copyable<KyberCipherText> {
+    encodedCoefficients: ByteArray,
+    encodedTerms: ByteArray) : Convertible, Copyable<KyberCipherText> {
+
+    internal val encodedCoefficients: ByteArray = encodedCoefficients.copyOf()
+    internal val encodedTerms: ByteArray = encodedTerms.copyOf()
     /**
      * All the bytes of the Cipher Text.
      *

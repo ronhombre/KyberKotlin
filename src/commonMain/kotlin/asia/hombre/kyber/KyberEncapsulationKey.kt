@@ -42,7 +42,8 @@ class KyberEncapsulationKey internal constructor(
     /**
      * The [KyberEncryptionKey].
      */
-    override val key: KyberEncryptionKey) : KyberKEMKey, Copyable<KyberEncapsulationKey> {
+    override val key: KyberEncryptionKey
+) : KyberKEMKey, Copyable<KyberEncapsulationKey> {
     /**
      * All the bytes of the Encapsulation Key.
      *

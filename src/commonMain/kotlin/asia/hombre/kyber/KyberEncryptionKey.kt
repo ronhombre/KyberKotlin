@@ -45,8 +45,11 @@ class KyberEncryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberEncryptionKey].
      */
     override val parameter: KyberParameter,
-    internal val keyBytes: ByteArray,
-    internal val nttSeed: ByteArray) : KyberPKEKey, Copyable<KyberEncryptionKey> {
+    keyBytes: ByteArray,
+    nttSeed: ByteArray
+) : KyberPKEKey, Copyable<KyberEncryptionKey> {
+    internal val keyBytes: ByteArray = keyBytes.copyOf()
+    internal val nttSeed: ByteArray = nttSeed.copyOf()
 
     init {
         if(!KyberMath.byteEncode(KyberMath.byteDecode(keyBytes, 12), 12).contentEquals(keyBytes))
