@@ -18,6 +18,7 @@
 
 package asia.hombre.kyber
 
+import org.kotlincrypto.core.Copyable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -26,11 +27,50 @@ import kotlin.js.JsExport
  *
  * This class contains the Encapsulation and Decapsulation Key.
  *
- * @param encapsulationKey [KyberEncapsulationKey]
- * @param decapsulationKey [KyberDecapsulationKey]
  * @constructor Stores the Encapsulation Key and the Decapsulation Key as a pair.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberKEMKeyPair internal constructor(val encapsulationKey: KyberEncapsulationKey, val decapsulationKey: KyberDecapsulationKey)
+class KyberKEMKeyPair internal constructor(
+    /**
+     * The [KyberEncapsulationKey].
+     */
+    val encapsulationKey: KyberEncapsulationKey,
+    /**
+     * The [KyberDecapsulationKey].
+     */
+    val decapsulationKey: KyberDecapsulationKey): Copyable<KyberKEMKeyPair> {
+
+    /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberKEMKeyPair]
+     */
+    override fun copy(): KyberKEMKeyPair {
+        return KyberKEMKeyPair(encapsulationKey.copy(), decapsulationKey.copy())
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberKEMKeyPair
+
+        if (encapsulationKey != other.encapsulationKey) return false
+        if (decapsulationKey != other.decapsulationKey) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = encapsulationKey.hashCode()
+        result = 31 * result + decapsulationKey.hashCode()
+        return result
+    }
+}

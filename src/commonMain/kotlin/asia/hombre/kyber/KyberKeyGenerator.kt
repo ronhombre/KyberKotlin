@@ -37,7 +37,6 @@ import kotlin.jvm.JvmSynthetic
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 sealed class KyberKeyGenerator private constructor() {
-
     companion object {
         /**
          * Generate ML-KEM keys.
@@ -107,7 +106,7 @@ sealed class KyberKeyGenerator private constructor() {
 
                     val seeds = sha3512.digest(byteArray)
 
-                    //Security Features
+                    //Security Feature
                     byteArray.fill(0, 0, byteArray.size)
 
                     val nttSeed = seeds.copyOfRange(0, 32)

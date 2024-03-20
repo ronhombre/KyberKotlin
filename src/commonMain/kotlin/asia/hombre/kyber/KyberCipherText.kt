@@ -21,6 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.Convertible
 import asia.hombre.kyber.internal.KyberMath
+import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -33,13 +34,18 @@ import kotlin.jvm.JvmStatic
  *
  * This class contains the raw bytes of the Cipher Text.
  *
- * @param parameter [KyberParameter]
  * @constructor Stores the parameter, encoded coefficients, and encoded terms of the Cipher Text.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberCipherText internal constructor(val parameter: KyberParameter, internal val encodedCoefficients: ByteArray, internal val encodedTerms: ByteArray): Convertible {
+class KyberCipherText internal constructor(
+    /**
+     * The [KyberParameter] associated with this [KyberCipherText].
+     */
+    val parameter: KyberParameter,
+    internal val encodedCoefficients: ByteArray,
+    internal val encodedTerms: ByteArray): Convertible, Copyable<KyberCipherText> {
     /**
      * All the bytes of the Cipher Text.
      *
@@ -130,6 +136,15 @@ class KyberCipherText internal constructor(val parameter: KyberParameter, intern
     }
 
     /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberCipherText]
+     */
+    override fun copy(): KyberCipherText {
+        return KyberCipherText(this.parameter, encodedCoefficients.copyOf(), encodedTerms.copyOf())
+    }
+
+    /**
      * Convert [KyberCipherText] into a String.
      *
      * This wraps [toHex], so they return the same values.
@@ -138,5 +153,30 @@ class KyberCipherText internal constructor(val parameter: KyberParameter, intern
      */
     override fun toString(): String {
         return toHex()
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberCipherText
+
+        if (parameter != other.parameter) return false
+        if (!encodedCoefficients.contentEquals(other.encodedCoefficients)) return false
+        if (!encodedTerms.contentEquals(other.encodedTerms)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = parameter.hashCode()
+        result = 31 * result + encodedCoefficients.contentHashCode()
+        result = 31 * result + encodedTerms.contentHashCode()
+        return result
     }
 }

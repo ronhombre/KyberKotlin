@@ -18,6 +18,7 @@
 
 package asia.hombre.kyber
 
+import org.kotlincrypto.core.Copyable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -26,11 +27,50 @@ import kotlin.js.JsExport
  *
  * This class contains the Encryption and Decryption Key.
  *
- * @param encryptionKey [KyberEncryptionKey]
- * @param decryptionKey [KyberDecryptionKey]
  * @constructor Stores the Encryption Key and the Decryption Key as a pair.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberPKEKeyPair(val encryptionKey: KyberEncryptionKey, val decryptionKey: KyberDecryptionKey)
+class KyberPKEKeyPair internal constructor(
+    /**
+     * The [KyberEncryptionKey].
+     */
+    val encryptionKey: KyberEncryptionKey,
+    /**
+     * The [KyberDecryptionKey].
+     */
+    val decryptionKey: KyberDecryptionKey): Copyable<KyberPKEKeyPair> {
+
+    /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberPKEKeyPair]
+     */
+    override fun copy(): KyberPKEKeyPair {
+        return KyberPKEKeyPair(encryptionKey.copy(), decryptionKey.copy())
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberPKEKeyPair
+
+        if (encryptionKey != other.encryptionKey) return false
+        if (decryptionKey != other.decryptionKey) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = encryptionKey.hashCode()
+        result = 31 * result + decryptionKey.hashCode()
+        return result
+    }
+}

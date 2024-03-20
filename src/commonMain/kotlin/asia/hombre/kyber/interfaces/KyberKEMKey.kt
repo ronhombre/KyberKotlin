@@ -27,5 +27,6 @@ import kotlin.js.JsExport
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 internal interface KyberKEMKey: Convertible {
+    @Suppress("NON_EXPORTABLE_TYPE") //This throws a warning which should be a bug in the Kotlin to JS compiler.
     val key: KyberPKEKey
 }

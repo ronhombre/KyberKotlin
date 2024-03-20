@@ -21,6 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.internal.KyberMath
+import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -33,23 +34,25 @@ import kotlin.jvm.JvmStatic
  *
  * This class contains the raw bytes of the Decapsulation Key.
  *
- * @param key [KyberDecryptionKey]
- * @param encryptionKey [KyberEncryptionKey]
- * @param hash [ByteArray]
- * @param randomSeed [ByteArray]
  * @constructor Stores the Encryption Key, Decryption Key, Hash, and Random Seed composing the Decapsulation Key.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 class KyberDecapsulationKey internal constructor(
+    /**
+     * The [KyberDecryptionKey].
+     */
     override val key: KyberDecryptionKey,
+    /**
+     * The [KyberEncryptionKey].
+     */
     val encryptionKey: KyberEncryptionKey,
     internal val hash: ByteArray,
-    internal val randomSeed: ByteArray) : KyberKEMKey {
+    internal val randomSeed: ByteArray) : KyberKEMKey, Copyable<KyberDecapsulationKey> {
 
     /**
-     * The [KyberParameter] of this decapsulation key.
+     * The [KyberParameter] associated with this [KyberDecapsulationKey].
      */
     val parameter = key.parameter
 
@@ -144,6 +147,15 @@ class KyberDecapsulationKey internal constructor(
     }
 
     /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberDecapsulationKey]
+     */
+    override fun copy(): KyberDecapsulationKey {
+        return KyberDecapsulationKey(key.copy(), encryptionKey, hash.copyOf(), randomSeed.copyOf())
+    }
+
+    /**
      * Convert [KyberDecapsulationKey] into a String.
      *
      * This wraps [toHex], so they return the same values.
@@ -152,5 +164,34 @@ class KyberDecapsulationKey internal constructor(
      */
     override fun toString(): String {
         return toHex()
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberDecapsulationKey
+
+        if (key != other.key) return false
+        if (encryptionKey != other.encryptionKey) return false
+        if (!hash.contentEquals(other.hash)) return false
+        if (!randomSeed.contentEquals(other.randomSeed)) return false
+        if (parameter != other.parameter) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = key.hashCode()
+        result = 31 * result + encryptionKey.hashCode()
+        result = 31 * result + hash.contentHashCode()
+        result = 31 * result + randomSeed.contentHashCode()
+        result = 31 * result + parameter.hashCode()
+        return result
     }
 }

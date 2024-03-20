@@ -21,6 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
+import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -33,14 +34,17 @@ import kotlin.jvm.JvmStatic
  *
  * This class contains the raw bytes of the Decryption Key.
  *
- * @param parameter [KyberParameter]
- * @param keyBytes [ByteArray]
  * @constructor Stores the parameter and raw bytes of the Decryption Key.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberDecryptionKey internal constructor(override val parameter: KyberParameter, internal val keyBytes: ByteArray) : KyberPKEKey {
+class KyberDecryptionKey internal constructor(
+    /**
+     * The [KyberParameter] associated with this [KyberDecryptionKey].
+     */
+    override val parameter: KyberParameter,
+    internal val keyBytes: ByteArray) : KyberPKEKey, Copyable<KyberDecryptionKey> {
     /**
      * All the bytes of the Decryption Key.
      *
@@ -48,7 +52,7 @@ class KyberDecryptionKey internal constructor(override val parameter: KyberParam
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() = keyBytes
+        get() = keyBytes.copyOf()
 
     companion object {
         /**
@@ -116,6 +120,15 @@ class KyberDecryptionKey internal constructor(override val parameter: KyberParam
     }
 
     /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberDecryptionKey]
+     */
+    override fun copy(): KyberDecryptionKey {
+        return KyberDecryptionKey(parameter, keyBytes.copyOf())
+    }
+
+    /**
      * Convert [KyberDecryptionKey] into a String.
      *
      * This wraps [toHex], so they return the same values.
@@ -124,5 +137,28 @@ class KyberDecryptionKey internal constructor(override val parameter: KyberParam
      */
     override fun toString(): String {
         return toHex()
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberDecryptionKey
+
+        if (parameter != other.parameter) return false
+        if (!keyBytes.contentEquals(other.keyBytes)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = parameter.hashCode()
+        result = 31 * result + keyBytes.contentHashCode()
+        return result
     }
 }

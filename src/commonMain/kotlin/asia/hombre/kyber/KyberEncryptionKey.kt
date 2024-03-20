@@ -18,9 +18,11 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
+import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -33,18 +35,23 @@ import kotlin.jvm.JvmStatic
  *
  * This class contains the raw bytes of the Encryption Key and the accompanying NTT Seed.
  *
- * @param parameter [KyberParameter]
- * @param keyBytes [ByteArray]
- * @param nttSeed [ByteArray]
  * @constructor Stores the parameter, raw bytes of the Encryption Key, and the NTT Seed.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 class KyberEncryptionKey internal constructor(
+    /**
+     * The [KyberParameter] associated with this [KyberEncryptionKey].
+     */
     override val parameter: KyberParameter,
     internal val keyBytes: ByteArray,
-    internal val nttSeed: ByteArray) : KyberPKEKey {
+    internal val nttSeed: ByteArray) : KyberPKEKey, Copyable<KyberEncryptionKey> {
+
+    init {
+        if(!KyberMath.byteEncode(KyberMath.byteDecode(keyBytes, 12), 12).contentEquals(keyBytes))
+            throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)
+    }
 
     /**
      * All the bytes of the Encryption Key.
@@ -133,6 +140,15 @@ class KyberEncryptionKey internal constructor(
     }
 
     /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberEncryptionKey]
+     */
+    override fun copy(): KyberEncryptionKey {
+        return KyberEncryptionKey(parameter, keyBytes.copyOf(), nttSeed.copyOf())
+    }
+
+    /**
      * Convert [KyberEncryptionKey] into a String.
      *
      * This wraps [toHex], so they return the same values.
@@ -141,5 +157,30 @@ class KyberEncryptionKey internal constructor(
      */
     override fun toString(): String {
         return toHex()
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberEncryptionKey
+
+        if (parameter != other.parameter) return false
+        if (!keyBytes.contentEquals(other.keyBytes)) return false
+        if (!nttSeed.contentEquals(other.nttSeed)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = parameter.hashCode()
+        result = 31 * result + keyBytes.contentHashCode()
+        result = 31 * result + nttSeed.contentHashCode()
+        return result
     }
 }

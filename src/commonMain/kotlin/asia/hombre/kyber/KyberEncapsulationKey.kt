@@ -20,11 +20,11 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
+import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
-import kotlin.js.JsName
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -33,13 +33,16 @@ import kotlin.jvm.JvmStatic
  *
  * This class contains the raw bytes of the Decryption Key.
  *
- * @param key [KyberEncryptionKey]
  * @constructor Stores the Encryption Key which is the Encapsulation Key itself.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberEncapsulationKey internal constructor(override val key: KyberEncryptionKey) : KyberKEMKey {
+class KyberEncapsulationKey internal constructor(
+    /**
+     * The [KyberEncryptionKey].
+     */
+    override val key: KyberEncryptionKey) : KyberKEMKey, Copyable<KyberEncapsulationKey> {
     /**
      * All the bytes of the Encapsulation Key.
      *
@@ -47,7 +50,7 @@ class KyberEncapsulationKey internal constructor(override val key: KyberEncrypti
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() = key.fullBytes
+        get() = key.fullBytes.copyOf()
     companion object {
         /**
          * Wrap raw Encapsulation Key bytes into a [KyberEncapsulationKey] object.
@@ -113,6 +116,15 @@ class KyberEncapsulationKey internal constructor(override val key: KyberEncrypti
     }
 
     /**
+     * Create an independent copy from an untrusted source.
+     *
+     * @return [KyberEncapsulationKey]
+     */
+    override fun copy(): KyberEncapsulationKey {
+        return KyberEncapsulationKey(key.copy())
+    }
+
+    /**
      * Convert [KyberEncapsulationKey] into a String.
      *
      * This wraps [toHex], so they return the same values.
@@ -121,5 +133,23 @@ class KyberEncapsulationKey internal constructor(override val key: KyberEncrypti
      */
     override fun toString(): String {
         return toHex()
+    }
+
+    /**
+     * Deep equality check.
+     *
+     * @return [Boolean]
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as KyberEncapsulationKey
+
+        return key == other.key
+    }
+
+    override fun hashCode(): Int {
+        return key.hashCode()
     }
 }

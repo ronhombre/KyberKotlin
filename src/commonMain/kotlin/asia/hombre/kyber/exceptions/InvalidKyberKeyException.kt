@@ -19,6 +19,6 @@
 package asia.hombre.kyber.exceptions
 
 /**
- * When Decapsulation fails for some reason.
+ * When a key fails a validity check.
  */
-class DecapsulationException(override val message: String): RuntimeException("Decapsulation failed! Reason: $message")
+class InvalidKyberKeyException(override val message: String): Exception("This may not be a Kyber Key! Reason: $message")
