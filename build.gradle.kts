@@ -21,7 +21,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.5.1"
+version = "0.6.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
@@ -43,6 +43,7 @@ val mavenBundleFileName = baseProjectName.plus("-bundle.zip")
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 kotlin {
@@ -186,7 +187,7 @@ kotlin {
         binaries {
             sharedLib {  }
         }
-    }
+    } //TODO: Build process for 'native mingw windows' release
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -194,6 +195,7 @@ kotlin {
                 implementation("org.kotlincrypto.sponges:keccak:$keccak")
                 implementation("org.kotlincrypto.endians:endians:$endians")
                 implementation("org.kotlincrypto:secure-random:$random")
+                implementation("asia.hombre:keccak:0.0.2")
             }
         }
         val commonTest by getting {

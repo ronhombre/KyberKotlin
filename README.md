@@ -23,8 +23,7 @@ two matrices.)
 ## Introduction
 
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
-It depends on Kotlin [sha3](https://github.com/KotlinCrypto/hash), [keccak](https://github.com/KotlinCrypto/sponges),
-and [secure-random](https://github.com/KotlinCrypto/secure-random) libraries in order to implement SHA3, SHAKE, and
+It depends on Kotlin [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
 > [!WARNING]
@@ -36,21 +35,21 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation             | Encapsulation         | Decapsulation          |
-|---------|------------------------|-----------------------|------------------------|
-| 512     | 6030.3125 (38% Faster) | 5436.1875(64% Faster) | 5612.75   (77% Faster) |
-| 768     | 10357.6875(31% Faster) | 10094.625(49% Faster) | 10399.5625(62% Faster) |
-| 1024    | 16815.0625(26% Faster) | 16573.25 (40% Faster) | 17015.5   (53% Faster) |
-| ML-KEM  | (in ms)                | (in ms)               | (in ms)                |
+| Variant | Generation              | Encapsulation           | Decapsulation           |
+|---------|-------------------------|-------------------------|-------------------------|
+| 512     | 2875.375  (290% Faster) | 2665.3125 (335% Faster) | 2913.8125 (341% Faster) |
+| 768     | 4569.6875 (297% Faster) | 4435.6875 (339% Faster) | 4775.125  (354% Faster) |
+| 1024    | 7145.625  (297% Faster) | 6912.8125 (336% Faster) | 7416.6875 (351% Faster) |
+| ML-KEM  | (in ms/10000)           | (in ms/10000)           | (in ms/10000)           |
 
-JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of March 21, 2024.
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 8, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
 This benchmark is for performance tracking through the development.
 
 > [!NOTE]
-> This master branch is faster than the standard branch due to optimizations. This is near constant time between parameters!
+> This master branch is faster than the standard branch due to optimizations. Additionally, I implemented my own Keccak.
 
 ## Capabilities
 * Key Generation (512, 768, 1024)
@@ -72,7 +71,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.5.1")
+    implementation("asia.hombre:kyber:0.6.0")
 }
 ```
 
@@ -90,7 +89,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.5.1
+npm install kyberkotlin@0.6.0
 ```
 
 ## Native C# Installation

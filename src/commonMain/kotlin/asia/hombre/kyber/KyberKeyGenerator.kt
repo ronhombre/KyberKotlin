@@ -18,10 +18,10 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.keccak.KeccakHash
+import asia.hombre.keccak.KeccakParameter
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.SecureRandom
-import org.kotlincrypto.hash.sha3.SHA3_256
-import org.kotlincrypto.hash.sha3.SHA3_512
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmStatic
@@ -68,13 +68,9 @@ sealed class KyberKeyGenerator private constructor() {
          */
         @JvmSynthetic
         internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
-            val sha3256 = SHA3_256()
-
             val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
-            sha3256.update(pkeKeyPair.encryptionKey.fullBytes)
-
-            val hash = sha3256.digest().copyOfRange(0, 32)
+            val hash = KeccakHash.generate(KeccakParameter.SHA3_256, pkeKeyPair.encryptionKey.fullBytes, 32)
 
             return KyberKEMKeyPair(
                 KyberEncapsulationKey(pkeKeyPair.encryptionKey),
@@ -102,9 +98,7 @@ sealed class KyberKeyGenerator private constructor() {
                  */
                 @JvmSynthetic
                 fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
-                    val sha3512 = SHA3_512()
-
-                    val seeds = sha3512.digest(byteArray)
+                    val seeds = KeccakHash.generate(KeccakParameter.SHA3_512, byteArray)
 
                     //Security Feature
                     byteArray.fill(0, 0, byteArray.size)

@@ -18,11 +18,10 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.keccak.KeccakHash
+import asia.hombre.keccak.KeccakParameter
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.SecureRandom
-import org.kotlincrypto.hash.sha3.SHA3_256
-import org.kotlincrypto.hash.sha3.SHA3_512
-import org.kotlincrypto.hash.sha3.SHAKE256
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
@@ -199,16 +198,13 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
          */
         @JvmSynthetic
         internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray): KyberEncapsulationResult {
-            val sha3256 = SHA3_256()
 
-            sha3256.update(kyberEncapsulationKey.key.fullBytes)
+            val sha3512Bytes = ByteArray(plainText.size + (KeccakParameter.SHA3_256.maxLength / 8))
 
-            val sha3512 = SHA3_512()
+            plainText.copyInto(sha3512Bytes)
+            KeccakHash.generate(KeccakParameter.SHA3_256, kyberEncapsulationKey.key.fullBytes).copyInto(sha3512Bytes, plainText.size)
 
-            sha3512.update(plainText)
-            sha3512.update(sha3256.digest())
-
-            val sharedKeyAndRandomness = sha3512.digest()
+            val sharedKeyAndRandomness = KeccakHash.generate(KeccakParameter.SHA3_512, sha3512Bytes)
 
             val cipherText = toCipherText(kyberEncapsulationKey.key, plainText, sharedKeyAndRandomness.copyOfRange(32, 64))
 
@@ -227,19 +223,19 @@ class KyberAgreement(kemKeyPair: KyberKEMKeyPair) {
         fun decapsulate(decapsulationKey: KyberDecapsulationKey, kyberCipherText: KyberCipherText): ByteArray {
             val recoveredPlainText = fromCipherText(decapsulationKey.key, kyberCipherText)
 
-            val sha3512 = SHA3_512()
+            val sha3512Bytes = ByteArray(recoveredPlainText.size + decapsulationKey.hash.size)
 
-            sha3512.update(recoveredPlainText)
-            sha3512.update(decapsulationKey.hash)
+            recoveredPlainText.copyInto(sha3512Bytes)
+            decapsulationKey.hash.copyInto(sha3512Bytes, recoveredPlainText.size)
 
-            val decapsHash = sha3512.digest()
+            val decapsHash = KeccakHash.generate(KeccakParameter.SHA3_512, sha3512Bytes)
 
-            val shake256 = SHAKE256(KyberConstants.SECRET_KEY_LENGTH)
+            val shake256Bytes = ByteArray(decapsulationKey.randomSeed.size + kyberCipherText.fullBytes.size)
 
-            shake256.update(decapsulationKey.randomSeed)
-            shake256.update(kyberCipherText.fullBytes)
+            decapsulationKey.randomSeed.copyInto(shake256Bytes)
+            kyberCipherText.fullBytes.copyInto(shake256Bytes, decapsulationKey.randomSeed.size)
 
-            val secretKeyRejection = shake256.digest()
+            val secretKeyRejection = KeccakHash.generate(KeccakParameter.SHAKE_256, shake256Bytes, KyberConstants.SECRET_KEY_LENGTH)
 
             var secretKeyCandidate = decapsHash.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH)
 

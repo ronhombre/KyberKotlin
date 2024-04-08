@@ -18,9 +18,10 @@
 
 package asia.hombre.kyber.internal
 
+import asia.hombre.keccak.KeccakByteStream
+import asia.hombre.keccak.KeccakHash
+import asia.hombre.keccak.KeccakParameter
 import asia.hombre.kyber.KyberConstants
-import org.kotlincrypto.hash.sha3.SHAKE128
-import org.kotlincrypto.hash.sha3.SHAKE256
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.*
 
@@ -97,7 +98,7 @@ internal class KyberMath {
             val bits = BooleanArray(shorts.size * bitSize)
 
             for(i in shorts.indices) {
-                val v = barrettReduce(shorts[i]).toInt()
+                val v = barrettReduce(shorts[i])
                 for(j in 0..<bitSize) {
                     bits[(i * bitSize) + j] = ((v ushr j) and 1) == 1
                 }
@@ -129,13 +130,20 @@ internal class KyberMath {
 
         @JvmSynthetic
         fun sampleNTT(bytes: ByteArray): IntArray {
+        fun sampleNTT(byteStream: KeccakByteStream): IntArray {
             val nttCoefficients = IntArray(KyberConstants.N)
 
-            var i = 0
+            val buffer = ByteArray(3)
+
             var j = 0
             while(j < KyberConstants.N) {
-                val d1 = ((bytes[i].toInt() and 0xFF) or ((bytes[i + 1].toInt() and 0xFF) shl 8) and 0xFFF)
-                val d2 = ((bytes[i + 1].toInt() and 0xFF) shr 4 or ((bytes[i + 2].toInt() and 0xFF) shl 4) and 0xFFF)
+                //Fill byte buffer
+                buffer[0] = byteStream.next()
+                buffer[1] = byteStream.next()
+                buffer[2] = byteStream.next()
+
+                val d1 = ((buffer[0].toInt() and 0xFF) or ((buffer[1].toInt() and 0xFF) shl 8) and 0xFFF)
+                val d2 = ((buffer[1].toInt() and 0xFF) shr 4 or ((buffer[2].toInt() and 0xFF) shl 4) and 0xFFF)
 
                 if(d1 < KyberConstants.Q) {
                     nttCoefficients[j] = toMontgomeryForm(d1)
@@ -145,11 +153,7 @@ internal class KyberMath {
                     nttCoefficients[j] = toMontgomeryForm(d2)
                     j++
                 }
-
-                i += 3
             }
-
-            bytes.fill(0, 0, bytes.lastIndex) //Security Feature
 
             return nttCoefficients
         }
@@ -324,24 +328,30 @@ internal class KyberMath {
         }
 
         @JvmSynthetic
-        fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): ByteArray {
-            val shake128 = SHAKE128(672)
+        fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): KeccakByteStream {
+            val shakeBytes = ByteArray(seed.size + 2)
 
-            shake128.update(seed)
-            shake128.update(byte1)
-            shake128.update(byte2)
+            seed.copyInto(shakeBytes)
 
-            return shake128.digest()
+            shakeBytes[shakeBytes.lastIndex - 1] = byte1
+            shakeBytes[shakeBytes.lastIndex] = byte2
+
+            val keccakStream = KeccakByteStream(KeccakParameter.SHAKE_128)
+
+            keccakStream.absorb(shakeBytes)
+
+            return keccakStream
         }
 
         @JvmSynthetic
         fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray {
-            val shake256 = SHAKE256((KyberConstants.N shr 2) * eta)
+            val shakeBytes = ByteArray(seed.size + 1)
 
-            shake256.update(seed)
-            shake256.update(byte)
+            seed.copyInto(shakeBytes)
 
-            return shake256.digest()
+            shakeBytes[shakeBytes.lastIndex] = byte
+
+            return KeccakHash.generate(KeccakParameter.SHAKE_256, shakeBytes, (KyberConstants.N shr 2) * eta)
         }
 
         @JvmSynthetic
