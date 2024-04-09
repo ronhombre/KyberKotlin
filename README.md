@@ -23,7 +23,7 @@ two matrices.)
 ## Introduction
 
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
-It depends on Kotlin [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) libraries in order to implement SHA3, SHAKE, and
+It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
 > [!WARNING]
@@ -71,7 +71,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.6.0")
+    implementation("asia.hombre:kyber:0.6.1")
 }
 ```
 
@@ -89,7 +89,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.6.0
+npm install kyberkotlin@0.6.1
 ```
 
 ## Native C# Installation
