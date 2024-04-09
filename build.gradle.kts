@@ -1,13 +1,8 @@
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.daemon.common.toHexString
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
 import java.nio.file.Files
-import java.security.MessageDigest
-import kotlin.io.path.Path
 
 val kmm: String by properties
 val keccak: String by properties
@@ -16,7 +11,8 @@ val random: String by properties
 plugins {
     kotlin("multiplatform") //Kotlin Multiplatform
     id("org.jetbrains.dokka")  //KDocs
-    signing //GPG
+    id("maven-publish")
+    id("signing") //GPG
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
@@ -26,8 +22,10 @@ description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 val projectName = project.group.toString().split(".").last() //Grab maven name
 val baseProjectName = projectName.plus("-").plus(project.version)
 
-val mavenDir = "./maven"
-val mavenBundlingDir = "$mavenDir/bundling"
+val isAutomated = false
+
+val mavenDir = projectDir.resolve("maven")
+val mavenBundlingDir = mavenDir.resolve("bundling")
 val mavenDeep = "$mavenBundlingDir/" + (project.group.toString().replace(".", "/")) + "/" + version
 
 val npmDir = "./npm"
@@ -56,116 +54,12 @@ kotlin {
             output //Get the main compilation output
         }
 
-        tasks.register<Jar>("generateSourcesJar") {
-            archiveFileName.set(sourcesFileName)
-            from(sourceSets.commonMain.get().kotlin.asFileTree)
-            from(sourceSets.jvmMain.get().kotlin.asFileTree)
-        }
-
-        tasks.register<Jar>("generateDocsJar") {
-            dependsOn("dokkaHtml")
-            archiveFileName.set(javadocsFileName)
-            from(files(buildDir.toPath().resolve("dokka").resolve("html")).asFileTree)
-        }
-
-        //Separated as its own task
-        tasks.register("cleanMaven") {
-            //Clean mavenBundlingDir and keep the old generated bundles
-            delete(file(mavenBundlingDir))
-            //Create mavenDir upto the deepest dir
-            Files.createDirectories(file(mavenDeep).toPath())
-        }
-
-        tasks.register<Zip>("bundleMaven") {
-            dependsOn("cleanMaven", "generateSourcesJar", "jvmJar", "generateDocsJar")
-
-            doFirst {
-                //Copy pom.xml, put the versions, and the description into it.
-                val pomSourcePath = projectDir.toPath().resolve("pom.xml")
-                val pomPath = Path(projectDir.path + mavenDeep.removePrefix(".")).resolve(pomFileName)
-
-                var packageFile = String(Files.readAllBytes(pomSourcePath))
-                packageFile = packageFile
-                    .replace("0<!--VERSION-->", version.toString())
-                    .replace("<!--DESCRIPTION-->", project.description.toString())
-                    .replace("<!--KMM-->", kmm)
-                    .replace("<!--KECCAK-->", keccak)
-                    .replace("<!--RANDOM-->", random)
-                Files.write(pomPath, packageFile.toByteArray())
-
-                //Copy jar build and sources
-                copy {
-                    from(libsDirectory.get())
-                    include(jarFileName, sourcesFileName, javadocsFileName)
-                    into(mavenDeep)
-                }
-
-                val files = fileTree(mavenBundlingDir)
-                for(file in files) {
-                    saveHash(file, sha1(file), ".sha1")
-                    saveHash(file, md5(file), ".md5")
-                    saveHash(file, sha256(file), ".sha256")
-                    saveHash(file, sha512(file), ".sha512")
-                }
-                //Sign
-                signing {
-                    useGpgCmd()
-                    //Specify which key to use
-                    sign(configurations.getByName(runtimeElementsConfigurationName))
-                    sign(file("$mavenDeep/$pomFileName"))
-                    sign(file("$mavenDeep/$jarFileName"))
-                    sign(file("$mavenDeep/$sourcesFileName"))
-                    sign(file("$mavenDeep/$javadocsFileName"))
-                }
-            }
-            //Grab everything from mavenBundlingDir
-            from(mavenBundlingDir)
-            //Include the deepest contents
-            include("/*".repeat(project.group.toString().split(".").size + 2).removePrefix("/"))
-            //Save to mavenDir
-            destinationDirectory.set(file(mavenDir))
-            //Set archive name
-            archiveFileName.set(mavenBundleFileName)
-        }
-
-        tasks.register<Exec>("publishMaven") {
-            commandLine(
-                "curl", "-X", "POST",
-                "https://central.sonatype.com/api/v1/publisher/upload?name=$projectName&publishingType=USER_MANAGED",
-                "-H", "accept: text/plain",
-                "-H", "Content-Type: multipart/form-data",
-                "-H", "Authorization: Bearer " + System.getenv("SONATYPE_TOKEN"),
-                "-F", "bundle=@$mavenBundleFileName;type=application/x-zip-compressed"
-            )
-            workingDir(mavenDir)
-            standardOutput = ByteArrayOutputStream()
-            errorOutput = ByteArrayOutputStream()
-
-            // Execute some action with the output
-            doLast {
-                println("$standardOutput")
-            }
-        }
-
         val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
             val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
 
             from(jvmMainCompilation.output.allOutputs)
-        }
-
-        tasks.register<Jar>("jvmFullJar") {
-            archiveFileName.set(jarFullFileName)
-
-            val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
-
-            // Include runtime dependencies by expanding them into the JAR
-            from(configurations.getByName("jvmRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) },
-                jvmMainCompilation.output.allOutputs)
-
-            // Set a duplicate strategy (optional)
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
@@ -176,27 +70,6 @@ kotlin {
 
         }
         binaries.executable()
-
-        tasks.register("packageNPM") {
-            val packageSourcePath = projectDir.toPath().resolve("npm.json")
-            val packagePath = projectDir.toPath().resolve("npm").resolve("package.json")
-
-            var packageFile = String(Files.readAllBytes(packageSourcePath))
-            packageFile = packageFile.replace("<VERSION>", version.toString()).replace("<DESCRIPTION>", project.description.toString())
-            Files.write(packagePath, packageFile.toByteArray())
-        }
-
-        tasks.register<Copy>("bundleNPM") {
-            dependsOn("jsBrowserProductionWebpack", "packageNPM")
-
-            from(buildDir.resolve("js").resolve("packages").resolve(project.name).resolve("kotlin"))
-            into(npmKotlinDir)
-
-            doFirst {
-                delete(npmKotlinDir)
-                mkdir(npmKotlinDir)
-            }
-        }
     }
     mingwX64("windows") {
         binaries {
@@ -228,6 +101,155 @@ kotlin {
     }
 }
 
+signing {
+    if (project.hasProperty("signing.gnupg.keyName")) {
+        useGpgCmd()
+        sign(publishing.publications)
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = mavenDir.toURI()
+        }
+    }
+    publications {
+        //Dynamically rename all artifacts
+        this.forEach {
+            val mavenPublication = it as MavenPublication
+            mavenPublication.artifactId = projectName +
+                    if(mavenPublication.artifactId.contains("-"))
+                        "-" + mavenPublication.artifactId.split("-").last()
+                    else
+                        ""
+        }
+    }
+    publications.withType<MavenPublication> {
+        // Stub javadoc.jar artifact
+        artifact(tasks.register("${name}JavadocJar", Jar::class) {
+            archiveClassifier.set("javadoc")
+            archiveAppendix.set(this@withType.name)
+        })
+
+        // Provide artifacts information required by Maven Central
+        pom {
+            name.set("Kyber Kotlin Multiplatform Library")
+            description.set(project.description)
+            url.set("https://github.com/ronhombre/KyberKotlin")
+
+            licenses {
+                license {
+                    name.set("The Apache Software License, Version 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
+            }
+            developers {
+                developer {
+                    name.set("Ron Lauren Hombre")
+                    email.set("ronlauren@hombre.asia")
+                }
+            }
+            scm {
+                url.set("https://github.com/ronhombre/KyberKotlin")
+            }
+        }
+    }
+}
+
+fun parseArtifactId(artifactId: String): String {
+    val list = artifactId.splitToSequence("-").map { it.replaceFirstChar(Char::uppercase) }
+
+    return list.joinToString("")
+}
+
+fun parseArtifactArchiveName(artifact: MavenPublication): String {
+    return artifact.artifactId + "-" + artifact.version + "-bundle.zip"
+}
+
+for (publication in publishing.publications.asMap) {
+    val artifact = publication.value as MavenPublication
+    val parsedArtifactId = parseArtifactId(artifact.artifactId)
+    val bundleFileName = parseArtifactArchiveName(artifact)
+
+    tasks.register<Zip>("bundle$parsedArtifactId") {
+        group = "Bundle"
+        from(mavenDir)
+        val mavenDeepDir = artifact.groupId.replace(".", "/") + "/" + artifact.artifactId
+        include("$mavenDeepDir/*/*")
+        destinationDirectory = mavenDir
+        archiveFileName = parseArtifactArchiveName(artifact)
+    }
+
+    tasks.register<Exec>("publish" + parsedArtifactId + "ToMavenCentral") {
+        mustRunAfter("bundle$parsedArtifactId")
+        group = "Publish"
+        /*if(!mavenDir.resolve(bundleFileName).exists())
+            throw RuntimeException("Bundle does not exist! Please run `bundle$parsedArtifactId`")*/
+
+        commandLine(
+            "curl", "-X", "POST",
+            "https://central.sonatype.com/api/v1/publisher/upload?name=${artifact.artifactId}&publishingType=" + if(isAutomated) "AUTOMATED" else "USER_MANAGED",
+            "-H", "accept: text/plain",
+            "-H", "Content-Type: multipart/form-data",
+            "-H", "Authorization: Bearer " + System.getenv("SONATYPE_TOKEN"),
+            "-F", "bundle=@$bundleFileName;type=application/x-zip-compressed"
+        )
+        workingDir(mavenDir.toString())
+        standardOutput = ByteArrayOutputStream()
+        errorOutput = ByteArrayOutputStream()
+
+        // Execute some action with the output
+        doLast {
+            println("$standardOutput")
+            println("$errorOutput")
+        }
+    }
+}
+
+tasks.register("bundleAll") {
+    group = "Bundle"
+    dependsOn("publish")
+
+    for (publication in publishing.publications.asMap) {
+        val artifact = publication.value as MavenPublication
+
+        dependsOn("bundle" + parseArtifactId(artifact.artifactId))
+    }
+}
+
+tasks.register("publishAllToMavenCentral") {
+    group = "Publish"
+    dependsOn("bundleAll")
+
+    for (publication in publishing.publications.asMap) {
+        val artifact = publication.value as MavenPublication
+
+        dependsOn("publish" + parseArtifactId(artifact.artifactId) + "ToMavenCentral")
+    }
+}
+
+tasks.register("packageNPM") {
+    val packageSourcePath = projectDir.toPath().resolve("npm.json")
+    val packagePath = projectDir.toPath().resolve("npm").resolve("package.json")
+
+    var packageFile = String(Files.readAllBytes(packageSourcePath))
+    packageFile = packageFile.replace("<VERSION>", version.toString()).replace("<DESCRIPTION>", project.description.toString())
+    Files.write(packagePath, packageFile.toByteArray())
+}
+
+tasks.register<Copy>("bundleNPM") {
+    dependsOn("jsBrowserProductionWebpack", "packageNPM")
+
+    from(buildDir.resolve("js").resolve("packages").resolve(project.name).resolve("kotlin"))
+    into(npmKotlinDir)
+
+    doFirst {
+        delete(npmKotlinDir)
+        mkdir(npmKotlinDir)
+    }
+}
+
 tasks.dokkaHtml.configure {
     dokkaSourceSets {
         named("commonMain") {
@@ -241,6 +263,7 @@ tasks.dokkaHtml.configure {
         }
     }
 }
+
 tasks.withType<DokkaTask>().configureEach {
     val dokkaBaseConfiguration = """
     {
@@ -253,41 +276,4 @@ tasks.withType<DokkaTask>().configureEach {
             "org.jetbrains.dokka.base.DokkaBase" to dokkaBaseConfiguration
         )
     )
-}
-
-fun saveHash(file: File, hash: String, suffix: String) {
-    val filePath = file.toPath()
-    Files.write(filePath.resolveSibling(filePath.fileName.toString() + suffix), hash.toByteArray())
-}
-
-//Required for Maven
-fun sha1(file: File): String {
-    val inStream = FileInputStream(file)
-    val sha1 = MessageDigest.getInstance("SHA-1").digest(inStream.readBytes())
-    inStream.close()
-    return sha1.toHexString()
-}
-
-//Required for Maven
-fun md5(file: File): String {
-    val inStream = FileInputStream(file)
-    val md5 = MessageDigest.getInstance("MD5").digest(inStream.readBytes())
-    inStream.close()
-    return md5.toHexString()
-}
-
-//Optional. Why not?
-fun sha256(file: File): String {
-    val inStream = FileInputStream(file)
-    val sha256 = MessageDigest.getInstance("SHA-256").digest(inStream.readBytes())
-    inStream.close()
-    return sha256.toHexString()
-}
-
-//Optional. Why not?
-fun sha512(file: File): String {
-    val inStream = FileInputStream(file)
-    val sha512 = MessageDigest.getInstance("SHA-512").digest(inStream.readBytes())
-    inStream.close()
-    return sha512.toHexString()
 }
