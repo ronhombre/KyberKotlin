@@ -35,14 +35,14 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation               | Encapsulation            | Decapsulation            |
-|---------|--------------------------|--------------------------|--------------------------|
-| 512     | 0.17280    (482% Faster) | 0.15259375 (586% Faster) | 0.176475   (563% Faster) |
-| 768     | 0.26934375 (503% Faster) | 0.25125625 (599% Faster) | 0.28605625 (590% Faster) |
-| 1024    | 0.41371875 (514% Faster) | 0.38836875 (598% Faster) | 0.43448125 (599% Faster) |
-| ML-KEM  | (in ms)                  | (in ms)                  | (in ms)                  |
+| Variant | Generation               | Encapsulation           | Decapsulation            |
+|---------|--------------------------|-------------------------|--------------------------|
+| 512     | 0.16520    (504% Faster) | 0.148775  (601% Faster) | 0.17235    (577% Faster) |
+| 768     | 0.26126875 (519% Faster) | 0.243875  (617% Faster) | 0.27790    (608% Faster) |
+| 1024    | 0.4023875  (528% Faster) | 0.3765625 (617% Faster) | 0.42336875 (614% Faster) |
+| ML-KEM  | (in ms)                  | (in ms)                 | (in ms)                  |
 
-JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 9, 2024.
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 10, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 

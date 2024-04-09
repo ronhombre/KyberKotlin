@@ -10,9 +10,7 @@ import java.security.MessageDigest
 import kotlin.io.path.Path
 
 val kmm: String by properties
-val hash: String by properties
 val keccak: String by properties
-val endians: String by properties
 val random: String by properties
 
 plugins {
@@ -91,9 +89,7 @@ kotlin {
                     .replace("0<!--VERSION-->", version.toString())
                     .replace("<!--DESCRIPTION-->", project.description.toString())
                     .replace("<!--KMM-->", kmm)
-                    .replace("<!--HASH-->", hash)
                     .replace("<!--KECCAK-->", keccak)
-                    .replace("<!--ENDIANS-->", endians)
                     .replace("<!--RANDOM-->", random)
                 Files.write(pomPath, packageFile.toByteArray())
 
@@ -211,7 +207,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.kotlincrypto:secure-random:$random")
-                implementation("asia.hombre:keccak:0.0.3")
+                implementation("asia.hombre:keccak:$keccak")
             }
         }
         val commonTest by getting {
