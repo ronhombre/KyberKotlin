@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "asia.hombre.kyber" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.6.0"
+version = "0.6.1"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = project.group.toString().split(".").last() //Grab maven name
@@ -44,7 +44,6 @@ val mavenBundleFileName = baseProjectName.plus("-bundle.zip")
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 kotlin {
@@ -211,9 +210,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kotlincrypto.endians:endians:$endians")
                 implementation("org.kotlincrypto:secure-random:$random")
-                implementation("asia.hombre:keccak:0.0.2")
+                implementation("asia.hombre:keccak:0.0.3")
             }
         }
         val commonTest by getting {

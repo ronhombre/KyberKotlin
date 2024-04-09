@@ -128,7 +128,7 @@ internal class KyberMath {
             return shorts
         }
 
-        @JvmSynthetic //148 bytecodes
+        @JvmSynthetic
         fun sampleNTT(byteStream: KeccakByteStream): IntArray {
             val nttCoefficients = IntArray(KyberConstants.N)
 
@@ -162,7 +162,7 @@ internal class KyberMath {
             val f = IntArray(KyberConstants.N)
             val bits = bytesToBits(bytes)
 
-            bytes.fill(0, 0, bytes.lastIndex) //Security Feature
+            bytes.fill(0, 0, bytes.size) //Security Feature
 
             for(i in 0..<KyberConstants.N) {
                 var x = 0
