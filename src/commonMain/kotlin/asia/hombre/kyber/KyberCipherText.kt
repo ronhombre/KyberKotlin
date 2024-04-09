@@ -21,7 +21,6 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.Convertible
 import asia.hombre.kyber.internal.KyberMath
-import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -45,7 +44,7 @@ class KyberCipherText internal constructor( //TODO: Copy parameter variables
      */
     val parameter: KyberParameter,
     encodedCoefficients: ByteArray,
-    encodedTerms: ByteArray) : Convertible, Copyable<KyberCipherText> {
+    encodedTerms: ByteArray) : Convertible {
 
     internal val encodedCoefficients: ByteArray = encodedCoefficients.copyOf()
     internal val encodedTerms: ByteArray = encodedTerms.copyOf()
@@ -143,7 +142,7 @@ class KyberCipherText internal constructor( //TODO: Copy parameter variables
      *
      * @return [KyberCipherText]
      */
-    override fun copy(): KyberCipherText {
+    fun copy(): KyberCipherText {
         return KyberCipherText(this.parameter, encodedCoefficients.copyOf(), encodedTerms.copyOf())
     }
 

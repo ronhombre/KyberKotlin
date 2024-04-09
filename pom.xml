@@ -56,16 +56,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.kotlincrypto.hash</groupId>
-            <artifactId>sha3</artifactId>
-            <version><!--HASH--></version>
-        </dependency>
-        <dependency>
-            <groupId>org.kotlincrypto.sponges</groupId>
-            <artifactId>keccak</artifactId>
-            <version><!--KECCAK--></version>
-        </dependency>
-        <dependency>
             <groupId>org.kotlincrypto.endians</groupId>
             <artifactId>endians</artifactId>
             <version><!--ENDIANS--></version>

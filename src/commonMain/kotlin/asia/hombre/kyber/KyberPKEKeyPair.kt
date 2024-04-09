@@ -18,7 +18,6 @@
 
 package asia.hombre.kyber
 
-import org.kotlincrypto.core.Copyable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -41,14 +40,14 @@ class KyberPKEKeyPair internal constructor(
      * The [KyberDecryptionKey].
      */
     val decryptionKey: KyberDecryptionKey
-): Copyable<KyberPKEKeyPair> {
+) {
 
     /**
      * Create an independent copy from an untrusted source.
      *
      * @return [KyberPKEKeyPair]
      */
-    override fun copy(): KyberPKEKeyPair {
+    fun copy(): KyberPKEKeyPair {
         return KyberPKEKeyPair(encryptionKey.copy(), decryptionKey.copy())
     }
 

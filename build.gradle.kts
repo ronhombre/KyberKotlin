@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.daemon.common.toHexString
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
+import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -132,6 +133,25 @@ kotlin {
             archiveFileName.set(mavenBundleFileName)
         }
 
+        tasks.register<Exec>("publishMaven") {
+            commandLine(
+                "curl", "-X", "POST",
+                "https://central.sonatype.com/api/v1/publisher/upload?name=$projectName&publishingType=USER_MANAGED",
+                "-H", "accept: text/plain",
+                "-H", "Content-Type: multipart/form-data",
+                "-H", "Authorization: Bearer " + System.getenv("SONATYPE_TOKEN"),
+                "-F", "bundle=@$mavenBundleFileName;type=application/x-zip-compressed"
+            )
+            workingDir(mavenDir)
+            standardOutput = ByteArrayOutputStream()
+            errorOutput = ByteArrayOutputStream()
+
+            // Execute some action with the output
+            doLast {
+                println("$standardOutput")
+            }
+        }
+
         val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
@@ -191,8 +211,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kotlincrypto.hash:sha3:$hash")
-                implementation("org.kotlincrypto.sponges:keccak:$keccak")
                 implementation("org.kotlincrypto.endians:endians:$endians")
                 implementation("org.kotlincrypto:secure-random:$random")
                 implementation("asia.hombre:keccak:0.0.2")

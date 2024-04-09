@@ -20,7 +20,6 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
-import org.kotlincrypto.core.Copyable
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -43,7 +42,7 @@ class KyberEncapsulationKey internal constructor(
      * The [KyberEncryptionKey].
      */
     override val key: KyberEncryptionKey
-) : KyberKEMKey, Copyable<KyberEncapsulationKey> {
+) : KyberKEMKey {
     /**
      * All the bytes of the Encapsulation Key.
      *
@@ -121,7 +120,7 @@ class KyberEncapsulationKey internal constructor(
      *
      * @return [KyberEncapsulationKey]
      */
-    override fun copy(): KyberEncapsulationKey {
+    fun copy(): KyberEncapsulationKey {
         return KyberEncapsulationKey(key.copy())
     }
 

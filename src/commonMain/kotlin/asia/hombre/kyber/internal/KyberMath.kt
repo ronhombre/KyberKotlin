@@ -128,8 +128,7 @@ internal class KyberMath {
             return shorts
         }
 
-        @JvmSynthetic
-        fun sampleNTT(bytes: ByteArray): IntArray {
+        @JvmSynthetic //148 bytecodes
         fun sampleNTT(byteStream: KeccakByteStream): IntArray {
             val nttCoefficients = IntArray(KyberConstants.N)
 
@@ -300,27 +299,13 @@ internal class KyberMath {
 
             for(i in 0..<(KyberConstants.N shr 1)) {
                 multipliedNtt[2 * i] = barrettReduce((
-                    productOf(
-                        ntt1[2 * i],
-                        ntt2[2 * i]
-                    ) +
-                    productOf(
-                        productOf(
-                            ntt1[(2 * i) + 1],
-                            ntt2[(2 * i) + 1]
-                        ),
-                        KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]
-                    ))
+                    productOf(ntt1[2 * i], ntt2[2 * i]) +
+                    productOf(productOf(ntt1[(2 * i) + 1], ntt2[(2 * i) + 1]),
+                        KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]))
                 )
                 multipliedNtt[(2 * i) + 1] = barrettReduce((
-                    productOf(
-                        ntt1[2 * i],
-                        ntt2[(2 * i) + 1]
-                    ) +
-                    productOf(
-                        ntt1[(2 * i) + 1],
-                        ntt2[2 * i]
-                    ))
+                    productOf(ntt1[2 * i], ntt2[(2 * i) + 1]) +
+                    productOf(ntt1[(2 * i) + 1], ntt2[2 * i]))
                 )
             }
 
