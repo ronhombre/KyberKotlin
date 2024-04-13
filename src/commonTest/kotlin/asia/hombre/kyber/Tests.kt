@@ -89,7 +89,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
 
@@ -109,7 +109,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
 
@@ -129,7 +129,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
 
@@ -149,7 +149,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
 
@@ -169,7 +169,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
 
@@ -189,7 +189,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
 
@@ -209,7 +209,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
 
@@ -229,7 +229,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
 
@@ -249,7 +249,7 @@ class Tests {
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
         val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
-        val cipherText = KyberAgreement(secondKeyPair).encapsulate(originalKeyPair.encapsulationKey).cipherText
+        val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
 
@@ -301,10 +301,10 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-            val bobAgreement = KyberAgreement(keyPairBob)
-            val aliceAgreement = KyberAgreement(keyPairAlice)
+            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
+            val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
-            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+            val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
 
             val bobSecretKey = result.secretKey
             val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)
@@ -319,10 +319,10 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
-            val bobAgreement = KyberAgreement(keyPairBob)
-            val aliceAgreement = KyberAgreement(keyPairAlice)
+            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
+            val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
-            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+            val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
 
             val bobSecretKey = result.secretKey
             val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)
@@ -337,10 +337,10 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
-            val bobAgreement = KyberAgreement(keyPairBob)
-            val aliceAgreement = KyberAgreement(keyPairAlice)
+            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
+            val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
-            val result = bobAgreement.encapsulate(keyPairAlice.encapsulationKey)
+            val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
 
             val bobSecretKey = result.secretKey
             val aliceSecretKey = aliceAgreement.decapsulate(result.cipherText)

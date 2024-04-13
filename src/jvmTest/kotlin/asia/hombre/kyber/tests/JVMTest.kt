@@ -73,13 +73,13 @@ class JVMTest {
         val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
         val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-        val agreementAlice = KyberAgreement(keyPairAlice)
+        val agreementAlice = KyberAgreement(keyPairAlice.decapsulationKey)
 
-        val cipherTextAlice = agreementAlice.encapsulate(keyPairBob.encapsulationKey)
+        val cipherTextAlice = KyberAgreement.encapsulate(keyPairBob.encapsulationKey)
 
-        val agreementBob = KyberAgreement(keyPairBob)
+        val agreementBob = KyberAgreement(keyPairBob.decapsulationKey)
 
-        val cipherTextBob = agreementBob.encapsulate(keyPairAlice.encapsulationKey)
+        val cipherTextBob = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
 
         val secretKeyAlice = agreementAlice.decapsulate(cipherTextBob.cipherText)
         val secretKeyBob = agreementBob.decapsulate(cipherTextAlice.cipherText)

@@ -31,7 +31,7 @@ import kotlin.js.JsExport
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberKEMKeyPair internal constructor(
+class KyberKEMKeyPair(
     /**
      * The [KyberEncapsulationKey].
      */

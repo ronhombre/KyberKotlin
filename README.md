@@ -65,13 +65,16 @@ This benchmark is for performance tracking through the development.
 ## Documentation
 * [kyber.hombre.asia](https://kyber.hombre.asia)
 
+> [!WARNING]
+> Upgrading to 0.7.0+ introduces breaking changes. Please refer to the documentation or to the code samples below.
+
 ## JVM Installation
 
 ### Maven with Gradle Kotlin DSL
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.6.1")
+    implementation("asia.hombre:kyber:0.7.0")
 }
 ```
 
@@ -89,7 +92,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.6.1
+npm install kyberkotlin@0.7.0
 ```
 
 ## Native C# Installation
@@ -113,13 +116,11 @@ import asia.hombre.kyber.KyberParameter
 val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-val agreementAlice = KyberAgreement(keyPairAlice)
-
 //Bob sends his encapsulation key to Alice
 //Alice uses it to encapsulate a Secret Key
-val cipherTextAlice = agreementAlice.encapsulate(keyPairBob.encapsulationKey)
+val cipherTextAlice = KyberAgreement.encapsulate(keyPairBob.encapsulationKey)
 
-val agreementBob = KyberAgreement(keyPairBob)
+val agreementBob = KyberAgreement(keyPairBob.decapsulationKey)
 
 //Alice sends the Cipher Text to Bob
 //Bob decapsulates the Cipher Text
@@ -152,13 +153,11 @@ import asia.hombre.kyber.KyberEncapsulationResult;
 KyberKEMKeyPair keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 KyberKEMKeyPair keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 
-KyberAgreement agreementAlice = new KyberAgreement(keyPairAlice);
-
 //Bob sends his encapsulation key to Alice
 //Alice uses it to encapsulate a Secret Key
-KyberEncapsulationResult encapsResult = agreementAlice.encapsulate(keyPairBob.getEncapsulationKey());
+KyberEncapsulationResult encapsResult = KyberAgreement.encapsulate(keyPairBob.getEncapsulationKey());
 
-KyberAgreement agreementBob = new KyberAgreement(keyPairBob);
+KyberAgreement agreementBob = new KyberAgreement(keyPairBob.getDecapsulationKey());
 
 //Alice sends the Cipher Text to Bob
 //Bob decapsulates the Cipher Text
@@ -190,10 +189,9 @@ const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("kyberkotl
 let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
 let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
 
-let aliceAgreement = new KyberAgreement(aliceKeypair);
-let bobAgreement = new KyberAgreement(bobKeypair);
+let bobAgreement = new KyberAgreement(bobKeypair.decapsulationKey);
 
-let results = bobAgreement.encapsulate(aliceKeypair.encapsulationKey);
+let results = KyberAgreement.encapsulate(aliceKeypair.encapsulationKey);
 
 let ciphertext = results.cipherText;
 let bobSecretKey = results.secretKey;
