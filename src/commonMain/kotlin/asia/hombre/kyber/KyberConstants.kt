@@ -118,7 +118,7 @@ class KyberConstants private constructor() {
         ) //Generated using Generators.generateZetas() test method
 
         /**
-         * Pre-generated Zeta values according to the formula 17^(2 * bitReverse(n)) mod Q and converted to Montgomery Form.
+         * Pre-generated Gamma values according to the formula 17^(2 * bitReverse(n)) mod Q and converted to Montgomery Form.
          */
         @JvmField
         val PRECOMPUTED_GAMMAS_TABLE = intArrayOf(

@@ -141,7 +141,6 @@ class JVMBenchmark {
         println("Benchmarking Encapsulation(10000) for 512...")
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             for(i in 0..<10_000) {
                 KyberAgreement.encapsulate(bob.encapsulationKey)
@@ -157,7 +156,6 @@ class JVMBenchmark {
         println("Benchmarking Encapsulation(10000) for 768...")
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             for(i in 0..<10_000) {
                 KyberAgreement.encapsulate(bob.encapsulationKey)
@@ -173,7 +171,6 @@ class JVMBenchmark {
         println("Benchmarking Encapsulation(10000) for 1024...")
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             for(i in 0..<10_000) {
                 KyberAgreement.encapsulate(bob.encapsulationKey)
@@ -192,7 +189,6 @@ class JVMBenchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
             val result = KyberAgreement.encapsulate(bob.encapsulationKey)
@@ -221,7 +217,6 @@ class JVMBenchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
             val result = KyberAgreement.encapsulate(bob.encapsulationKey)
@@ -250,7 +245,6 @@ class JVMBenchmark {
         var failure = 0
 
         val time = measureTime {
-            val alice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             val bob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
             val result = KyberAgreement.encapsulate(bob.encapsulationKey)

@@ -88,7 +88,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
@@ -108,7 +107,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
@@ -128,7 +126,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val hexCipherText = cipherText.toHex()
@@ -148,7 +145,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
@@ -168,7 +164,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
@@ -188,7 +183,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val base64CipherText = cipherText.toBase64()
@@ -208,7 +202,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
@@ -228,7 +221,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
@@ -248,7 +240,6 @@ class Tests {
         assertContentEquals(originalKeyPair.encapsulationKey.key.fullBytes, recoveredKeyPair.encapsulationKey.key.fullBytes)
         assertContentEquals(originalKeyPair.decapsulationKey.fullBytes, recoveredKeyPair.decapsulationKey.fullBytes)
 
-        val secondKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
         val cipherText = KyberAgreement.encapsulate(originalKeyPair.encapsulationKey).cipherText
 
         val bytesCipherText = cipherText.fullBytes
@@ -298,10 +289,8 @@ class Tests {
     @Test
     fun mlEncapsDecaps512() {
         for(i in 1..1000) {
-            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
             val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
@@ -316,10 +305,8 @@ class Tests {
     @Test
     fun mlEncapsDecaps768() {
         for(i in 1..1000) {
-            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
-            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
             val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
@@ -334,10 +321,8 @@ class Tests {
     @Test
     fun mlEncapsDecaps1024() {
         for(i in 1..1000) {
-            val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
-            val bobAgreement = KyberAgreement(keyPairBob.decapsulationKey)
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
 
             val result = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
