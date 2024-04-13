@@ -33,7 +33,7 @@ import kotlin.jvm.JvmSynthetic
  * This class contains K-PKE.Encrypt(), K-PKE.Decrypt(), ML-KEM.Encaps(), and ML-KEM.Decaps() all according to NIST FIPS 203.
  *
  * @param decapsulationKey [KyberDecapsulationKey]
- * @constructor Stores the key pair for encapsulating and decapsulating.
+ * @constructor Stores the Decapsulation Key for decapsulating later.
  * @author Ron Lauren Hombre
  */
 @OptIn(ExperimentalJsExport::class)

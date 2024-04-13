@@ -3,12 +3,10 @@ const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("./kotlin/
 function test512() {
     console.log("Testing 512...");
     let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
-    let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair);
-    let bobAgreement = new KyberAgreement(bobKeypair);
+    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
 
-    let results = bobAgreement.encapsulate(aliceKeypair.encapsulationKey);
+    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
 
     let ciphertext = results.cipherText;
     let bobSecretKey = results.secretKey;
@@ -21,12 +19,10 @@ function test512() {
 function test768() {
     console.log("Testing 768...");
     let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_768);
-    let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_768);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair);
-    let bobAgreement = new KyberAgreement(bobKeypair);
+    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
 
-    let results = bobAgreement.encapsulate(aliceKeypair.encapsulationKey);
+    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
 
     let ciphertext = results.cipherText;
     let bobSecretKey = results.secretKey;
@@ -39,12 +35,10 @@ function test768() {
 function test1024() {
     console.log("Testing 1024...");
     let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_1024);
-    let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_1024);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair);
-    let bobAgreement = new KyberAgreement(bobKeypair);
+    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
 
-    let results = bobAgreement.encapsulate(aliceKeypair.encapsulationKey);
+    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
 
     let ciphertext = results.cipherText;
     let bobSecretKey = results.secretKey;
