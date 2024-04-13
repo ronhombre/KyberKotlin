@@ -64,7 +64,7 @@ class KyberConstants private constructor() {
         const val BARRETT_APPROX: Short = 20159 //(((1L shl 26) + (Q / 2)) / Q).toShort()
         //const val MONT_R: Int = 1 shl 16
         /**
-         * 2^16 * 2^16 mod Q for Montgomery Reduction.
+         * 2^16 * 2^16 (mod Q) for Montgomery Reduction.
          */
         const val MONT_R2: Short = 1353 //MONT_R.toLong() shl 16 <- mod Q = 1353 //Basically R^2 mod Q
 

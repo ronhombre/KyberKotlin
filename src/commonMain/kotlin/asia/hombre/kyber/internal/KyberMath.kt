@@ -34,10 +34,10 @@ internal class KyberMath {
 
         @JvmSynthetic
         fun bitsToBytes(bits: BooleanArray): ByteArray {
-            val byteArray = ByteArray(bits.size / 8)
+            val byteArray = ByteArray(bits.size shr 3)
 
             for(i in bits.indices) {
-                val bIndex = i / 8
+                val bIndex = i shr 3
                 byteArray[bIndex] = (byteArray[bIndex].toInt() or (bits[i].int shl (i % 8))).toByte()
             }
 
@@ -97,12 +97,9 @@ internal class KyberMath {
 
             val bits = BooleanArray(shorts.size * bitSize)
 
-            for(i in shorts.indices) {
-                val v = barrettReduce(shorts[i])
-                for(j in 0..<bitSize) {
-                    bits[(i * bitSize) + j] = ((v ushr j) and 1) == 1
-                }
-            }
+            for(i in shorts.indices)
+                for(j in 0..<bitSize)
+                    bits[(i * bitSize) + j] = ((barrettReduce(shorts[i]) ushr j) and 1) == 1
 
             return bitsToBytes(bits)
         }
