@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "asia.hombre" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.7.0"
+version = "0.7.1"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"

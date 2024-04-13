@@ -25,6 +25,7 @@ import org.kotlincrypto.SecureRandom
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlin.jvm.JvmStatic
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -264,6 +265,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
          * @param kyberEncapsulationKey [KyberEncapsulationKey] received from sender.
          * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Secret Key.
          */
+        @JvmStatic
         @JsName("encapsulate")
         fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey): KyberEncapsulationResult {
             return encapsulate(kyberEncapsulationKey, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))

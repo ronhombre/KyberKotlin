@@ -35,12 +35,12 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation               | Encapsulation           | Decapsulation            |
-|---------|--------------------------|-------------------------|--------------------------|
-| 512     | 0.16520    (504% Faster) | 0.148775  (601% Faster) | 0.17235    (577% Faster) |
-| 768     | 0.26126875 (519% Faster) | 0.243875  (617% Faster) | 0.27790    (608% Faster) |
-| 1024    | 0.4023875  (528% Faster) | 0.3765625 (617% Faster) | 0.42336875 (614% Faster) |
-| ML-KEM  | (in ms)                  | (in ms)                 | (in ms)                  |
+| Variant | Generation                | Encapsulation            | Decapsulation            |
+|---------|---------------------------|--------------------------|--------------------------|
+| 512     | 0.1665.625  (500% Faster) | 0.14875625 (601% Faster) | 0.17250    (576% Faster) |
+| 768     | 0.2606.75   (520% Faster) | 0.24445625 (616% Faster) | 0.2788125  (606% Faster) |
+| 1024    | 0.3999.375  (531% Faster) | 0.3790375  (613% Faster) | 0.42285625 (615% Faster) |
+| ML-KEM  | (in ms)                   | (in ms)                  | (in ms)                  |
 
 JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 10, 2024.
 
@@ -74,7 +74,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.7.0")
+    implementation("asia.hombre:kyber:0.7.1")
 }
 ```
 
@@ -92,7 +92,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.7.0
+npm install kyberkotlin@0.7.1
 ```
 
 ## Native C# Installation
@@ -150,7 +150,6 @@ import asia.hombre.kyber.KyberEncapsulationResult;
 
 //Generate keys
 //This would be done in their own systems
-KyberKEMKeyPair keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 KyberKEMKeyPair keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 
 //Bob sends his encapsulation key to Alice
@@ -191,7 +190,7 @@ let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_51
 let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
 
 //Bob receives Alice's Encapsulation Key and generates a Secret Key out of it.
-let results = KyberAgreement.encapsulate(aliceKeypair.encapsulationKey);
+let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
 
 let ciphertext = results.cipherText; //Send back to Alice.
 let bobSecretKey = results.secretKey;
