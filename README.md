@@ -187,17 +187,19 @@ algorithm _i.e. AES_.
 const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("kyberkotlin").asia.hombre.kyber;
 
 let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
-let bobKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
 
-let bobAgreement = new KyberAgreement(bobKeypair.decapsulationKey);
+let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
 
+//Bob receives Alice's Encapsulation Key and generates a Secret Key out of it.
 let results = KyberAgreement.encapsulate(aliceKeypair.encapsulationKey);
 
-let ciphertext = results.cipherText;
+let ciphertext = results.cipherText; //Send back to Alice.
 let bobSecretKey = results.secretKey;
 
+//Alice receives Bob's Cipher Text and decapsulates the Secret Key in it.
 let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
 
+//This checks the equality of the Secret Key. This should not fail unless you are very very very unlucky.
 console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Secret Keys does not match!");
 
 //Simple check
