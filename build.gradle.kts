@@ -15,8 +15,8 @@ plugins {
     id("signing") //GPG
 }
 
-group = "asia.hombre" //The value after the last '.' is considered the maven name i.e. asia.hombre:kyber:+
-version = "0.7.1"
+group = "asia.hombre"
+version = "0.8.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -40,6 +40,7 @@ val mavenBundleFileName = baseProjectName.plus("-bundle.zip")
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 kotlin {

@@ -35,21 +35,22 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation                | Encapsulation            | Decapsulation            |
-|---------|---------------------------|--------------------------|--------------------------|
-| 512     | 0.1665.625  (500% Faster) | 0.14875625 (601% Faster) | 0.17250    (576% Faster) |
-| 768     | 0.2606.75   (520% Faster) | 0.24445625 (616% Faster) | 0.2788125  (606% Faster) |
-| 1024    | 0.3999.375  (531% Faster) | 0.3790375  (613% Faster) | 0.42285625 (615% Faster) |
-| ML-KEM  | (in ms)                   | (in ms)                  | (in ms)                  |
+| Variant | Generation               | Encapsulation             | Decapsulation            |
+|---------|--------------------------|---------------------------|--------------------------|
+| 512     | 0.09238125 (902% Faster) | 0.08665625 (1031% Faster) | 0.111925   (888% Faster) |
+| 768     | 0.14525625 (933% Faster) | 0.139525   (1079% Faster) | 0.17450    (968% Faster) |
+| 1024    | 0.2185125  (973% Faster) | 0.2105875  (1103% Faster) | 0.2573625 (1010% Faster) |
+| ML-KEM  | (in ms)                  | (in ms)                   | (in ms)                  |
 
-JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 10, 2024.
+JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 15, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)
 
 This benchmark is for performance tracking through the development.
 
 > [!NOTE]
-> This master branch is faster than the standard branch due to optimizations. Additionally, I implemented my own Keccak.
+> This master branch is faster than the standard branch due to optimizations. Additionally, I implemented my own Keccak,
+> which gave me great control over its optimizations.
 
 ## Capabilities
 * Key Generation (512, 768, 1024)
@@ -74,7 +75,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.7.1")
+    implementation("asia.hombre:kyber:0.8.0")
 }
 ```
 
@@ -92,7 +93,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.7.1
+npm install kyberkotlin@0.8.0
 ```
 
 ## Native C# Installation
