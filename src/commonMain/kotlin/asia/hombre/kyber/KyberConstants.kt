@@ -34,12 +34,12 @@ import kotlin.jvm.JvmField
 class KyberConstants private constructor() {
     companion object {
         /**
-         * Number of polynomials.
+         * Number of coefficients in the polynomial.
          */
         const val N: Int = 256
 
         /**
-         * The byte size of the number of polynomials in bits.
+         * The byte size of the number of coefficients in bits.
          */
         const val N_BYTES: Int = N shr 3
 
