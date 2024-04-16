@@ -36,9 +36,15 @@ internal class KyberMath {
         fun bitsToBytes(bits: BooleanArray): ByteArray {
             val byteArray = ByteArray(bits.size shr 3)
 
-            for(i in bits.indices) {
-                val bIndex = i shr 3
-                byteArray[bIndex] = (byteArray[bIndex].toInt() or (bits[i].int shl (i % 8))).toByte()
+            for(i in byteArray.indices) {
+                byteArray[i] = (bits[(i * 8)].int or
+                        (bits[(i * 8) + 1].int shl 1) or
+                        (bits[(i * 8) + 2].int shl 2) or
+                        (bits[(i * 8) + 3].int shl 3) or
+                        (bits[(i * 8) + 4].int shl 4) or
+                        (bits[(i * 8) + 5].int shl 5) or
+                        (bits[(i * 8) + 6].int shl 6) or
+                        (bits[(i * 8) + 7].int shl 7)).toByte()
             }
 
             return byteArray
@@ -49,11 +55,15 @@ internal class KyberMath {
             val bitArray = BooleanArray(bytes.size * 8)
 
             for(i in bytes.indices) {
-                var byteVal = bytes[i].toUByte().toInt() //Preserve leftmost bit
-                for(j in 0..<8) {
-                    bitArray[(8 * i) + j] = (byteVal and 0b1) == 1
-                    byteVal = byteVal ushr 1
-                }
+                val byte = bytes[i].toUByte().toInt() //Preserve leftmost bit
+                bitArray[(8 * i)] = (byte and 0b1) == 1
+                bitArray[(8 * i) + 1] = ((byte shr 1) and 0b1) == 1
+                bitArray[(8 * i) + 2] = ((byte shr 2) and 0b1) == 1
+                bitArray[(8 * i) + 3] = ((byte shr 3) and 0b1) == 1
+                bitArray[(8 * i) + 4] = ((byte shr 4) and 0b1) == 1
+                bitArray[(8 * i) + 5] = ((byte shr 5) and 0b1) == 1
+                bitArray[(8 * i) + 6] = ((byte shr 6) and 0b1) == 1
+                bitArray[(8 * i) + 7] = ((byte shr 7) and 0b1) == 1
             }
 
             return bitArray
