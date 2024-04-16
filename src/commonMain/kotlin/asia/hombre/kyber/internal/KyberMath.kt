@@ -295,14 +295,15 @@ internal class KyberMath {
             val multipliedNtt = IntArray(KyberConstants.N)
 
             for(i in 0..<(KyberConstants.N shr 1)) {
-                multipliedNtt[2 * i] = barrettReduce((
-                    productOf(ntt1[2 * i], ntt2[2 * i]) +
-                    productOf(productOf(ntt1[(2 * i) + 1], ntt2[(2 * i) + 1]),
-                        KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]))
+                //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
+                val x = productOf(ntt1[2 * i], ntt2[2 * i])
+                val y = productOf(ntt1[(2 * i) + 1], ntt2[(2 * i) + 1])
+                multipliedNtt[2 * i] = barrettReduce(
+                    x + productOf(y, KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i])
                 )
-                multipliedNtt[(2 * i) + 1] = barrettReduce((
-                    productOf(ntt1[2 * i], ntt2[(2 * i) + 1]) +
-                    productOf(ntt1[(2 * i) + 1], ntt2[2 * i]))
+                multipliedNtt[(2 * i) + 1] = barrettReduce(
+                    productOf(ntt1[2 * i] + ntt1[(2 * i) + 1], ntt2[2 * i] + ntt2[(2 * i) + 1])
+                            - x - y
                 )
             }
 
@@ -365,7 +366,7 @@ internal class KyberMath {
             val result = IntArray(v1.size)
 
             for(i in v1.indices)
-                result[i] = barrettReduce((v1[i] + v2[i]))
+                result[i] = barrettReduce(v1[i] + v2[i])
 
             return result
         }
