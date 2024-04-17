@@ -35,13 +35,12 @@ At the 1.0.0 release, developers from various platforms should be able to use th
 
 ## Benchmarks (Tested on a Ryzen 7 5800X; Windows 11)
 
-| Variant | Generation               | Encapsulation             | Decapsulation            |
-|---------|--------------------------|---------------------------|--------------------------|
-| 512     | 0.09238125 (902% Faster) | 0.08665625 (1031% Faster) | 0.111925   (888% Faster) |
-| 768     | 0.14525625 (933% Faster) | 0.139525   (1079% Faster) | 0.17450    (968% Faster) |
-| 1024    | 0.2185125  (973% Faster) | 0.2105875  (1103% Faster) | 0.2573625 (1010% Faster) |
-| ML-KEM  | (in ms)                  | (in ms)                   | (in ms)                  |
-
+| Variant | Generation                | Encapsulation             | Decapsulation             |
+|---------|---------------------------|---------------------------|---------------------------|
+| 512     | 0.0762125  (1093% Faster) | 0.0745875  (1198% Faster) | 0.09534375 (1042% Faster) |
+| 768     | 0.1194375  (1135% Faster) | 0.12181875 (1235% Faster) | 0.1507125  (1120% Faster) |
+| 1024    | 0.18365625 (1157% Faster) | 0.183575   (1265% Faster) | 0.22190    (1172% Faster) |
+| ML-KEM  | (in ms)                   | (in ms)                   | (in ms)                   |
 JVM: Coretto 1.8, Count: 10000, Iterations: 5 (Average), Relative to 'standard' branch as of April 15, 2024.
 
 Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/master/src/jvmTest/kotlin/asia/hombre/kyber/tests/JVMBenchmark.kt)

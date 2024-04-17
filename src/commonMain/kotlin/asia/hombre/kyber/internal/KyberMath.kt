@@ -84,7 +84,7 @@ internal class KyberMath {
             val decompressed = IntArray(shorts.size)
 
             for (i in shorts.indices)
-                decompressed[i] = ((KyberConstants.Q * shorts[i]) + (1 shl bitSize) / 2) / (1 shl bitSize)
+                decompressed[i] = ((KyberConstants.Q * shorts[i]) + (1 shl (bitSize - 1))) / (1 shl bitSize)
 
             return decompressed
         }
@@ -109,7 +109,7 @@ internal class KyberMath {
 
             for(i in shorts.indices)
                 for(j in 0..<bitSize)
-                    bits[(i * bitSize) + j] = ((barrettReduce(shorts[i]) ushr j) and 1) == 1
+                    bits[(i * bitSize) + j] = ((barrettReduce(shorts[i]) shr j) and 1) == 1
 
             return bitsToBytes(bits)
         }
@@ -380,7 +380,7 @@ internal class KyberMath {
             val result = IntArray(v1.size)
 
             for(i in v1.indices)
-                result[i] = barrettReduce(v1[i] + v2[i])
+                result[i] = v1[i] + v2[i]
 
             return result
         }

@@ -19,13 +19,16 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
+import asia.hombre.kyber.internal.KyberMath.Companion.barrettReduce
 import asia.hombre.kyber.internal.KyberMath.Companion.int
+import asia.hombre.kyber.internal.KyberMath.Companion.productOf
 import org.kotlincrypto.SecureRandom
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.*
 
 class Tests {
+    @OptIn(ExperimentalStdlibApi::class)
     @Test
     fun playground() {
 
@@ -249,7 +252,7 @@ class Tests {
 
     @Test
     fun pkeEncryptDecrypt512() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
             val original = SecureRandom().nextBytesOf(32)
@@ -262,7 +265,7 @@ class Tests {
 
     @Test
     fun pkeEncryptDecrypt768() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
             val original = SecureRandom().nextBytesOf(32)
@@ -275,7 +278,7 @@ class Tests {
 
     @Test
     fun pkeEncryptDecrypt1024() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
             val original = SecureRandom().nextBytesOf(32)
@@ -288,7 +291,7 @@ class Tests {
 
     @Test
     fun mlEncapsDecaps512() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
@@ -304,7 +307,7 @@ class Tests {
 
     @Test
     fun mlEncapsDecaps768() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
@@ -320,7 +323,7 @@ class Tests {
 
     @Test
     fun mlEncapsDecaps1024() {
-        for(i in 1..1000) {
+        for(i in 1..10000) {
             val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
             val aliceAgreement = KyberAgreement(keyPairAlice.decapsulationKey)
@@ -341,6 +344,17 @@ class Tests {
         val recoveredVectors = KyberMath.invNTT(nttVectors)
 
         assertContentEquals(vectors, recoveredVectors, "Conversion to NTT and inversion failed!")
+    }
+
+    @Test
+    fun ntt_comprehensive() {
+        for(i in 0..KyberConstants.Q) {
+            val vectors = IntArray(KyberConstants.N) { i % KyberConstants.Q }
+            val nttVectors = KyberMath.NTT(vectors)
+            val recoveredVectors = KyberMath.invNTT(nttVectors)
+
+            assertContentEquals(vectors, recoveredVectors, "Comprehensive NTT conversion and inversion failed!")
+        }
     }
 
     @Test
