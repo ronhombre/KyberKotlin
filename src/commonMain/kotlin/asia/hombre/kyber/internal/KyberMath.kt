@@ -256,9 +256,9 @@ internal class KyberMath {
             while(len >= 2) {
                 for(start in 0..<KyberConstants.N step (2 * len)) {
                     for(j in start..<(start + len)) {
-                        val t = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
-                        output[j + len] = barrettReduce(output[j] - t)
-                        output[j] = output[j] + t //Turns out you don't need to Barrett Reduce this.
+                        val temp = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
+                        output[j + len] = barrettReduce(output[j] - temp)
+                        output[j] = output[j] + temp //Turns out you don't need to Barrett Reduce this.
                     }
                     k++
                 }
@@ -283,10 +283,9 @@ internal class KyberMath {
             while(len <= (KyberConstants.N shr 1)) {
                 for(start in 0..<KyberConstants.N step (2 * len)) {
                     for(j in start..<(start + len)) {
-                        val t0 = output[j]
-                        val t1 = output[j + len]
-                        output[j] = t0 + t1 //Turns out you don't need to Barrett Reduce this.
-                        output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], barrettReduce(t1 - t0))
+                        val temp = output[j]
+                        output[j] = temp + output[j + len] //Turns out you don't need to Barrett Reduce this.
+                        output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], barrettReduce(output[j + len] - temp))
                     }
                     k--
                 }
@@ -295,7 +294,7 @@ internal class KyberMath {
             }
 
             for(i in output.indices)
-                output[i] = productOf(output[i], 512) // toMontgomeryForm(3303) = 512
+                output[i] = barrettReduce(productOf(output[i], 512)) // toMontgomeryForm(3303) = 512
 
             return output
         }
@@ -416,8 +415,8 @@ internal class KyberMath {
         @JvmSynthetic
         fun montgomeryReduce(t: Int): Int {
             val m = (t * KyberConstants.Q_INV) and 0xFFFF//((KyberConstants.MONT_R shl 1) - 1) //mod MONT_R
-            val u = (t + m * KyberConstants.Q) ushr 16
-            return u - (KyberConstants.Q * ((u >= KyberConstants.Q).int))
+            val u = (t + (m * KyberConstants.Q)) shr 16
+            return u //Lazy Montgomery Reduction. This assumes that the final operation is a Barrett Reduction.
         }
 
         @JvmSynthetic
