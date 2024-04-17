@@ -74,7 +74,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.8.0")
+    implementation("asia.hombre:kyber:0.8.1")
 }
 ```
 
@@ -94,6 +94,9 @@ dependencies {
 ```
 npm install kyberkotlin@0.8.0
 ```
+
+> [!NOTE]
+> NPM release for 0.8.1 will be delayed for a week.
 
 ## Native C# Installation
 
