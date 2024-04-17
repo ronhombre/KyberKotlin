@@ -258,13 +258,17 @@ internal class KyberMath {
                     for(j in start..<(start + len)) {
                         val t = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
                         output[j + len] = barrettReduce(output[j] - t)
-                        output[j] = barrettReduce(output[j] + t)
+                        output[j] = output[j] + t //Turns out you don't need to Barrett Reduce this.
                     }
                     k++
                 }
 
                 len = len shr 1
             }
+
+            //However, to guarantee modulo Q, this has to be done at the end.
+            for(i in output.indices)
+                output[i] = barrettReduce(output[i])
 
             return output
         }
@@ -279,9 +283,10 @@ internal class KyberMath {
             while(len <= (KyberConstants.N shr 1)) {
                 for(start in 0..<KyberConstants.N step (2 * len)) {
                     for(j in start..<(start + len)) {
-                        val t = output[j]
-                        output[j] = barrettReduce(t + output[j + len])
-                        output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], barrettReduce(output[j + len] - t))
+                        val t0 = output[j]
+                        val t1 = output[j + len]
+                        output[j] = t0 + t1 //Turns out you don't need to Barrett Reduce this.
+                        output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], barrettReduce(t1 - t0))
                     }
                     k--
                 }
