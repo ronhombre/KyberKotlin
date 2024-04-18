@@ -93,11 +93,8 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.8.0
+npm install kyberkotlin@0.8.1
 ```
-
-> [!NOTE]
-> NPM release for 0.8.1 will be delayed for a week.
 
 ## Native C# Installation
 
