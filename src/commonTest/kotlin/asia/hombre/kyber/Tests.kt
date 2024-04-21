@@ -19,9 +19,7 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.Companion.barrettReduce
 import asia.hombre.kyber.internal.KyberMath.Companion.int
-import asia.hombre.kyber.internal.KyberMath.Companion.productOf
 import org.kotlincrypto.SecureRandom
 import kotlin.math.abs
 import kotlin.random.Random
@@ -406,6 +404,15 @@ class Tests {
         val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed.copyOf())
 
         assertContentEquals(firstGeneration.encapsulationKey.key.fullBytes, secondGeneration.encapsulationKey.key.fullBytes, "Regeneration failed for 1024!")
+    }
+
+    @Test
+    fun modulusIntegrityCheck() {
+        for(i in 0..<KyberConstants.Q)
+            assertTrue(KyberMath.isModuloOfQ(i), "Good Modulus Integrity check failed!")
+
+        for(i in KyberConstants.Q..<(KyberConstants.Q * 2))
+            assertTrue(!KyberMath.isModuloOfQ(i), "Evil Modulus Integrity check failed!")
     }
 
     fun generateRandom256Shorts(seed: Int = 24): IntArray {
