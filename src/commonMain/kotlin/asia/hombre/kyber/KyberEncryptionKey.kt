@@ -53,7 +53,7 @@ class KyberEncryptionKey internal constructor(
     init {
         val coefficients = KyberMath.byteDecode(keyBytes, 12)
         for(c in coefficients)
-            if(c != KyberMath.barrettReduce(c)) //If it can be barrett reduced that means it wasn't a modulo of Q.
+            if(!KyberMath.isModuloOfQ(c))
                 throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)
     }
 

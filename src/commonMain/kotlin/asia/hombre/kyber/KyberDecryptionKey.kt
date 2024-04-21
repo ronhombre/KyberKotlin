@@ -18,6 +18,7 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
@@ -46,6 +47,13 @@ class KyberDecryptionKey internal constructor(
     keyBytes: ByteArray
 ) : KyberPKEKey {
     internal val keyBytes: ByteArray = keyBytes.copyOf()
+
+    init {
+        val coefficients = KyberMath.byteDecode(keyBytes, 12)
+        for(c in coefficients)
+            if(!KyberMath.isModuloOfQ(c))
+                throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)
+    }
 
     /**
      * All the bytes of the Decryption Key.

@@ -406,10 +406,18 @@ internal class KyberMath {
         }
 
         @JvmSynthetic
-        fun barrettReduce(a: Int): Int {
-            val q = (a * KyberConstants.BARRETT_APPROX) shr 26
+        fun barrettReduce(n: Int): Int {
+            val q = (n * KyberConstants.BARRETT_APPROX) shr 26
 
-            return a - (q * KyberConstants.Q)
+            return n - (q * KyberConstants.Q)
+        }
+
+        /**
+         * Partial Barrett Reduction to check if n is mod of Q.
+         */
+        @JvmSynthetic
+        fun isModuloOfQ(n: Int): Boolean {
+            return ((n * KyberConstants.BARRETT_APPROX) shr 26) == 0
         }
 
         @JvmSynthetic
