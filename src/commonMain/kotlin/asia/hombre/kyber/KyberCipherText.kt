@@ -130,6 +130,9 @@ class KyberCipherText internal constructor( //TODO: Copy parameter variables
      * @param isUppercase
      * @return [String]
      */
+    @Deprecated("Conversion to hex values are up to the user.", level = DeprecationLevel.WARNING, replaceWith =
+        ReplaceWith("fullBytes.toHexString(if (isUppercase) HexFormat.UpperCase else HexFormat.Default)")
+    )
     @OptIn(ExperimentalStdlibApi::class)
     override fun toHex(isUppercase: Boolean): String {
         return fullBytes.toHexString(if(isUppercase) HexFormat.UpperCase else HexFormat.Default)
@@ -140,6 +143,9 @@ class KyberCipherText internal constructor( //TODO: Copy parameter variables
      *
      * @return [String]
      */
+    @Deprecated("Conversion to base64 values are up to the user.", level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith("Base64.encode(fullBytes)", "kotlin.io.encoding.Base64")
+    )
     @OptIn(ExperimentalEncodingApi::class)
     override fun toBase64(): String {
         return Base64.encode(fullBytes)
