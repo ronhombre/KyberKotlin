@@ -27,6 +27,8 @@ import kotlin.js.JsExport
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 internal interface Convertible {
+    @Deprecated("Conversion to hex values are up to the user.", level = DeprecationLevel.WARNING)
     fun toHex(isUppercase: Boolean = true): String
+    @Deprecated("Conversion to base64 values are up to the user.", level = DeprecationLevel.WARNING)
     fun toBase64(): String
 }

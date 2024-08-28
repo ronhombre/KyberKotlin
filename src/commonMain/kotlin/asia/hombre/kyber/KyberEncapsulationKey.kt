@@ -75,6 +75,7 @@ class KyberEncapsulationKey internal constructor(
          */
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
+        @Deprecated("Conversion from hex values are up to the user.", level = DeprecationLevel.WARNING)
         fun fromHex(hexString: String): KyberEncapsulationKey {
             return KyberEncapsulationKey(KyberEncryptionKey.fromHex(hexString))
         }
@@ -89,6 +90,12 @@ class KyberEncapsulationKey internal constructor(
          */
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
+        @Deprecated("Conversion from base64 values are up to the user.", level = DeprecationLevel.WARNING,
+            replaceWith = ReplaceWith(
+                "KyberEncapsulationKey(KyberEncryptionKey.fromBase64(base64String))",
+                "asia.hombre.kyber.KyberEncapsulationKey"
+            )
+        )
         fun fromBase64(base64String: String): KyberEncapsulationKey {
             return KyberEncapsulationKey(KyberEncryptionKey.fromBase64(base64String))
         }

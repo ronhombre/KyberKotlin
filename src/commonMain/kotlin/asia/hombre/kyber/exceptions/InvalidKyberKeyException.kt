@@ -21,4 +21,4 @@ package asia.hombre.kyber.exceptions
 /**
  * When a key fails a validity check.
  */
-class InvalidKyberKeyException(override val message: String): Exception("This may not be a Kyber Key! Reason: $message")
+class InvalidKyberKeyException(override val message: String): Exception("This may not be an ML-KEM Key! Reason: $message")

@@ -88,6 +88,7 @@ class KyberDecryptionKey internal constructor(
          */
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
+        @Deprecated("Conversion from hex values are up to the user.", level = DeprecationLevel.WARNING)
         fun fromHex(hexString: String): KyberDecryptionKey {
             return fromBytes(KyberMath.decodeHex(hexString))
         }
@@ -103,6 +104,13 @@ class KyberDecryptionKey internal constructor(
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
         @OptIn(ExperimentalEncodingApi::class)
+        @Deprecated("Conversion from base64 values are up to the user.", level = DeprecationLevel.WARNING,
+            replaceWith = ReplaceWith(
+                "fromBytes(Base64.decode(base64String))",
+                "asia.hombre.kyber.KyberDecryptionKey.Companion.fromBytes",
+                "kotlin.io.encoding.Base64"
+            )
+        )
         fun fromBase64(base64String: String): KyberDecryptionKey {
             return fromBytes(Base64.decode(base64String))
         }
