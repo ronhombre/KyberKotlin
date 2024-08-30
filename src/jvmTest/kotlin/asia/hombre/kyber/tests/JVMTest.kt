@@ -20,7 +20,7 @@ package asia.hombre.kyber.tests
 
 import asia.hombre.kyber.*
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.Companion.int
+import asia.hombre.kyber.internal.KyberMath.int
 import org.junit.Ignore
 import org.junit.Test
 import java.nio.ByteBuffer
