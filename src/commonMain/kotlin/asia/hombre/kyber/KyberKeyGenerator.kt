@@ -58,7 +58,7 @@ object KyberKeyGenerator {
     /**
      * Internal Generate function for ML-KEM keys for testing purposes.
      *
-     * This method is the ML-KEM.KeyGen() specified in NIST FIPS 203.
+     * This method is the ML-KEM.KeyGen_internal() specified in NIST FIPS 203.
      *
      * @param parameter [KyberParameter] of the keys to be generated.
      * @param randomSeed [ByteArray]

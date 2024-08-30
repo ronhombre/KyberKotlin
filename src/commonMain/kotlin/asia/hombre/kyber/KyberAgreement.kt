@@ -192,7 +192,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
         /**
          * Internal Encapsulation function for testing purposes.
          *
-         * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
+         * This method is the ML-KEM.Encaps_internal() specified in NIST FIPS 203.
          *
          * @param kyberEncapsulationKey [KyberEncapsulationKey] of the second party.
          * @param plainText [ByteArray] The Plain Text to use.
@@ -216,7 +216,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
         /**
          * Internal Decapsulation function for testing purposes.
          *
-         * This method is the ML-KEM.Decaps() specified in NIST FIPS 203.
+         * This method is the ML-KEM.Decaps_internal() specified in NIST FIPS 203.
          *
          * @param decapsulationKey [KyberDecapsulationKey] from yourself.
          * @param kyberCipherText [KyberCipherText] received from sender.
