@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "0.8.1"
+version = "0.9.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -33,7 +33,6 @@ val npmKotlinDir = "$npmDir/kotlin"
 
 val jarFileName = baseProjectName.plus(".jar")
 val jarFullFileName = baseProjectName.plus("-full.jar")
-val pomFileName = baseProjectName.plus(".pom")
 val javadocsFileName = baseProjectName.plus("-javadoc.jar")
 val sourcesFileName = baseProjectName.plus("-sources.jar")
 val mavenBundleFileName = baseProjectName.plus("-bundle.zip")
@@ -46,9 +45,9 @@ repositories {
 kotlin {
     jvm {
         val main by compilations.getting {
-            compilerOptions.configure {
+            compileTaskProvider.configure {
                 //Set up the Kotlin compiler options for the 'main' compilation:
-                jvmTarget.set(JvmTarget.JVM_1_8)
+                compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
             }
 
             compileTaskProvider //Get the Kotlin task 'compileKotlinJvm'

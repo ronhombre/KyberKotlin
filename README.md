@@ -69,13 +69,18 @@ This benchmark is for performance tracking through the development.
 > [!WARNING]
 > Upgrading to 0.7.0+ introduces breaking changes. Please refer to the documentation or to the code samples below.
 
+> [!WARNING]
+> In preparation for the 1.0.0 release, 0.9.0 is a deprecation version. There were not much changes except for the 
+> deprecated methods and classes. These are marked with the Deprecated annotation to notify the current users of the
+> library. `Use the 1.x.x versions if you want the latest version!`
+
 ## JVM Installation
 
 ### Maven with Gradle Kotlin DSL
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.8.1")
+    implementation("asia.hombre:kyber:0.9.0")
 }
 ```
 
@@ -93,7 +98,7 @@ dependencies {
 
 ## JS NPM Installation
 ```
-npm install kyberkotlin@0.8.1
+npm install kyberkotlin@0.9.0
 ```
 
 ## Native C# Installation
