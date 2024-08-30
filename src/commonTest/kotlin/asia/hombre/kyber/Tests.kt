@@ -19,7 +19,7 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.Companion.int
+import asia.hombre.kyber.internal.KyberMath.int
 import org.kotlincrypto.SecureRandom
 import kotlin.math.abs
 import kotlin.random.Random
@@ -338,8 +338,8 @@ class Tests {
     @Test
     fun ntt() {
         val vectors = generateRandom256Shorts()
-        val nttVectors = KyberMath.NTT(vectors)
-        val recoveredVectors = KyberMath.invNTT(nttVectors)
+        val nttVectors = KyberMath.ntt(vectors)
+        val recoveredVectors = KyberMath.nttInv(nttVectors)
 
         assertContentEquals(vectors, recoveredVectors, "Conversion to NTT and inversion failed!")
     }
@@ -348,8 +348,8 @@ class Tests {
     fun ntt_comprehensive() {
         for(i in 0..KyberConstants.Q) {
             val vectors = IntArray(KyberConstants.N) { i % KyberConstants.Q }
-            val nttVectors = KyberMath.NTT(vectors)
-            val recoveredVectors = KyberMath.invNTT(nttVectors)
+            val nttVectors = KyberMath.ntt(vectors)
+            val recoveredVectors = KyberMath.nttInv(nttVectors)
 
             assertContentEquals(vectors, recoveredVectors, "Comprehensive NTT conversion and inversion failed!")
         }

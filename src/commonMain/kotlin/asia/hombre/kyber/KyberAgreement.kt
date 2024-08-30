@@ -84,7 +84,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
                     parameter.ETA1,
                     KyberMath.prf(parameter.ETA1, randomness, n.toByte())
                 )
-                randomnessVector[i] = KyberMath.NTT(randomnessVector[i])
+                randomnessVector[i] = KyberMath.ntt(randomnessVector[i])
 
                 noiseVector[i] = KyberMath.samplePolyCBD(
                     parameter.ETA2,
@@ -107,7 +107,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
 
             var constantTerm = IntArray(KyberConstants.N)
             for(i in 0..<parameter.K) {
-                coefficients[i] = KyberMath.invNTT(coefficients[i])
+                coefficients[i] = KyberMath.nttInv(coefficients[i])
                 coefficients[i] = KyberMath.vectorToVectorAdd(coefficients[i], noiseVector[i])
 
                 constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
@@ -119,7 +119,7 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
                 randomnessVector[i].fill(0, 0, randomnessVector[i].size)
             }
 
-            constantTerm = KyberMath.invNTT(constantTerm)
+            constantTerm = KyberMath.nttInv(constantTerm)
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, noiseTerm)
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, muse)
 
@@ -172,12 +172,12 @@ class KyberAgreement(private val decapsulationKey: KyberDecapsulationKey) {
             val secretVector = KyberMath.byteDecode(decryptionKey.keyBytes, 12)
 
             for (i in 0..<parameter.K) {
-                val subtraction = KyberMath.invNTT(
+                val subtraction = KyberMath.nttInv(
                     KyberMath.multiplyNTTs(
                         KyberMath.vectorToMontVector(secretVector.copyOfRange(
                             i * KyberConstants.N,
                             (i + 1) * KyberConstants.N)),
-                        KyberMath.NTT(coefficients[i])
+                        KyberMath.ntt(coefficients[i])
                     )
                 )
                 for (j in 0..<KyberConstants.N)

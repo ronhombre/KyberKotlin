@@ -118,13 +118,13 @@ object KyberKeyGenerator {
                     parameter.ETA1,
                     KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte())
                 )
-                secretVector[i] = KyberMath.NTT(secretVector[i])
+                secretVector[i] = KyberMath.ntt(secretVector[i])
 
                 noiseVector[i] = KyberMath.samplePolyCBD(
                     parameter.ETA1,
                     KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte())
                 )
-                noiseVector[i] = KyberMath.NTT(noiseVector[i])
+                noiseVector[i] = KyberMath.ntt(noiseVector[i])
             }
 
             cbdSeed.fill(0, 0, cbdSeed.size) //Security Feature

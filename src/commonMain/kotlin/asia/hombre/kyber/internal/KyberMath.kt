@@ -245,7 +245,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun NTT(polynomials: IntArray): IntArray {
+    fun ntt(polynomials: IntArray): IntArray {
         val output = polynomials.copyOf()
 
         var k = 1
@@ -272,7 +272,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun invNTT(nttPolynomials: IntArray): IntArray {
+    fun nttInv(nttPolynomials: IntArray): IntArray {
         val output = nttPolynomials.copyOf()
 
         var k = (KyberConstants.N shr 1) - 1
