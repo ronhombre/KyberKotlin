@@ -20,6 +20,7 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
+import org.kotlincrypto.SecureRandom
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
@@ -135,6 +136,17 @@ class KyberEncapsulationKey internal constructor(
      */
     fun copy(): KyberEncapsulationKey {
         return KyberEncapsulationKey(key.copy())
+    }
+
+    /**
+     * Encapsulates this [KyberEncapsulationKey] into a [KyberCipherText] and generates a Secret Key.
+     *
+     * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
+     *
+     * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Secret Key.
+     */
+    fun encapsulate(): KyberEncapsulationResult {
+        return KyberAgreement.encapsulate(this, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
     }
 
     /**
