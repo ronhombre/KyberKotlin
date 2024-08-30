@@ -174,12 +174,13 @@ class KyberDecapsulationKey internal constructor(
     /**
      * Convert [KyberDecapsulationKey] into a String.
      *
-     * This wraps [toHex], so they return the same values.
+     * Deprecated and usage is forbidden!
      *
-     * @return [String]
+     * @return empty "" [String]
      */
+    @Deprecated("This leaks the contents and is a risk when used in logging.", level =  DeprecationLevel.ERROR)
     override fun toString(): String {
-        return toHex()
+        return ""
     }
 
     /**
