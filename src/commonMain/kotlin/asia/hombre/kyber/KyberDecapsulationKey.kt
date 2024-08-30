@@ -18,6 +18,9 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.keccak.KeccakHash
+import asia.hombre.keccak.KeccakParameter
+import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.internal.KyberMath
@@ -52,6 +55,13 @@ class KyberDecapsulationKey internal constructor(
 ) : KyberKEMKey {
     internal val hash: ByteArray = hash.copyOf()
     internal val randomSeed: ByteArray = randomSeed.copyOf()
+
+    init {
+        val ekHash = KeccakHash.generate(KeccakParameter.SHA3_256, encryptionKey.fullBytes, 32)
+
+        if(!ekHash.contentEquals(hash))
+            throw InvalidKyberKeyException("Hash Check failed! This is not a valid Decapsulation Key.")
+    }
 
     /**
      * The [KyberParameter] associated with this [KyberDecapsulationKey].
