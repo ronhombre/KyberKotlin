@@ -139,11 +139,11 @@ class KyberEncapsulationKey internal constructor(
     }
 
     /**
-     * Encapsulates this [KyberEncapsulationKey] into a [KyberCipherText] and generates a Secret Key.
+     * Encapsulates this [KyberEncapsulationKey] into a [KyberCipherText] and generates a Shared Secret Key.
      *
      * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
      *
-     * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Secret Key.
+     * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Shared Secret Key.
      */
     fun encapsulate(): KyberEncapsulationResult {
         return KyberAgreement.encapsulate(this, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))

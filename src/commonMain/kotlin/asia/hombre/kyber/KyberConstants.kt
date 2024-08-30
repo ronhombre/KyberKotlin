@@ -68,7 +68,7 @@ object KyberConstants {
     const val MONT_R2: Short = 1353 //MONT_R.toLong() shl 16 <- mod Q = 1353 //Basically R^2 mod Q
 
     /**
-     * The length of the Secret Key in bytes.
+     * The length of the Shared Secret Key in bytes.
      */
     const val SECRET_KEY_LENGTH: Int = N_BYTES
 
