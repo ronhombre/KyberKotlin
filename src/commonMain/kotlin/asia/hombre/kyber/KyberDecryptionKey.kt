@@ -149,7 +149,7 @@ class KyberDecryptionKey internal constructor(
      * @return [KyberDecryptionKey]
      */
     fun copy(): KyberDecryptionKey {
-        return KyberDecryptionKey(parameter, keyBytes.copyOf())
+        return KyberDecryptionKey(parameter, keyBytes)
     }
 
     /**

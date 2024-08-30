@@ -163,7 +163,7 @@ class KyberEncryptionKey internal constructor(
      * @return [KyberEncryptionKey]
      */
     fun copy(): KyberEncryptionKey {
-        return KyberEncryptionKey(parameter, keyBytes.copyOf(), nttSeed.copyOf())
+        return KyberEncryptionKey(parameter, keyBytes, nttSeed)
     }
 
     /**

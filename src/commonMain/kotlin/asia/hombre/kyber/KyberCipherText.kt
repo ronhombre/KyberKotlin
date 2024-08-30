@@ -38,7 +38,7 @@ import kotlin.jvm.JvmStatic
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class KyberCipherText internal constructor( //TODO: Copy parameter variables
+class KyberCipherText internal constructor(
     /**
      * The [KyberParameter] associated with this [KyberCipherText].
      */
@@ -157,7 +157,7 @@ class KyberCipherText internal constructor( //TODO: Copy parameter variables
      * @return [KyberCipherText]
      */
     fun copy(): KyberCipherText {
-        return KyberCipherText(this.parameter, encodedCoefficients.copyOf(), encodedTerms.copyOf())
+        return KyberCipherText(this.parameter, encodedCoefficients, encodedTerms)
     }
 
     /**

@@ -168,7 +168,7 @@ class KyberDecapsulationKey internal constructor(
      * @return [KyberDecapsulationKey]
      */
     fun copy(): KyberDecapsulationKey {
-        return KyberDecapsulationKey(key.copy(), encryptionKey, hash.copyOf(), randomSeed.copyOf())
+        return KyberDecapsulationKey(key.copy(), encryptionKey, hash, randomSeed)
     }
 
     /**
