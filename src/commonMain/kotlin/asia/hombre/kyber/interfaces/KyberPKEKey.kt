@@ -27,6 +27,6 @@ import kotlin.js.JsExport
  */
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-internal interface KyberPKEKey: Convertible {
+internal interface KyberPKEKey {
     val parameter: KyberParameter
 }

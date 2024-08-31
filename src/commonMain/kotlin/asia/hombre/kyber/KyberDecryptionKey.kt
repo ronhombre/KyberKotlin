@@ -22,8 +22,6 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmName
@@ -71,76 +69,13 @@ class KyberDecryptionKey internal constructor(
          * @param bytes [ByteArray]
          * @return [KyberDecryptionKey]
          * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
+         * @throws InvalidKyberKeyException if the modulus check fails.
          */
         @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class)
+        @Throws(UnsupportedKyberVariantException::class, InvalidKyberKeyException::class)
         fun fromBytes(bytes: ByteArray): KyberDecryptionKey {
             return KyberDecryptionKey(KyberParameter.findByDecryptionKeySize(bytes.size), bytes)
         }
-
-        /**
-         * Wrap raw Decryption Key hex values into a [KyberDecryptionKey] object.
-         *
-         * @param hexString [String] of hex values.
-         * @return [KyberDecryptionKey]
-         * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
-         * @throws IllegalArgumentException when there is a character that is not a hex value.
-         */
-        @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
-        @Deprecated("Conversion from hex values are up to the user.", level = DeprecationLevel.WARNING)
-        fun fromHex(hexString: String): KyberDecryptionKey {
-            return fromBytes(KyberMath.decodeHex(hexString))
-        }
-
-        /**
-         * Wrap raw Base64 encoded Decryption Key into a [KyberDecryptionKey] object.
-         *
-         * @param base64String [String] of valid Base64 values.
-         * @return [KyberDecryptionKey]
-         * @throws UnsupportedKyberVariantException when the length of the Decryption Key is not of any ML-KEM variant.
-         * @throws IllegalArgumentException when the Base64 is invalid.
-         */
-        @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
-        @OptIn(ExperimentalEncodingApi::class)
-        @Deprecated("Conversion from base64 values are up to the user.", level = DeprecationLevel.WARNING,
-            replaceWith = ReplaceWith(
-                "fromBytes(Base64.decode(base64String))",
-                "asia.hombre.kyber.KyberDecryptionKey.Companion.fromBytes",
-                "kotlin.io.encoding.Base64"
-            )
-        )
-        fun fromBase64(base64String: String): KyberDecryptionKey {
-            return fromBytes(Base64.decode(base64String))
-        }
-    }
-
-    /**
-     * Convert [KyberDecryptionKey] into a string of hex values.
-     *
-     * @param isUppercase
-     * @return [String]
-     */
-    @Deprecated("Conversion to hex values are up to the user.", level = DeprecationLevel.WARNING, replaceWith =
-        ReplaceWith("fullBytes.toHexString(if (isUppercase) HexFormat.UpperCase else HexFormat.Default)")
-    )
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun toHex(isUppercase: Boolean): String {
-        return fullBytes.toHexString(if(isUppercase) HexFormat.UpperCase else HexFormat.Default)
-    }
-
-    /**
-     * Convert [KyberDecryptionKey] into Base64 encoding.
-     *
-     * @return [String]
-     */
-    @Deprecated("Conversion to base64 values are up to the user.", level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith("Base64.encode(fullBytes)", "kotlin.io.encoding.Base64")
-    )
-    @OptIn(ExperimentalEncodingApi::class)
-    override fun toBase64(): String {
-        return Base64.encode(fullBytes)
     }
 
     /**
@@ -150,18 +85,6 @@ class KyberDecryptionKey internal constructor(
      */
     fun copy(): KyberDecryptionKey {
         return KyberDecryptionKey(parameter, keyBytes)
-    }
-
-    /**
-     * Convert [KyberDecryptionKey] into a String.
-     *
-     * Deprecated and usage is forbidden!
-     *
-     * @return empty "" [String]
-     */
-    @Deprecated("This leaks the contents and is a risk when used in logging.", level =  DeprecationLevel.ERROR)
-    override fun toString(): String {
-        return ""
     }
 
     /**

@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "0.9.0"
+version = "1.0.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -71,11 +71,6 @@ kotlin {
         }
         binaries.executable()
     }
-    mingwX64("windows") {
-        binaries {
-            sharedLib {  }
-        }
-    } //TODO: Build process for 'native mingw windows' release
     sourceSets {
         val commonMain by getting {
             dependencies {

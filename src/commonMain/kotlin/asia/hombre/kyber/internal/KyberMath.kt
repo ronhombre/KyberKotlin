@@ -324,16 +324,11 @@ internal object KyberMath {
 
     @JvmSynthetic
     fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): KeccakByteStream {
-        val shakeBytes = ByteArray(seed.size + 2)
-
-        seed.copyInto(shakeBytes)
-
-        shakeBytes[shakeBytes.lastIndex - 1] = byte1
-        shakeBytes[shakeBytes.lastIndex] = byte2
-
         val keccakStream = KeccakByteStream(KeccakParameter.SHAKE_128)
 
-        keccakStream.absorb(shakeBytes)
+        keccakStream.absorb(seed)
+        keccakStream.absorb(byte1)
+        keccakStream.absorb(byte2)
 
         return keccakStream
     }

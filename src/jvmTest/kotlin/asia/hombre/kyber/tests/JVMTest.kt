@@ -73,21 +73,17 @@ class JVMTest {
         val keyPairAlice = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
         val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-        val agreementAlice = KyberAgreement(keyPairAlice.decapsulationKey)
+        val cipherTextAlice = keyPairBob.encapsulationKey.encapsulate()
 
-        val cipherTextAlice = KyberAgreement.encapsulate(keyPairBob.encapsulationKey)
+        val cipherTextBob = keyPairAlice.encapsulationKey.encapsulate()
 
-        val agreementBob = KyberAgreement(keyPairBob.decapsulationKey)
+        val secretKeyAlice = cipherTextBob.cipherText.decapsulate(keyPairAlice.decapsulationKey)
+        val secretKeyBob = cipherTextAlice.cipherText.decapsulate(keyPairBob.decapsulationKey)
 
-        val cipherTextBob = KyberAgreement.encapsulate(keyPairAlice.encapsulationKey)
-
-        val secretKeyAlice = agreementAlice.decapsulate(cipherTextBob.cipherText)
-        val secretKeyBob = agreementBob.decapsulate(cipherTextAlice.cipherText)
-
-        println("Gen: " + cipherTextAlice.secretKey.joinToString(", "))
+        println("Gen: " + cipherTextAlice.sharedSecretKey.joinToString(", "))
         println("Rec: " + secretKeyBob.joinToString(", "))
 
-        println("Gen: " + cipherTextBob.secretKey.joinToString(", "))
+        println("Gen: " + cipherTextBob.sharedSecretKey.joinToString(", "))
         println("Rec: " + secretKeyAlice.joinToString(", "))
     }
 }

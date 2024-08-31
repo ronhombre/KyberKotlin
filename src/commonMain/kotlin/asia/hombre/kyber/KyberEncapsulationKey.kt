@@ -18,11 +18,11 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
+import asia.hombre.kyber.internal.KyberAgreement
 import org.kotlincrypto.SecureRandom
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmName
@@ -52,6 +52,7 @@ class KyberEncapsulationKey internal constructor(
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
         get() = key.fullBytes.copyOf()
+
     companion object {
         /**
          * Wrap raw Encapsulation Key bytes into a [KyberEncapsulationKey] object.
@@ -59,74 +60,13 @@ class KyberEncapsulationKey internal constructor(
          * @param bytes [ByteArray]
          * @return [KyberEncapsulationKey]
          * @throws UnsupportedKyberVariantException when the length of the Encapsulation Key is not of any ML-KEM variant.
+         * @throws InvalidKyberKeyException if the modulus check fails.
          */
         @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class)
+        @Throws(UnsupportedKyberVariantException::class, InvalidKyberKeyException::class)
         fun fromBytes(bytes: ByteArray): KyberEncapsulationKey {
             return KyberEncapsulationKey(KyberEncryptionKey.fromBytes(bytes))
         }
-
-        /**
-         * Wrap raw Encapsulation Key hex values into a [KyberEncapsulationKey] object.
-         *
-         * @param hexString [String] of hex values.
-         * @return [KyberEncapsulationKey]
-         * @throws UnsupportedKyberVariantException when the length of the Encapsulation Key is not of any ML-KEM variant.
-         * @throws IllegalArgumentException when there is a character that is not a hex value.
-         */
-        @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
-        @Deprecated("Conversion from hex values are up to the user.", level = DeprecationLevel.WARNING)
-        fun fromHex(hexString: String): KyberEncapsulationKey {
-            return KyberEncapsulationKey(KyberEncryptionKey.fromHex(hexString))
-        }
-
-        /**
-         * Wrap raw Base64 encoded Encapsulation Key into a [KyberEncapsulationKey] object.
-         *
-         * @param base64String [String] of valid Base64 values.
-         * @return [KyberEncapsulationKey]
-         * @throws UnsupportedKyberVariantException when the length of the Encapsulation Key is not of any ML-KEM variant.
-         * @throws IllegalArgumentException when the Base64 is invalid.
-         */
-        @JvmStatic
-        @Throws(UnsupportedKyberVariantException::class, IllegalArgumentException::class)
-        @Deprecated("Conversion from base64 values are up to the user.", level = DeprecationLevel.WARNING,
-            replaceWith = ReplaceWith(
-                "KyberEncapsulationKey(KyberEncryptionKey.fromBase64(base64String))",
-                "asia.hombre.kyber.KyberEncapsulationKey"
-            )
-        )
-        fun fromBase64(base64String: String): KyberEncapsulationKey {
-            return KyberEncapsulationKey(KyberEncryptionKey.fromBase64(base64String))
-        }
-    }
-
-    /**
-     * Convert [KyberEncapsulationKey] into a string of hex values.
-     *
-     * @param isUppercase
-     * @return [String]
-     */
-    @Deprecated("Conversion to hex values are up to the user.", level = DeprecationLevel.WARNING, replaceWith =
-        ReplaceWith("fullBytes.toHexString(if (isUppercase) HexFormat.UpperCase else HexFormat.Default)")
-    )
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun toHex(isUppercase: Boolean): String {
-        return fullBytes.toHexString(if(isUppercase) HexFormat.UpperCase else HexFormat.Default)
-    }
-
-    /**
-     * Convert [KyberEncapsulationKey] into Base64 encoding.
-     *
-     * @return [String]
-     */
-    @Deprecated("Conversion to base64 values are up to the user.", level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith("Base64.encode(fullBytes)", "kotlin.io.encoding.Base64")
-    )
-    @OptIn(ExperimentalEncodingApi::class)
-    override fun toBase64(): String {
-        return Base64.encode(fullBytes)
     }
 
     /**
@@ -147,18 +87,6 @@ class KyberEncapsulationKey internal constructor(
      */
     fun encapsulate(): KyberEncapsulationResult {
         return KyberAgreement.encapsulate(this, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
-    }
-
-    /**
-     * Convert [KyberEncapsulationKey] into a String.
-     *
-     * Deprecated and usage is forbidden!
-     *
-     * @return empty "" [String]
-     */
-    @Deprecated("This leaks the contents and is a risk when used in logging.", level =  DeprecationLevel.ERROR)
-    override fun toString(): String {
-        return ""
     }
 
     /**
