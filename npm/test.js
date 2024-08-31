@@ -1,51 +1,45 @@
-const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("./kotlin/KyberKotlin").asia.hombre.kyber;
+const { KyberParameter, KyberKeyGenerator } = require("./kotlin/KyberKotlin").asia.hombre.kyber;
 
 function test512() {
     console.log("Testing 512...");
-    let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
+    let aliceKeypair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
-
-    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
+    let results = aliceKeypair.encapsulationKey.encapsulate();
 
     let ciphertext = results.cipherText;
-    let bobSecretKey = results.secretKey;
+    let bobSecretKey = results.sharedSecretKey;
 
-    let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
+    let aliceSecretKey = aliceKeypair.decapsulationKey.decapsulate(ciphertext);
 
-    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Secret Keys for 512 does not match!");
+    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Shared Secret Keys for 512 does not match!");
 }
 
 function test768() {
     console.log("Testing 768...");
-    let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_768);
+    let aliceKeypair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
-
-    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
+    let results = aliceKeypair.encapsulationKey.encapsulate();
 
     let ciphertext = results.cipherText;
-    let bobSecretKey = results.secretKey;
+    let bobSecretKey = results.sharedSecretKey;
 
-    let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
+    let aliceSecretKey = aliceKeypair.decapsulationKey.decapsulate(ciphertext);
 
-    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Secret Keys for 768 does not match!");
+    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Shared Secret Keys for 768 does not match!");
 }
 
 function test1024() {
     console.log("Testing 1024...");
-    let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_1024);
+    let aliceKeypair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024);
 
-    let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
-
-    let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
+    let results = aliceKeypair.encapsulationKey.encapsulate();
 
     let ciphertext = results.cipherText;
-    let bobSecretKey = results.secretKey;
+    let bobSecretKey = results.sharedSecretKey;
 
-    let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
+    let aliceSecretKey = aliceKeypair.decapsulationKey.decapsulate(ciphertext);
 
-    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Secret Keys for 1024 does not match!");
+    console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Shared Secret Keys for 1024 does not match!");
 }
 
 test512();

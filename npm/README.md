@@ -1,4 +1,6 @@
 # KyberKotlin (NPM build)
+### Bringing ML-KEM into Javascript from a compiled Kotlin Multiplatform Project.
+
 Parent Source: [KyberKotlin](https://github.com/ronhombre/KyberKotlin)
 
 Generated from parent KMM library using `./gradlew bundleNPM`
@@ -11,22 +13,21 @@ Visit [kyber.hombre.asia](https://kyber.hombre.asia). All **common** methods and
 
 ## Usage sample
 ```javascript
-const { KyberParameter, KyberKeyGenerator, KyberAgreement } = require("kyberkotlin").asia.hombre.kyber;
+const { KyberParameter, KyberKeyGenerator } = require("kyberkotlin").asia.hombre.kyber;
 
-let aliceKeypair = KyberKeyGenerator.Companion.generate(KyberParameter.ML_KEM_512);
+let aliceKeypair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512);
 
-let aliceAgreement = new KyberAgreement(aliceKeypair.decapsulationKey);
-
-//Send the Encapsulation Key and they encapsulate a Shared Secret Key with it.
-let results = KyberAgreement.Companion.encapsulate(aliceKeypair.encapsulationKey);
+//Send the Encapsulation Key to Bob and they encapsulate a Shared Secret Key with it.
+let results = aliceKeypair.encapsulationKey.encapsulate();
 
 let ciphertext = results.cipherText;
-let bobSecretKey = results.secretKey;
+let bobSecretKey = results.sharedSecretKey; //This is Bob's copy of the Shared Secret Key
 
-//Receive the Cipher Text and decapsulate the Shared Secret Key in it.
-let aliceSecretKey = aliceAgreement.decapsulate(ciphertext);
+//Alice receives the Cipher Text from Bob and decapsulates the Shared Secret Key in it.
+let aliceSecretKey = aliceKeypair.decapsulationKey.decapsulate(ciphertext);
+//You can also decapsulate the other way -> ciphertext.decapsulate(aliceKeypair.decapsulationKey);
 
-console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Secret Keys does not match!");
+console.assert(contentEquals(aliceSecretKey, bobSecretKey), "Shared Secret Keys does not match!");
 
 //Simple check
 function contentEquals(a, b) {
