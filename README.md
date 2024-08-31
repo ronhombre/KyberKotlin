@@ -17,9 +17,6 @@ of the finalists in the NIST post-quantum cryptography project. The submission l
 aiming at different security levels. Specifically, Kyber-512 aims at security roughly equivalent to AES-128, Kyber-768 
 aims at security roughly equivalent to AES-192, and Kyber-1024 aims at security roughly equivalent to AES-256.
 
-This project is semi-fully based on FIPS 203! (Some seemingly unintended changes were reverted i.e. transposition of
-two matrices.)
-
 ## Introduction
 
 This is a 100% Kotlin Multiplatform implementation of ML-KEM.
