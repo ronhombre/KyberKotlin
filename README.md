@@ -46,15 +46,50 @@ Secure Random within the library.
 > been massive improvements and changes in the way the API works.
 
 ## Installation
+### JVM (Kotlin, Java, Android)
 
-```Kotlin
-//Gradle Kotlin DSL (build.gradle.kts)
+**Requirements: JAVA 8+**
+
+NOTE: if _implementation_ does not work, replace with _compile_.
+
+### Gradle through Maven
+
+`build.gradle`
+
+```groovy
+dependencies {
+    implementation 'asia.hombre:kyber:1.0.0'
+}
+```
+
+### Gradle Kotlin through Maven
+
+`build.gradle.kts`
+
+```kotlin
 dependencies {
     implementation("asia.hombre:kyber:1.0.0")
 }
 ```
 
-Checkout the Wiki for more installation options.
+### Maven
+
+`pom.xml`
+
+```xml
+<dependency>
+    <groupId>asia.hombre</groupId>
+    <artifactId>kyber</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### NPM JS
+```
+npm i kyberkotlin@1.0.0
+```
+
+Checkout the [Wiki](https://github.com/ronhombre/KyberKotlin/wiki/Installation) for more installation instructions and examples.
 
 ## API Usage
 
