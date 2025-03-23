@@ -41,7 +41,7 @@ Secure Random within the library.
 ## Tested Platforms
 * JVM (Java, Kotlin)
 * Javascript (NPM)
-* 
+
 ## Supported Platforms
 
 | Target                    | Arm32              | Arm64              | X64                |
