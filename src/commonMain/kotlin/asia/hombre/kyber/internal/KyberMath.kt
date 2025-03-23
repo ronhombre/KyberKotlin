@@ -23,7 +23,7 @@ import asia.hombre.keccak.KeccakHash
 import asia.hombre.keccak.KeccakParameter
 import asia.hombre.kyber.KyberConstants
 import kotlin.jvm.JvmSynthetic
-import kotlin.math.*
+import kotlin.math.absoluteValue
 
 internal object KyberMath {
     @get:JvmSynthetic

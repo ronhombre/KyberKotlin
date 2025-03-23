@@ -21,7 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.kyber.internal.KyberAgreement
 import asia.hombre.kyber.internal.KyberMath
 import asia.hombre.kyber.internal.KyberMath.int
-import org.kotlincrypto.SecureRandom
+import org.kotlincrypto.random.CryptoRand
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.*
@@ -140,7 +140,7 @@ class Tests {
         for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
-            val original = SecureRandom().nextBytesOf(32)
+            val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
@@ -153,7 +153,7 @@ class Tests {
         for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
-            val original = SecureRandom().nextBytesOf(32)
+            val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
@@ -166,7 +166,7 @@ class Tests {
         for(i in 1..10000) {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
-            val original = SecureRandom().nextBytesOf(32)
+            val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
             val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
@@ -256,8 +256,8 @@ class Tests {
 
     @Test
     fun regenerationComparison512() {
-        val randomSeed = SecureRandom().nextBytesOf(32)
-        val pkeSeed = SecureRandom().nextBytesOf(32)
+        val randomSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
+        val pkeSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
 
         val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed.copyOf())
         val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512, randomSeed, pkeSeed.copyOf())
@@ -267,8 +267,8 @@ class Tests {
 
     @Test
     fun regenerationComparison768() {
-        val randomSeed = SecureRandom().nextBytesOf(32)
-        val pkeSeed = SecureRandom().nextBytesOf(32)
+        val randomSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
+        val pkeSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
 
         val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed.copyOf())
         val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomSeed, pkeSeed.copyOf())
@@ -278,8 +278,8 @@ class Tests {
 
     @Test
     fun regenerationComparison1024() {
-        val randomSeed = SecureRandom().nextBytesOf(32)
-        val pkeSeed = SecureRandom().nextBytesOf(32)
+        val randomSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
+        val pkeSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
 
         val firstGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed.copyOf())
         val secondGeneration = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024, randomSeed, pkeSeed.copyOf())

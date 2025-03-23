@@ -20,7 +20,13 @@ package asia.hombre.kyber.internal
 
 import asia.hombre.keccak.KeccakHash
 import asia.hombre.keccak.KeccakParameter
-import asia.hombre.kyber.*
+import asia.hombre.kyber.KyberCipherText
+import asia.hombre.kyber.KyberConstants
+import asia.hombre.kyber.KyberDecapsulationKey
+import asia.hombre.kyber.KyberDecryptionKey
+import asia.hombre.kyber.KyberEncapsulationKey
+import asia.hombre.kyber.KyberEncapsulationResult
+import asia.hombre.kyber.KyberEncryptionKey
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmSynthetic
@@ -30,7 +36,6 @@ import kotlin.jvm.JvmSynthetic
  *
  * This class contains K-PKE.Encrypt(), K-PKE.Decrypt(), ML-KEM.Encaps(), and ML-KEM.Decaps() all according to NIST FIPS 203.
  *
- * @param decapsulationKey [KyberDecapsulationKey]
  * @constructor Stores the Decapsulation Key for decapsulating later.
  * @author Ron Lauren Hombre
  */
@@ -101,10 +106,10 @@ internal object KyberAgreement {
             constantTerm = KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(nttKeyVector[i], randomnessVector[i]))
 
             //Security Features
-            for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].size)
-            noiseVector[i].fill(0, 0, noiseVector[i].size)
-            nttKeyVector[i].fill(0, 0, nttKeyVector[i].size)
-            randomnessVector[i].fill(0, 0, randomnessVector[i].size)
+            for(j in 0..<parameter.K) matrix[i][j].fill(0)
+            noiseVector[i].fill(0)
+            nttKeyVector[i].fill(0)
+            randomnessVector[i].fill(0)
         }
 
         constantTerm = KyberMath.nttInv(constantTerm)
@@ -112,7 +117,7 @@ internal object KyberAgreement {
         constantTerm = KyberMath.vectorToVectorAdd(constantTerm, muse)
 
         //Security Feature
-        muse.fill(0, 0, muse.size)
+        muse.fill(0)
 
         val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
@@ -197,9 +202,9 @@ internal object KyberAgreement {
 
         val sharedKeyAndRandomness = KeccakHash.generate(KeccakParameter.SHA3_512, sha3512Bytes)
 
-        val cipherText = toCipherText(kyberEncapsulationKey.key, plainText, sharedKeyAndRandomness.copyOfRange(32, 64))
+        val cipherText = toCipherText(kyberEncapsulationKey.key, plainText, sharedKeyAndRandomness.copyOfRange(KyberConstants.SECRET_KEY_LENGTH, sharedKeyAndRandomness.size))
 
-        return KyberEncapsulationResult(sharedKeyAndRandomness.copyOfRange(0, 32), cipherText)
+        return KyberEncapsulationResult(sharedKeyAndRandomness.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH), cipherText)
     }
 
     /**
@@ -236,11 +241,11 @@ internal object KyberAgreement {
         val regeneratedCipherText = toCipherText(
             decapsulationKey.encryptionKey,
             recoveredPlainText,
-            decapsHash.copyOfRange(32, 64)
+            decapsHash.copyOfRange(KyberConstants.SECRET_KEY_LENGTH, decapsHash.size)
         )
 
         //Security Feature
-        decapsHash.fill(0, 0, decapsHash.size)
+        decapsHash.fill(0)
 
         if(!kyberCipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
             secretKeyCandidate = secretKeyRejection //Implicit Rejection

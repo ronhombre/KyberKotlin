@@ -22,7 +22,7 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.internal.KyberAgreement
-import org.kotlincrypto.SecureRandom
+import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmName
@@ -86,7 +86,7 @@ class KyberEncapsulationKey internal constructor(
      * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Shared Secret Key.
      */
     fun encapsulate(): KyberEncapsulationResult {
-        return KyberAgreement.encapsulate(this, SecureRandom().nextBytesOf(KyberConstants.N_BYTES))
+        return KyberAgreement.encapsulate(this, ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) })
     }
 
     /**

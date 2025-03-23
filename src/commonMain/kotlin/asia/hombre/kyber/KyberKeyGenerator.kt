@@ -21,7 +21,7 @@ package asia.hombre.kyber
 import asia.hombre.keccak.KeccakHash
 import asia.hombre.keccak.KeccakParameter
 import asia.hombre.kyber.internal.KyberMath
-import org.kotlincrypto.SecureRandom
+import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmStatic
@@ -47,11 +47,10 @@ object KyberKeyGenerator {
      */
     @JvmStatic
     fun generate(parameter: KyberParameter): KyberKEMKeyPair {
-        val secureRandom = SecureRandom()
         return generate(
             parameter,
-            secureRandom.nextBytesOf(KyberConstants.N_BYTES),
-            secureRandom.nextBytesOf(KyberConstants.N_BYTES)
+            ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) },
+            ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) },
         )
     }
 
@@ -99,12 +98,12 @@ object KyberKeyGenerator {
             val seeds = KeccakHash.generate(KeccakParameter.SHA3_512, byteArray)
 
             //Security Feature
-            byteArray.fill(0, 0, byteArray.size)
+            byteArray.fill(0)
 
             val nttSeed = seeds.copyOfRange(0, 32)
             val cbdSeed = seeds.copyOfRange(32, 64)
 
-            seeds.fill(0, 0, seeds.size) //Security Feature
+            seeds.fill(0) //Security Feature
 
             val matrix = Array(parameter.K) { Array(parameter.K) { IntArray(KyberConstants.N) } }
             val secretVector = Array(parameter.K) { IntArray(KyberConstants.N) }
@@ -127,7 +126,7 @@ object KyberKeyGenerator {
                 noiseVector[i] = KyberMath.ntt(noiseVector[i])
             }
 
-            cbdSeed.fill(0, 0, cbdSeed.size) //Security Feature
+            cbdSeed.fill(0) //Security Feature
 
             val systemVector = KyberMath.vectorAddition(
                 KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
@@ -139,8 +138,8 @@ object KyberKeyGenerator {
 
             for(i in 0..<parameter.K) {
                 //Security Features
-                for(j in 0..<parameter.K) matrix[i][j].fill(0, 0, matrix[i][j].size)
-                noiseVector[i].fill(0, 0, noiseVector[i].size)
+                for(j in 0..<parameter.K) matrix[i][j].fill(0)
+                noiseVector[i].fill(0)
 
                 KyberMath.byteEncode(KyberMath.montVectorToVector(systemVector[i]), 12)
                     .copyInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE)

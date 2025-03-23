@@ -9,6 +9,10 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![JS](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Linux Arm64 & X64](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![Windows X64](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![iOS Arm64 & X64](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
+![Android Arm32, Arm64, & X64](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 
 > **ML-KEM** is a key-encapsulation mechanism based on _CRYSTALS-KYBER_. The security of ML-KEM is based on the presumed
 > hardness of the so-called Module Learning with Errors (MLWE) problem, which is a generalization of the Learning With
@@ -34,9 +38,25 @@ Secure Random within the library.
 * Decapsulation (512, 768, 1024)
 * Convert to or from bytes.
 
-## Supported & Tested Platforms
+## Tested Platforms
 * JVM (Java, Kotlin)
 * Javascript (NPM)
+* 
+## Supported Platforms
+
+| Target                    | Arm32              | Arm64              | X64                |
+|---------------------------|--------------------|--------------------|--------------------|
+| JVM (Kotlin & Java)       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| JS (Node, Bun, & Browser) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Linux                     | :x: *              | :x: **             | :white_check_mark: |
+| Windows (Mingw)           | :x: *              | :x: *              | :white_check_mark: |
+| Android                   | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| iOS                       | :x: *              | :x: **             | :x: **             |
+| iOS Simulator             | :x: *              | :x: **             | :x: *              |
+
+*Note: Some platforms are unavailable/deprecated as targets in Kotlin Multiplatform. Please send your complaints to Jetbrains.
+
+**These targets are currently available, but I have no ability to compile them **yet**. Once I have more free time, I will setup a publishing server to compile to all targets.
 
 ## Documentation
 * [kyber.hombre.asia](https://kyber.hombre.asia)
@@ -58,7 +78,7 @@ NOTE: if _implementation_ does not work, replace with _compile_.
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:1.0.0'
+    implementation 'asia.hombre:kyber:1.1.0'
 }
 ```
 
@@ -68,7 +88,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:1.0.0")
+    implementation("asia.hombre:kyber:1.1.0")
 }
 ```
 
@@ -80,13 +100,13 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ### NPM JS
 ```
-npm i kyberkotlin@1.0.0
+npm i kyberkotlin@1.1.0
 ```
 
 Checkout the [Wiki](https://github.com/ronhombre/KyberKotlin/wiki/Installation) for more installation instructions and examples.

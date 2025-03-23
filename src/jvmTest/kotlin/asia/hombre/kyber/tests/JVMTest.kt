@@ -23,9 +23,10 @@ import asia.hombre.kyber.internal.KyberMath
 import asia.hombre.kyber.internal.KyberMath.int
 import org.junit.Ignore
 import org.junit.Test
-import java.nio.ByteBuffer
+import org.kotlincrypto.random.CryptoRand
 import java.nio.file.Files
 import java.security.SecureRandom
+import kotlin.ByteArray
 import kotlin.io.path.Path
 
 class JVMTest {
@@ -65,7 +66,7 @@ class JVMTest {
         SecureRandom.getInstanceStrong().nextBytes(bytes)
         //Visualize through binvis.io
         Files.write(Path("./randomjvm.bin"), bytes)
-        Files.write(Path("./random.bin"), org.kotlincrypto.SecureRandom().nextBytesOf(1024 * 1024))
+        Files.write(Path("./random.bin"), ByteArray(1024 * 1024).apply { CryptoRand.Default.nextBytes(this) })
     }
 
     @Test

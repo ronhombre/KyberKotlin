@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import java.io.ByteArrayOutputStream
@@ -16,7 +19,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "1.0.0"
+version = "1.1.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -71,26 +74,25 @@ kotlin {
         }
         binaries.executable()
     }
+    linuxX64()
+    //linuxArm64()
+    mingwX64()
+    //iosArm64()
+    //iosX64()
+    //iosSimulatorArm64()
+    androidNativeArm32()
+    androidNativeArm64()
+    androidNativeX64()
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kotlincrypto:secure-random:$random")
+                implementation("org.kotlincrypto.random:crypto-rand:$random")
                 implementation("asia.hombre:keccak:$keccak")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-
             }
         }
     }
