@@ -1,4 +1,4 @@
-# KyberKotlin (1.0.0)
+# KyberKotlin (1.1.0)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
