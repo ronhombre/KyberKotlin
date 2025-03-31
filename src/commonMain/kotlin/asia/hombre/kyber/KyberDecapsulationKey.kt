@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Ron Lauren Hombre
+ * Copyright 2025 Ron Lauren Hombre
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
 
 package asia.hombre.kyber
 
-import asia.hombre.keccak.KeccakHash
-import asia.hombre.keccak.KeccakParameter
+import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
@@ -55,7 +54,7 @@ class KyberDecapsulationKey internal constructor(
     internal val randomSeed: ByteArray = randomSeed.copyOf()
 
     init {
-        val ekHash = KeccakHash.generate(KeccakParameter.SHA3_256, encryptionKey.fullBytes, 32)
+        val ekHash = SHA3_256().digest(encryptionKey.fullBytes)
 
         if(!ekHash.contentEquals(hash))
             throw InvalidKyberKeyException("Hash Check failed! This is not a valid Decapsulation Key.")

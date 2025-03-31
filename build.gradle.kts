@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "1.1.0"
+version = "1.1.1"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -264,7 +264,7 @@ tasks.dokkaHtml.configure {
 tasks.withType<DokkaTask>().configureEach {
     val dokkaBaseConfiguration = """
     {
-      "footerMessage": "(C) 2024 Ron Lauren Hombre"
+      "footerMessage": "(C) 2025 Ron Lauren Hombre"
     }
     """
     pluginsMapConfiguration.set(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Ron Lauren Hombre
+ * Copyright 2025 Ron Lauren Hombre
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 package asia.hombre.kyber
 
-import asia.hombre.keccak.KeccakHash
-import asia.hombre.keccak.KeccakParameter
+import asia.hombre.keccak.api.SHA3_256
+import asia.hombre.keccak.api.SHA3_512
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
@@ -68,7 +68,7 @@ object KyberKeyGenerator {
     internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
         val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
-        val hash = KeccakHash.generate(KeccakParameter.SHA3_256, pkeKeyPair.encryptionKey.fullBytes, 32)
+        val hash = SHA3_256().digest(pkeKeyPair.encryptionKey.fullBytes)
 
         return KyberKEMKeyPair(
             KyberEncapsulationKey(pkeKeyPair.encryptionKey),
@@ -95,7 +95,7 @@ object KyberKeyGenerator {
          */
         @JvmSynthetic
         fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
-            val seeds = KeccakHash.generate(KeccakParameter.SHA3_512, byteArray)
+            val seeds = SHA3_512().digest(byteArray)
 
             //Security Feature
             byteArray.fill(0)

@@ -1,4 +1,4 @@
-# KyberKotlin (1.1.0)
+# KyberKotlin (1.1.1)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
@@ -42,7 +42,7 @@ Secure Random within the library.
 * JVM (Java, Kotlin)
 * Javascript (NPM)
 
-## Supported Platforms
+## Supported Targets
 
 | Target                    | Arm32              | Arm64              | X64                |
 |---------------------------|--------------------|--------------------|--------------------|
@@ -61,10 +61,6 @@ Secure Random within the library.
 ## Documentation
 * [kyber.hombre.asia](https://kyber.hombre.asia)
 
-> [!WARNING]
-> Upgrading to 1.x.x from the 0.x.x versions requires a quick read up with the documentation. This is because there have
-> been massive improvements and changes in the way the API works.
-
 ## Installation
 ### JVM (Kotlin, Java, Android)
 
@@ -78,7 +74,7 @@ NOTE: if _implementation_ does not work, replace with _compile_.
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:1.1.0'
+    implementation 'asia.hombre:kyber:1.1.1'
 }
 ```
 
@@ -88,7 +84,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:1.1.0")
+    implementation("asia.hombre:kyber:1.1.1")
 }
 ```
 
@@ -100,7 +96,7 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -108,6 +104,9 @@ dependencies {
 ```
 npm i kyberkotlin@1.1.0
 ```
+
+> [!WARNING]
+> NPM support will be dropped soon since KeccakKotlin dropped NPM support upstream.
 
 Checkout the [Wiki](https://github.com/ronhombre/KyberKotlin/wiki/Installation) for more installation instructions and examples.
 
@@ -140,7 +139,7 @@ Checkout the Wiki or the Documentation for more information.
 ### License
 
 ```
-Copyright 2024 Ron Lauren Hombre
+Copyright 2025 Ron Lauren Hombre
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

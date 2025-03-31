@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Ron Lauren Hombre
+ * Copyright 2025 Ron Lauren Hombre
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 
 package asia.hombre.kyber.internal
 
-import asia.hombre.keccak.KeccakByteStream
-import asia.hombre.keccak.KeccakHash
-import asia.hombre.keccak.KeccakParameter
+import asia.hombre.keccak.api.SHAKE128
+import asia.hombre.keccak.api.SHAKE256
+import asia.hombre.keccak.streams.HashOutputStream
 import asia.hombre.kyber.KyberConstants
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.absoluteValue
@@ -134,7 +134,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun sampleNTT(byteStream: KeccakByteStream): IntArray {
+    fun sampleNTT(byteStream: HashOutputStream): IntArray {
         val nttCoefficients = IntArray(KyberConstants.N)
 
         val buffer = ByteArray(3)
@@ -142,9 +142,7 @@ internal object KyberMath {
         var j = 0
         while(j < KyberConstants.N) {
             //Fill byte buffer
-            buffer[0] = byteStream.next()
-            buffer[1] = byteStream.next()
-            buffer[2] = byteStream.next()
+            byteStream.nextBytes(buffer)
 
             val d1 = ((buffer[0].toInt() and 0xFF) or ((buffer[1].toInt() and 0xFF) shl 8) and 0xFFF)
             val d2 = ((buffer[1].toInt() and 0xFF) shr 4 or ((buffer[2].toInt() and 0xFF) shl 4) and 0xFFF)
@@ -323,14 +321,14 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): KeccakByteStream {
-        val keccakStream = KeccakByteStream(KeccakParameter.SHAKE_128)
+    fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): HashOutputStream {
+        val shake128 = SHAKE128()
 
-        keccakStream.absorb(seed)
-        keccakStream.absorb(byte1)
-        keccakStream.absorb(byte2)
+        shake128.update(seed)
+        shake128.update(byte1)
+        shake128.update(byte2)
 
-        return keccakStream
+        return shake128.stream()
     }
 
     @JvmSynthetic
@@ -341,7 +339,7 @@ internal object KyberMath {
 
         shakeBytes[shakeBytes.lastIndex] = byte
 
-        return KeccakHash.generate(KeccakParameter.SHAKE_256, shakeBytes, (KyberConstants.N shr 2) * eta)
+        return SHAKE256((KyberConstants.N shr 2) * eta).digest(shakeBytes)
     }
 
     @JvmSynthetic

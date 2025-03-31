@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Ron Lauren Hombre
+ * Copyright 2025 Ron Lauren Hombre
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 
 package asia.hombre.kyber.internal
 
-import asia.hombre.keccak.KeccakHash
-import asia.hombre.keccak.KeccakParameter
+import asia.hombre.keccak.api.SHA3_256
+import asia.hombre.keccak.api.SHA3_512
+import asia.hombre.keccak.api.SHAKE256
 import asia.hombre.kyber.KyberCipherText
 import asia.hombre.kyber.KyberConstants
 import asia.hombre.kyber.KyberDecapsulationKey
@@ -195,12 +196,12 @@ internal object KyberAgreement {
     @JvmSynthetic
     internal fun encapsulate(kyberEncapsulationKey: KyberEncapsulationKey, plainText: ByteArray): KyberEncapsulationResult {
 
-        val sha3512Bytes = ByteArray(plainText.size + (KeccakParameter.SHA3_256.maxLength / 8))
+        val sha3512Bytes = ByteArray(plainText.size + 32)
 
         plainText.copyInto(sha3512Bytes)
-        KeccakHash.generate(KeccakParameter.SHA3_256, kyberEncapsulationKey.key.fullBytes).copyInto(sha3512Bytes, plainText.size)
+        SHA3_256().digest(kyberEncapsulationKey.key.fullBytes).copyInto(sha3512Bytes, plainText.size)
 
-        val sharedKeyAndRandomness = KeccakHash.generate(KeccakParameter.SHA3_512, sha3512Bytes)
+        val sharedKeyAndRandomness = SHA3_512().digest(sha3512Bytes)
 
         val cipherText = toCipherText(kyberEncapsulationKey.key, plainText, sharedKeyAndRandomness.copyOfRange(KyberConstants.SECRET_KEY_LENGTH, sharedKeyAndRandomness.size))
 
@@ -220,21 +221,19 @@ internal object KyberAgreement {
     internal fun decapsulate(decapsulationKey: KyberDecapsulationKey, kyberCipherText: KyberCipherText): ByteArray {
         val recoveredPlainText = fromCipherText(decapsulationKey.key, kyberCipherText)
 
-        val sha3512Bytes = ByteArray(recoveredPlainText.size + decapsulationKey.hash.size)
+        val sha3_512 = SHA3_512()
 
-        recoveredPlainText.copyInto(sha3512Bytes)
-        decapsulationKey.hash.copyInto(sha3512Bytes, recoveredPlainText.size)
+        sha3_512.update(recoveredPlainText)
+        sha3_512.update(decapsulationKey.hash)
 
-        val decapsHash = KeccakHash.generate(KeccakParameter.SHA3_512, sha3512Bytes)
+        val decapsHash = sha3_512.digest()
 
-        val shake256Bytes = ByteArray(decapsulationKey.randomSeed.size + kyberCipherText.fullBytes.size)
+        val shake256 = SHAKE256(KyberConstants.SECRET_KEY_LENGTH)//Bytes = ByteArray(decapsulationKey.randomSeed.size + kyberCipherText.fullBytes.size)
 
-        decapsulationKey.randomSeed.copyInto(shake256Bytes)
-        kyberCipherText.fullBytes.copyInto(shake256Bytes, decapsulationKey.randomSeed.size)
+        shake256.update(decapsulationKey.randomSeed)
+        shake256.update(kyberCipherText.fullBytes)
 
-        val secretKeyRejection = KeccakHash.generate(KeccakParameter.SHAKE_256, shake256Bytes,
-            KyberConstants.SECRET_KEY_LENGTH
-        )
+        val secretKeyRejection = shake256.digest()
 
         var secretKeyCandidate = decapsHash.copyOfRange(0, KyberConstants.SECRET_KEY_LENGTH)
 
