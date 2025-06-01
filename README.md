@@ -44,6 +44,7 @@ Code is in [JVMBenchmark.kt](https://github.com/ronhombre/KyberKotlin/blob/maste
 
 This benchmark is for performance tracking through the development.
 
+**NOT UPDATED ON THIS REVISION**
 ## Capabilities
 * Key Generation (512, 768, 1024)
 * Encapsulation (512, 768, 1024)
@@ -56,7 +57,7 @@ This benchmark is for performance tracking through the development.
 
 ```Kotlin
 dependencies {
-    implementation("asia.hombre:kyber:0.3.1-standard")
+    implementation("asia.hombre:kyber:0.4.0-standard")
 }
 ```
 

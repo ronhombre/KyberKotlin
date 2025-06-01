@@ -25,9 +25,10 @@ import kotlin.random.Random
 import kotlin.test.*
 
 class Tests {
+    @OptIn(ExperimentalStdlibApi::class)
     @Test
     fun playground() {
-        val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
+        /*val keyPairAlice = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
         val keyPairBob = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512)
 
         val agreementAlice = KeyAgreement(keyPairAlice)
@@ -45,7 +46,20 @@ class Tests {
         println("Rec: " + secretKeyBob.joinToString(", "))
 
         println("Gen: " + cipherTextBob.secretKey.joinToString(", "))
-        println("Rec: " + secretKeyAlice.joinToString(", "))
+        println("Rec: " + secretKeyAlice.joinToString(", "))*/
+
+        val z = KyberMath.decodeHex("ad10ad3409a90c4b24ab0da526f289209abcb1f05c86c7e4437a144c91e1c867")
+        val d = KyberMath.decodeHex("23ca80a61c0201f08d6b9bfae101fa573fac5581ea3e54daaad3ad7a00be5716")
+        val keypair = KyberKeyPairGenerator.generate(KyberParameter.ML_KEM_512, z, d)
+
+        println(keypair.encapsulationKey.fullBytes.toHexString())
+        println(keypair.decapsulationKey.fullBytes.toHexString())
+
+        val m = KyberMath.decodeHex("81c5839b15d7335676dbeee048f6bca56c4976331b5df39a212bbc2a450f4143")
+        val result = KeyAgreement(keypair).encapsulate(keypair.encapsulationKey, m)
+
+        println(result.cipherText.fullBytes.toHexString())
+        println(result.secretKey.toHexString())
     }
 
     @Test

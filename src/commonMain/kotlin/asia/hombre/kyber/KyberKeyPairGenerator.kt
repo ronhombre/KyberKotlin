@@ -58,7 +58,9 @@ internal class KyberKeyPairGenerator {
                 fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
                     val sha3512 = SHA3_512()
 
-                    val seeds = sha3512.digest(byteArray)
+                    sha3512.update(byteArray)
+
+                    val seeds = sha3512.digest(byteArrayOf(parameter.K.toByte()))
 
                     val nttSeed = seeds.copyOfRange(0, 32)
                     val cbdSeed = seeds.copyOfRange(32, 64)
@@ -69,7 +71,7 @@ internal class KyberKeyPairGenerator {
 
                     for((nonce, i) in (0..<parameter.K).withIndex()) {
                         for(j in 0..<parameter.K) {
-                            matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
+                            matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, j.toByte(), i.toByte()))
                         }
 
                         secretVector[i] = KyberMath.samplePolyCBD(
@@ -87,7 +89,7 @@ internal class KyberKeyPairGenerator {
 
                     //Transposed ? Old Kyber v3
                     val systemVector = KyberMath.vectorAddition(
-                        KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
+                        KyberMath.nttMatrixToVectorDot(matrix, secretVector, false),
                         noiseVector
                     )
 
