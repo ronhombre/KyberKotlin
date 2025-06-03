@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "1.1.1"
+version = "1.2.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -93,6 +93,11 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.bouncycastle:bcprov-jdk15to18:1.80")
             }
         }
     }

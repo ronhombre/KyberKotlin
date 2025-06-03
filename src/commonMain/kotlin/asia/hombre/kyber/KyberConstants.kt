@@ -53,15 +53,15 @@ object KyberConstants {
     const val Q_INV: Int = -62209 //Generated using KyberMath.powMod(Q, -1, 2^16) and negated
 
     /**
-     * Half of Q rounded to the closest whole integer.
+     * Half of Q.
      */
-    const val Q_HALF: Int = 1665 //round(Q/2)
+    const val Q_HALF: Int = Q / 2 //1664
 
     /**
      * Approximation of Q for Barrett Reduction
      */
     const val BARRETT_APPROX: Short = 20159 //(((1L shl 26) + (Q / 2)) / Q).toShort()
-    //const val MONT_R: Int = 1 shl 16
+    //const val MONT_R: Int = 1 shl 16 //Kept for reference
     /**
      * 2^16 * 2^16 (mod Q) for Montgomery Reduction.
      */
@@ -82,7 +82,7 @@ object KyberConstants {
      */
     @JvmField
     val PRECOMPUTED_ZETAS_TABLE = intArrayOf(
-        1, 2571, 2970, 1812, 1493, 1422, 287, 202,
+        2285, 2571, 2970, 1812, 1493, 1422, 287, 202,
         3158, 622, 1577, 182, 962, 2127, 1855, 1468,
         573, 2004, 264, 383, 2500, 1458, 1727, 3199,
         2648, 1017, 732, 608, 1787, 411, 3124, 1758,

@@ -90,7 +90,7 @@ internal object KyberMath {
     @JvmSynthetic
     fun singleDecompress(shorts: IntArray): IntArray {
         val decompressed = IntArray(shorts.size)
-        val decompressConstant = KyberConstants.Q_HALF
+        val decompressConstant = KyberConstants.Q_HALF + 1
 
         for (i in shorts.indices)
             decompressed[i] = toMontgomeryForm(shorts[i] * decompressConstant)
@@ -262,10 +262,6 @@ internal object KyberMath {
             len = len shr 1
         }
 
-        //However, to guarantee modulo Q, this has to be done at the end.
-        for(i in output.indices)
-            output[i] = barrettReduce(output[i])
-
         return output
     }
 
@@ -296,25 +292,20 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun productOf(a: Int, b: Int): Int {
-        return montgomeryReduce(a * b)
-    }
+    fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
 
     @JvmSynthetic
     fun multiplyNTTs(ntt1: IntArray, ntt2: IntArray): IntArray {
         val multipliedNtt = IntArray(KyberConstants.N)
 
         for(i in 0..<(KyberConstants.N shr 1)) {
+            val a = 2 * i
+            val b = a + 1
             //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
-            val x = productOf(ntt1[2 * i], ntt2[2 * i])
-            val y = productOf(ntt1[(2 * i) + 1], ntt2[(2 * i) + 1])
-            multipliedNtt[2 * i] = barrettReduce(
-                x + productOf(y, KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i])
-            )
-            multipliedNtt[(2 * i) + 1] = barrettReduce(
-                productOf(ntt1[2 * i] + ntt1[(2 * i) + 1], ntt2[2 * i] + ntt2[(2 * i) + 1])
-                        - x - y
-            )
+            val x = productOf(ntt1[a], ntt2[a])
+            val y = productOf(ntt1[b], ntt2[b])
+            multipliedNtt[a] = x + productOf(y, KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i])
+            multipliedNtt[b] = productOf(barrettReduce(ntt1[a] + ntt1[b]), barrettReduce(ntt2[a] + ntt2[b])) - x - y
         }
 
         return multipliedNtt
@@ -332,15 +323,11 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray {
-        val shakeBytes = ByteArray(seed.size + 1)
-
-        seed.copyInto(shakeBytes)
-
-        shakeBytes[shakeBytes.lastIndex] = byte
-
-        return SHAKE256((KyberConstants.N shr 2) * eta).digest(shakeBytes)
-    }
+    fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray =
+        SHAKE256((KyberConstants.N shr 2) * eta).apply {
+            update(seed)
+            update(byte)
+        }.digest()
 
     @JvmSynthetic
     fun nttMatrixToVectorDot(matrix: Array<Array<IntArray>>, vector: Array<IntArray>, isTransposed: Boolean = false): Array<IntArray> {
@@ -391,7 +378,7 @@ internal object KyberMath {
         val result = IntArray(v1.size)
 
         for(i in v1.indices)
-            result[i] = toMontgomeryForm(v1[i])
+            result[i] = barrettReduce(toMontgomeryForm(v1[i]))
 
         return result
     }
@@ -399,8 +386,9 @@ internal object KyberMath {
     @JvmSynthetic
     fun barrettReduce(n: Int): Int {
         val q = (n * KyberConstants.BARRETT_APPROX) shr 26
+        val result = n - (q * KyberConstants.Q)
 
-        return n - (q * KyberConstants.Q)
+        return if(result == KyberConstants.Q) 0 else result
     }
 
     /**
@@ -408,7 +396,7 @@ internal object KyberMath {
      */
     @JvmSynthetic
     fun isModuloOfQ(n: Int): Boolean {
-        return ((n * KyberConstants.BARRETT_APPROX) shr 26) == 0
+        return ((n * KyberConstants.BARRETT_APPROX) shr 26) == 0 && n >= 0
     }
 
     @JvmSynthetic
@@ -418,11 +406,9 @@ internal object KyberMath {
         return u //Lazy Montgomery Reduction. This assumes that the final operation is a Barrett Reduction.
     }
 
+    //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
     @JvmSynthetic
-    fun toMontgomeryForm(a: Int): Int {
-        //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
-        return montgomeryReduce(a * KyberConstants.MONT_R2)
-    }
+    fun toMontgomeryForm(a: Int): Int = montgomeryReduce(barrettReduce(a) * KyberConstants.MONT_R2)
 
     @JvmSynthetic
     @Throws(IllegalArgumentException::class)

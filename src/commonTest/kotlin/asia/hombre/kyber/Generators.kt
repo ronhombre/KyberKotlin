@@ -47,7 +47,7 @@ class Generators {
 
         val time = measureTime {
             val zetas = IntArray(128)
-            zetas[0] = 1
+            zetas[0] = KyberMath.toMontgomeryForm(1)
             for(i in 1..<128) {
                 zetas[i] = KyberMath.powMod(17, KyberMath.reverseBits(i).toInt(), KyberConstants.Q).toInt()
                 zetas[i] = KyberMath.toMontgomeryForm(zetas[i]) //Comment this line if you want the standard form.

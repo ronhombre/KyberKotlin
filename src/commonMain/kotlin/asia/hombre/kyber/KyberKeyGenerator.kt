@@ -20,6 +20,7 @@ package asia.hombre.kyber
 
 import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.keccak.api.SHA3_512
+import asia.hombre.kyber.exceptions.RandomBitGenerationException
 import asia.hombre.kyber.internal.KyberMath
 import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
@@ -44,6 +45,7 @@ object KyberKeyGenerator {
      *
      * @param parameter [KyberParameter] of the keys to be generated.
      * @return [KyberKEMKeyPair] - Contains the Encapsulation and Decapsulation Key.
+     * @throws IllegalStateException when the generated random seed and pke seed are empty/null.
      */
     @JvmStatic
     fun generate(parameter: KyberParameter): KyberKEMKeyPair {
@@ -63,9 +65,13 @@ object KyberKeyGenerator {
      * @param randomSeed [ByteArray]
      * @param pkeSeed [ByteArray]
      * @return [KyberKEMKeyPair] - Contains the Encapsulation and Decapsulation Key.
+     * @throws IllegalStateException when the generated random seed and pke seed are empty/null.
      */
     @JvmSynthetic
     internal fun generate(parameter: KyberParameter, randomSeed: ByteArray, pkeSeed: ByteArray): KyberKEMKeyPair {
+        if(randomSeed.fold(true) { acc, it -> acc and (it == 0.toByte()) } or
+            pkeSeed.fold(true) { acc, it -> acc and (it == 0.toByte()) })
+            throw RandomBitGenerationException()
         val pkeKeyPair = PKEGenerator.generate(parameter, pkeSeed)
 
         val hash = SHA3_256().digest(pkeKeyPair.encryptionKey.fullBytes)
@@ -95,7 +101,10 @@ object KyberKeyGenerator {
          */
         @JvmSynthetic
         fun generate(parameter: KyberParameter, byteArray: ByteArray): KyberPKEKeyPair {
-            val seeds = SHA3_512().digest(byteArray)
+            val seeds = SHA3_512().apply {
+                update(byteArray)
+                update(parameter.K.toByte())
+            }.digest()
 
             //Security Feature
             byteArray.fill(0)
@@ -109,19 +118,19 @@ object KyberKeyGenerator {
             val secretVector = Array(parameter.K) { IntArray(KyberConstants.N) }
             val noiseVector = Array(parameter.K) { IntArray(KyberConstants.N) }
 
-            for((nonce, i) in (0..<parameter.K).withIndex()) {
+            for(i in 0..<parameter.K) {
                 for(j in 0..<parameter.K)
-                    matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, i.toByte(), j.toByte()))
+                    matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, j.toByte(), i.toByte()))
 
                 secretVector[i] = KyberMath.samplePolyCBD(
                     parameter.ETA1,
-                    KyberMath.prf(parameter.ETA1, cbdSeed, nonce.toByte())
+                    KyberMath.prf(parameter.ETA1, cbdSeed, i.toByte())
                 )
                 secretVector[i] = KyberMath.ntt(secretVector[i])
 
                 noiseVector[i] = KyberMath.samplePolyCBD(
                     parameter.ETA1,
-                    KyberMath.prf(parameter.ETA1, cbdSeed, (nonce + parameter.K).toByte())
+                    KyberMath.prf(parameter.ETA1, cbdSeed, (i + parameter.K).toByte())
                 )
                 noiseVector[i] = KyberMath.ntt(noiseVector[i])
             }
@@ -129,7 +138,7 @@ object KyberKeyGenerator {
             cbdSeed.fill(0) //Security Feature
 
             val systemVector = KyberMath.vectorAddition(
-                KyberMath.nttMatrixToVectorDot(matrix, secretVector, true),
+                KyberMath.nttMatrixToVectorDot(matrix, secretVector, false),
                 noiseVector
             )
 

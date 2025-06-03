@@ -1,4 +1,4 @@
-# KyberKotlin (1.1.1)
+# KyberKotlin (1.2.0)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
@@ -22,9 +22,16 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 *This is quoted from 
 [Section 3.2](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf) of the NIST FIPS 203 document.*
 
+> [!WARNING]
+> If you are using any versions below 1.2.0, you must update to 1.2.0 and above to fix a critical vulnerability in this
+> implementation. In summary, the previous versions were NOT ML-KEM but Kyber. There is a big difference between the
+> two. In addition, the algorithm was sometimes producing rare bit flips that doesn't affect the encaps, decaps process,
+> but it is still a different result than the implementation of others so it would cause confusion once mixed with other
+> libraries seen in #14.
+
 ## Introduction
 
-This is a 100% Kotlin Multiplatform implementation of ML-KEM.
+This is a 100% Kotlin Multiplatform implementation of ML-KEM Final.
 It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
@@ -74,7 +81,7 @@ NOTE: if _implementation_ does not work, replace with _compile_.
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:1.1.1'
+    implementation 'asia.hombre:kyber:1.2.0'
 }
 ```
 
@@ -84,7 +91,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:1.1.1")
+    implementation("asia.hombre:kyber:1.2.0")
 }
 ```
 
@@ -96,17 +103,9 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 </dependency>
 ```
-
-### NPM JS
-```
-npm i kyberkotlin@1.1.0
-```
-
-> [!WARNING]
-> NPM support will be dropped soon since KeccakKotlin dropped NPM support upstream.
 
 Checkout the [Wiki](https://github.com/ronhombre/KyberKotlin/wiki/Installation) for more installation instructions and examples.
 
