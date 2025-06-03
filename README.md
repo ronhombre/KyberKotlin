@@ -35,10 +35,6 @@ This is a 100% Kotlin Multiplatform implementation of ML-KEM Final.
 It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
-> [!NOTE]
-> With the release of the final version of NIST FIPS 203 for ML-KEM, I'm proud to present that my KyberKotlin library is
-> ready for production use. In the past months, there have been no reports about any problems.
-
 ## Capabilities
 * Key Generation (512, 768, 1024)
 * Encapsulation (512, 768, 1024)
