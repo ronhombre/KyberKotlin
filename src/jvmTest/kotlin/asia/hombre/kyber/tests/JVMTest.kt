@@ -21,7 +21,6 @@ package asia.hombre.kyber.tests
 import asia.hombre.kyber.*
 import asia.hombre.kyber.internal.KyberAgreement
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.int
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.pqc.crypto.mlkem.MLKEMGenerator
 import org.bouncycastle.pqc.crypto.mlkem.MLKEMKeyGenerationParameters
@@ -101,10 +100,10 @@ class JVMTest {
         var count = 0
         var temp = ""
         for(byte in byteArray) {
-            val bits = KyberMath.bytesToBits(byteArrayOf(byte))
+            val bits = KyberMath.expandBytesAsBits(byteArrayOf(byte))
             var tempString = ""
             for(bit in bits) {
-                temp += bit.int
+                temp += bit
 
                 count++
 

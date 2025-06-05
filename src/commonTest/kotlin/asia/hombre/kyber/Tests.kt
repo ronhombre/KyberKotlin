@@ -20,14 +20,17 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.internal.KyberAgreement
 import asia.hombre.kyber.internal.KyberMath
-import asia.hombre.kyber.internal.KyberMath.int
 import org.kotlincrypto.random.CryptoRand
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.*
 
 @OptIn(ExperimentalStdlibApi::class)
 class Tests {
+    @get:JvmSynthetic
+    val Boolean.int
+        get() = this.compareTo(false)
 
     @Test
     fun playground() {
@@ -39,7 +42,7 @@ class Tests {
     @Test
     fun barrettApproximationVerification() {
         for (i in Short.MIN_VALUE .. Short.MAX_VALUE) {
-            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.barrettReduce(i), "Fuck!")
+            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.barrettReduce(i), "True Value: $i")
         }
     }
 
@@ -57,24 +60,22 @@ class Tests {
                 return@IntArray i
             }
 
-            val montArray = KyberMath.vectorToMontVector(array)
-            val nttArray = KyberMath.ntt(montArray)
-            val resultantMont = KyberMath.nttInv(nttArray)
-            val resultantFinal = KyberMath.montVectorToVector(resultantMont)
+            //We are barrett reducing here because barrett reduce is skipped in the function since it's not immediately needed
+            val nttArray = KyberMath.ntt(array).also {
+                it.forEachIndexed { i, value ->
+                    it[i] = KyberMath.barrettReduce(value)
+                }
+            }
+            val result = KyberMath.nttInv(nttArray).also {
+                it.forEachIndexed { i, value ->
+                    it[i] = KyberMath.barrettReduce(value)
+                }
+            }
 
-            assertContentEquals(montArray, resultantMont, "NTT Failure!")
-            assertContentEquals(array, resultantFinal, "Montgomery Failure!")
+            assertContentEquals(array, result, "NTT Failure!")
         }
     }
 
-    @Test
-    fun bitToBytesAndBytesToBitsVerification() {
-        val randomBytes = CryptoRand.nextBytes(ByteArray(1024 * 1024))
-        val bits = KyberMath.bytesToBits(randomBytes)
-        val resultant = KyberMath.bitsToBytes(bits)
-
-        assertContentEquals(randomBytes, resultant, "Bits Conversion Failure!")
-    }
 
     @Test
     fun bytesTest512() {
@@ -139,7 +140,7 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
 
             val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
-            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original.copyOf()).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 512 failed at attempt $i!")
@@ -152,7 +153,7 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768)
 
             val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
-            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original.copyOf()).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 768 failed at attempt $i!")
@@ -165,7 +166,7 @@ class Tests {
             val keyPairBob = KyberKeyGenerator.generate(KyberParameter.ML_KEM_1024)
 
             val original = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
-            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original).cipherText
+            val cipher = KyberAgreement.encapsulate(keyPairBob.encapsulationKey, original.copyOf()).cipherText
             val recovered = KyberAgreement.fromCipherText(keyPairBob.decapsulationKey.key, cipher)
 
             assertContentEquals(original, recovered, "PKE Encryption and Decryption for 1024 failed at attempt $i!")
@@ -215,24 +216,6 @@ class Tests {
     }
 
     @Test
-    fun byteEncoding() {
-        val shorts = generateRandom256Shorts()
-        val encodedBytes = KyberMath.byteEncode(shorts, 12)
-        val decodedBytes = KyberMath.byteDecode(encodedBytes, 12)
-
-        assertContentEquals(shorts, decodedBytes, "Byte Encoding and Decoding failed!")
-    }
-
-    @Test
-    fun byteToBits() {
-        val bytes = generateRandom32Bytes()
-        val bits = KyberMath.bytesToBits(bytes)
-        val recoveredBytes = KyberMath.bitsToBytes(bits)
-
-        assertContentEquals(bytes, recoveredBytes, "Byte to Bits failed!")
-    }
-
-    @Test
     fun regenerationComparison512() {
         val randomSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
         val pkeSeed = ByteArray(32).apply { CryptoRand.Default.nextBytes(this) }
@@ -271,7 +254,10 @@ class Tests {
             assertTrue(KyberMath.isModuloOfQ(i), "Good Modulus Integrity check failed!")
 
         for(i in KyberConstants.Q..<(KyberConstants.Q * 2))
-            assertTrue(!KyberMath.isModuloOfQ(i), "Evil Modulus Integrity check failed!")
+            assertTrue(!KyberMath.isModuloOfQ(i), "Bad Modulus Integrity check failed!")
+
+        for(i in -(KyberConstants.Q * 2)..<0)
+            assertTrue(!KyberMath.isModuloOfQ(i), "Negative Modulus Integrity check failed!")
     }
 
     fun generateRandom256Shorts(seed: Int = 24): IntArray {
@@ -301,24 +287,28 @@ class Tests {
         return ((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)
     }
 
+    fun decomposeShort(int: Int): ByteArray {
+        return byteArrayOf(int.toByte(), (int shr 8).toByte())
+    }
+
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0
         for(byte in byteArray) {
-            val bits = KyberMath.bytesToBits(byteArrayOf(byte))
+            val bits = KyberMath.expandBytesAsBits(byteArrayOf(byte))
             for(bit in bits) {
-                stringOutput += bit.int
+                stringOutput += bit
 
                 count++
 
                 if(count >= bitCount) {
-                    stringOutput += joiner
+                    stringOutput += joiner.reversed()
                     count = 0
                 }
             }
         }
 
-        return stringOutput.removeSuffix(joiner).reversed()
+        return stringOutput.removeSuffix(joiner.reversed()).reversed()
     }
 
     fun bitsToString(booleanArray: BooleanArray, bitCount: Int, joiner: String): String {

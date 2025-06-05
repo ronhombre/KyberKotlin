@@ -24,111 +24,125 @@ import asia.hombre.keccak.streams.HashOutputStream
 import asia.hombre.kyber.KyberConstants
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.absoluteValue
+import kotlin.math.min
 
 internal object KyberMath {
-    @get:JvmSynthetic
-    val Boolean.int
-        get() = this.compareTo(false)
 
     @JvmSynthetic
-    fun bitsToBytes(bits: BooleanArray): ByteArray {
-        val byteArray = ByteArray(bits.size shr 3)
-
-        for(i in byteArray.indices) {
-            byteArray[i] = (bits[(i * 8)].int or
-                    (bits[(i * 8) + 1].int shl 1) or
-                    (bits[(i * 8) + 2].int shl 2) or
-                    (bits[(i * 8) + 3].int shl 3) or
-                    (bits[(i * 8) + 4].int shl 4) or
-                    (bits[(i * 8) + 5].int shl 5) or
-                    (bits[(i * 8) + 6].int shl 6) or
-                    (bits[(i * 8) + 7].int shl 7)).toByte()
-        }
-
-        return byteArray
-    }
-
-    @JvmSynthetic
-    fun bytesToBits(bytes: ByteArray): BooleanArray {
-        val bitArray = BooleanArray(bytes.size * 8)
+    fun expandBytesAsBits(bytes: ByteArray): IntArray {
+        val bitArray = IntArray(bytes.size * 8)
 
         for(i in bytes.indices) {
-            val byte = bytes[i].toUByte().toInt() //Preserve leftmost bit
-            bitArray[(8 * i)] = (byte and 0b1) == 1
-            bitArray[(8 * i) + 1] = ((byte shr 1) and 0b1) == 1
-            bitArray[(8 * i) + 2] = ((byte shr 2) and 0b1) == 1
-            bitArray[(8 * i) + 3] = ((byte shr 3) and 0b1) == 1
-            bitArray[(8 * i) + 4] = ((byte shr 4) and 0b1) == 1
-            bitArray[(8 * i) + 5] = ((byte shr 5) and 0b1) == 1
-            bitArray[(8 * i) + 6] = ((byte shr 6) and 0b1) == 1
-            bitArray[(8 * i) + 7] = ((byte shr 7) and 0b1) == 1
+            val byte = bytes[i].toInt()
+            bitArray[(8 * i)] = byte and 1
+            bitArray[(8 * i) + 1] = (byte shr 1) and 1
+            bitArray[(8 * i) + 2] = (byte shr 2) and 1
+            bitArray[(8 * i) + 3] = (byte shr 3) and 1
+            bitArray[(8 * i) + 4] = (byte shr 4) and 1
+            bitArray[(8 * i) + 5] = (byte shr 5) and 1
+            bitArray[(8 * i) + 6] = (byte shr 6) and 1
+            bitArray[(8 * i) + 7] = (byte shr 7) and 1
         }
 
         return bitArray
     }
 
     @JvmSynthetic
-    fun compress(shorts: IntArray, bitSize: Int): IntArray {
-        val compressed = IntArray(shorts.size)
-
-        for(i in shorts.indices)
-            compressed[i] = (((1 shl bitSize) * shorts[i]) + KyberConstants.Q_HALF) / KyberConstants.Q
-
-        return compressed
-    }
-
-    @JvmSynthetic
-    fun decompress(shorts: IntArray, bitSize: Int): IntArray {
-        val decompressed = IntArray(shorts.size)
-
+    fun decompress(shorts: IntArray, bitSize: Int) {
         for (i in shorts.indices)
-            decompressed[i] = ((KyberConstants.Q * shorts[i]) + (1 shl (bitSize - 1))) / (1 shl bitSize)
+            shorts[i] = ((KyberConstants.Q * shorts[i]) + (1 shl (bitSize - 1))) shr bitSize
+    }
 
-        return decompressed
+    /**
+     * O(n * bitSize / 8) compared to O(n * n * bitSize) with the standard algorithm.
+     * Significantly reduced iterations and minimized memory operations to bare minimum.
+     */
+    @JvmSynthetic
+    fun fastByteDecode(bytes: ByteArray, bitSize: Int, offset: Int = 0, length: Int = bytes.size - offset): IntArray {
+        val result = IntArray(length * 8 / bitSize)
+        val lastIndex = offset + length - 1
+        var byteIndex = offset
+        var usableBits = 8
+        var currentByte = bytes[byteIndex].toInt() and 0xFF
+
+        for (i in result.indices) {
+            var accumulator = 0
+            var ingestedBits = 0
+
+            while (ingestedBits < bitSize) {
+                val canIngest = min(usableBits, bitSize - ingestedBits)
+                val mask = 0xFF shr (8 - canIngest)
+
+                accumulator = accumulator or ((currentByte and mask) shl ingestedBits)
+                currentByte = currentByte shr canIngest
+                usableBits -= canIngest
+                ingestedBits += canIngest
+
+                if (usableBits == 0 && byteIndex < lastIndex) {
+                    byteIndex++
+                    currentByte = bytes[byteIndex].toInt() and 0xFF
+                    usableBits = 8
+                }
+            }
+            result[i] = accumulator
+        }
+        return result
+    }
+
+    /**
+     * Reduced memory copy operations compared to byteEncode(vector, bitSize)
+     */
+    @JvmSynthetic
+    fun byteEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
+        var outputIndex = 0
+        var bitIndex = 0
+        var temp = 0
+        for(i in vector.indices) {
+            val value = barrettReduce(montgomeryReduce(vector[i]))
+
+            for(j in 0 until bitSize) {
+                temp = temp or (((value shr j) and 1) shl bitIndex++)
+                if(bitIndex == 8) {
+                    output[destIndex + outputIndex++] = temp.toByte()
+                    bitIndex = 0
+                    temp = 0
+                }
+            }
+        }
+    }
+
+    /**
+     * Reduced memory copy operations compared to byteEncode(compress(vector, bitSize), bitSize)
+     */
+    @JvmSynthetic
+    fun compressAndEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
+        val mask = 1 shl bitSize
+        var outputIndex = 0
+        var bitIndex = 0
+        var temp = 0
+        for(i in vector.indices) {
+            val value = ((mask * montgomeryReduce(vector[i])) + KyberConstants.Q_HALF) / KyberConstants.Q
+
+            for(j in 0 until bitSize) {
+                temp = temp or (((value shr j) and 1) shl bitIndex++)
+                if(bitIndex == 8) {
+                    output[destIndex + outputIndex++] = temp.toByte()
+                    bitIndex = 0
+                    temp = 0
+                }
+            }
+        }
     }
 
     @JvmSynthetic
-    fun singleDecompress(shorts: IntArray): IntArray {
-        val decompressed = IntArray(shorts.size)
-        val decompressConstant = KyberConstants.Q_HALF + 1
+    fun expandMuse(bytes: ByteArray): IntArray {
+        val shorts = IntArray(bytes.size * 8)
+        val decompressConstant = toMontgomeryForm(KyberConstants.Q_HALF + 1)
 
-        for (i in shorts.indices)
-            decompressed[i] = toMontgomeryForm(shorts[i] * decompressConstant)
-
-        return decompressed
-    }
-
-    @JvmSynthetic
-    fun byteEncode(shorts: IntArray, bitSize: Int): ByteArray {
-        if(bitSize > UShort.SIZE_BITS)
-            throw ArithmeticException("There are not enough bits to encode! Bit Size: $bitSize is too big!")
-
-        val bits = BooleanArray(shorts.size * bitSize)
-
-        for(i in shorts.indices)
-            for(j in 0..<bitSize)
-                bits[(i * bitSize) + j] = ((barrettReduce(shorts[i]) shr j) and 1) == 1
-
-        return bitsToBytes(bits)
-    }
-
-    @JvmSynthetic
-    fun byteDecode(byteArray: ByteArray, bitSize: Int): IntArray {
-        val bits = bytesToBits(byteArray)
-        val shorts = IntArray(bits.size / bitSize)
-        for(i in shorts.indices)
-            for(j in 0..<(bitSize))
-                shorts[i] = shorts[i] + (bits[(i * bitSize) + j].int shl j)
-
-        return shorts
-    }
-
-    @JvmSynthetic
-    fun singleByteDecode(byteArray: ByteArray): IntArray {
-        val bits = bytesToBits(byteArray)
-        val shorts = IntArray(bits.size)
-        for(i in shorts.indices)
-            shorts[i] = bits[i].int
+        for(i in bytes.indices) {
+            val byte = bytes[i].toInt()
+            for(j in 0 until 8) shorts[(i * 8) + j] = ((byte shr j) and 1) * decompressConstant
+        }
 
         return shorts
     }
@@ -141,20 +155,13 @@ internal object KyberMath {
 
         var j = 0
         while(j < KyberConstants.N) {
-            //Fill byte buffer
-            byteStream.nextBytes(buffer)
+            byteStream.nextBytes(buffer) //Fill byte buffer
 
-            val d1 = ((buffer[0].toInt() and 0xFF) or ((buffer[1].toInt() and 0xFF) shl 8) and 0xFFF)
-            val d2 = ((buffer[1].toInt() and 0xFF) shr 4 or ((buffer[2].toInt() and 0xFF) shl 4) and 0xFFF)
+            val d1 = ((buffer[0].toInt() and 0xFF) or (buffer[1].toInt() shl 8) and 0xFFF)
+            val d2 = ((buffer[1].toInt() and 0xFF) shr 4 or (buffer[2].toInt() shl 4) and 0xFFF)
 
-            if(d1 < KyberConstants.Q) {
-                nttCoefficients[j] = toMontgomeryForm(d1)
-                j++
-            }
-            if(d2 < KyberConstants.Q && j < KyberConstants.N) {
-                nttCoefficients[j] = toMontgomeryForm(d2)
-                j++
-            }
+            if(d1 < KyberConstants.Q) nttCoefficients[j++] = toMontgomeryForm(d1)
+            if(d2 < KyberConstants.Q && j < KyberConstants.N) nttCoefficients[j++] = toMontgomeryForm(d2)
         }
 
         return nttCoefficients
@@ -163,22 +170,163 @@ internal object KyberMath {
     @JvmSynthetic
     fun samplePolyCBD(eta: Int, bytes: ByteArray): IntArray {
         val f = IntArray(KyberConstants.N)
-        val bits = bytesToBits(bytes)
+        val bits = expandBytesAsBits(bytes)
 
-        bytes.fill(0, 0, bytes.size) //Security Feature
-
-        for(i in 0..<KyberConstants.N) {
+        for(i in 0 until KyberConstants.N) {
+            val offset = 2 * i * eta
             var x = 0
             var y = 0
-            for(j in 0..<eta) {
-                x += bits[(2 * i * eta) + j].int
-                y += bits[(2 * i * eta) + eta + j].int
+            for(j in 0 until eta) {
+                x += bits[offset + j]
+                y += bits[offset + eta + j]
             }
             f[i] = toMontgomeryForm(x - y)
         }
 
         return f
     }
+
+    @JvmSynthetic
+    fun ntt(polynomials: IntArray): IntArray {
+        val output = polynomials
+
+        var k = 1
+        var len = KyberConstants.N shr 1
+
+        while(len >= 2) {
+            for(start in 0 until KyberConstants.N step (2 * len)) {
+                for(j in start until (start + len)) {
+                    val temp = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
+                    output[j + len] = output[j] - temp
+                    output[j] = output[j] + temp
+                }
+                k++
+            }
+
+            len = len shr 1
+        }
+
+        return output
+    }
+
+    @JvmSynthetic
+    fun nttInv(nttPolynomials: IntArray): IntArray {
+        val output = nttPolynomials
+
+        var k = (KyberConstants.N shr 1) - 1
+        var len = 2
+
+        while(len <= (KyberConstants.N shr 1)) {
+            for(start in 0 until KyberConstants.N step (2 * len)) {
+                for(j in start until (start + len)) {
+                    val temp = output[j]
+                    output[j] = temp + output[j + len]
+                    output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len] - temp)
+                }
+                k--
+            }
+
+            len = len shl 1
+        }
+
+        for(i in output.indices)
+            output[i] = productOf(output[i], 512) // toMontgomeryForm(3303) = 512
+
+        return output
+    }
+
+    @JvmSynthetic
+    fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
+
+    @JvmSynthetic
+    fun multiplyNTTs(ntt1: IntArray, ntt2: IntArray, offset1: Int = 0): IntArray {
+        val multipliedNtt = IntArray(KyberConstants.N)
+
+        for(i in 0 until (KyberConstants.N shr 1)) {
+            val a = i shl 1
+            val b = a + 1
+            //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
+            val x = productOf(ntt1[a + offset1], ntt2[a])
+            val y = productOf(ntt1[b + offset1], ntt2[b])
+            multipliedNtt[a] = productOf(y, KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i]) + x
+            multipliedNtt[b] = productOf(ntt1[a + offset1] + ntt1[b + offset1], ntt2[a] + ntt2[b]) - x - y
+        }
+
+        return multipliedNtt
+    }
+
+    @JvmSynthetic
+    fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): HashOutputStream =
+        SHAKE128().apply {
+            update(seed)
+            update(byte1)
+            update(byte2)
+        }.stream()
+
+    @JvmSynthetic
+    fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray =
+        SHAKE256((KyberConstants.N shr 2) * eta).apply {
+            update(seed)
+            update(byte)
+        }.digest()
+
+    @JvmSynthetic
+    fun nttMatrixToVectorDot(matrix: Array<Array<IntArray>>, vector: Array<IntArray>, isTransposed: Boolean = false): Array<IntArray> {
+        val result = Array(vector.size) { IntArray(KyberConstants.N) }
+
+        for(i in matrix.indices)
+            for(j in vector.indices) {
+                val a = if(isTransposed) j else i
+                val b = if(isTransposed) i else j
+                vectorToVectorAdd(result[i], multiplyNTTs(matrix[a][b], vector[j]))
+            }
+
+        return result
+    }
+
+    @JvmSynthetic
+    fun vectorAddition(v1: Array<IntArray>, v2: Array<IntArray>){
+        for(i in v1.indices) vectorToVectorAdd(v1[i], v2[i])
+    }
+
+    @JvmSynthetic
+    fun vectorToVectorAdd(v1: IntArray, v2: IntArray) {
+        for(i in v1.indices) v1[i] += v2[i]
+    }
+
+    @JvmSynthetic
+    fun vectorToMontVector(vector: IntArray) {
+        for(i in vector.indices) vector[i] = barrettReduce(toMontgomeryForm(vector[i]))
+    }
+
+    @JvmSynthetic
+    fun barrettReduce(n: Int): Int {
+        val q = (n * KyberConstants.BARRETT_APPROX) shr 26
+        val result = n - (q * KyberConstants.Q)
+
+        return if(result == KyberConstants.Q) 0 else result
+    }
+
+    /**
+     * Partial Barrett Reduction to check if n is mod of Q.
+     */
+    @JvmSynthetic
+    fun isModuloOfQ(n: Int): Boolean = ((n * KyberConstants.BARRETT_APPROX) shr 26) == 0 && n >= 0
+
+    @JvmSynthetic
+    fun montgomeryReduce(t: Int): Int {
+        val m = (t * KyberConstants.Q_INV) and 0xFFFF//((KyberConstants.MONT_R shl 1) - 1) //mod MONT_R
+        val u = (t + (m * KyberConstants.Q)) shr 16
+        return u //Lazy Montgomery Reduction. This assumes that the final operation is a Barrett Reduction.
+    }
+
+    //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
+    @JvmSynthetic
+    fun toMontgomeryForm(a: Int): Int = montgomeryReduce(a * KyberConstants.MONT_R2)
+
+    /**
+     * From here on, these functions are used for testing or to generate constants.
+     */
 
     @JvmSynthetic
     fun reverseBits(x: Int): UByte {
@@ -201,7 +349,7 @@ internal object KyberMath {
 
         var c = 1L
 
-        for(i in 0..<e)
+        for(i in 0 until e)
             c = (b * c) % m
 
         return c
@@ -211,7 +359,7 @@ internal object KyberMath {
     private fun pow(a: Int, b: Int): Long {
         var out = 1L
 
-        for(i in 0..<b) {
+        for(i in 0 until b) {
             out *= a
         }
 
@@ -241,174 +389,6 @@ internal object KyberMath {
 
         return oldS
     }
-
-    @JvmSynthetic
-    fun ntt(polynomials: IntArray): IntArray {
-        val output = polynomials.copyOf()
-
-        var k = 1
-        var len = KyberConstants.N shr 1
-
-        while(len >= 2) {
-            for(start in 0..<KyberConstants.N step (2 * len)) {
-                for(j in start..<(start + len)) {
-                    val temp = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
-                    output[j + len] = barrettReduce(output[j] - temp)
-                    output[j] = output[j] + temp //Turns out you don't need to Barrett Reduce this.
-                }
-                k++
-            }
-
-            len = len shr 1
-        }
-
-        return output
-    }
-
-    @JvmSynthetic
-    fun nttInv(nttPolynomials: IntArray): IntArray {
-        val output = nttPolynomials.copyOf()
-
-        var k = (KyberConstants.N shr 1) - 1
-        var len = 2
-
-        while(len <= (KyberConstants.N shr 1)) {
-            for(start in 0..<KyberConstants.N step (2 * len)) {
-                for(j in start..<(start + len)) {
-                    val temp = output[j]
-                    output[j] = temp + output[j + len] //Turns out you don't need to Barrett Reduce this.
-                    output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], barrettReduce(output[j + len] - temp))
-                }
-                k--
-            }
-
-            len = len shl 1
-        }
-
-        for(i in output.indices)
-            output[i] = barrettReduce(productOf(output[i], 512)) // toMontgomeryForm(3303) = 512
-
-        return output
-    }
-
-    @JvmSynthetic
-    fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
-
-    @JvmSynthetic
-    fun multiplyNTTs(ntt1: IntArray, ntt2: IntArray): IntArray {
-        val multipliedNtt = IntArray(KyberConstants.N)
-
-        for(i in 0..<(KyberConstants.N shr 1)) {
-            val a = 2 * i
-            val b = a + 1
-            //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
-            val x = productOf(ntt1[a], ntt2[a])
-            val y = productOf(ntt1[b], ntt2[b])
-            multipliedNtt[a] = x + productOf(y, KyberConstants.PRECOMPUTED_GAMMAS_TABLE[i])
-            multipliedNtt[b] = productOf(barrettReduce(ntt1[a] + ntt1[b]), barrettReduce(ntt2[a] + ntt2[b])) - x - y
-        }
-
-        return multipliedNtt
-    }
-
-    @JvmSynthetic
-    fun xof(seed: ByteArray, byte1: Byte, byte2: Byte): HashOutputStream {
-        val shake128 = SHAKE128()
-
-        shake128.update(seed)
-        shake128.update(byte1)
-        shake128.update(byte2)
-
-        return shake128.stream()
-    }
-
-    @JvmSynthetic
-    fun prf(eta: Int, seed: ByteArray, byte: Byte): ByteArray =
-        SHAKE256((KyberConstants.N shr 2) * eta).apply {
-            update(seed)
-            update(byte)
-        }.digest()
-
-    @JvmSynthetic
-    fun nttMatrixToVectorDot(matrix: Array<Array<IntArray>>, vector: Array<IntArray>, isTransposed: Boolean = false): Array<IntArray> {
-        val result = Array(vector.size) { IntArray(KyberConstants.N) }
-
-        for(i in matrix.indices)
-            for(j in vector.indices) {
-                val a = if(isTransposed) j else i
-                val b = if(isTransposed) i else j
-                result[i] = vectorToVectorAdd(result[i], multiplyNTTs(matrix[a][b], vector[j]))
-            }
-
-        return result
-    }
-
-    @JvmSynthetic
-    fun vectorAddition(v1: Array<IntArray>, v2: Array<IntArray>): Array<IntArray> {
-        val result = Array(v1.size) { IntArray(v2[0].size) }
-
-        for(i in v1.indices)
-            result[i] = vectorToVectorAdd(v1[i], v2[i])
-
-        return result
-    }
-
-    @JvmSynthetic
-    fun vectorToVectorAdd(v1: IntArray, v2: IntArray): IntArray {
-        val result = IntArray(v1.size)
-
-        for(i in v1.indices)
-            result[i] = v1[i] + v2[i]
-
-        return result
-    }
-
-    @JvmSynthetic
-    fun montVectorToVector(v1: IntArray): IntArray {
-        val result = IntArray(v1.size)
-
-        for(i in v1.indices)
-            result[i] = montgomeryReduce(v1[i])
-
-        return result
-    }
-
-    @JvmSynthetic
-    fun vectorToMontVector(v1: IntArray): IntArray {
-        val result = IntArray(v1.size)
-
-        for(i in v1.indices)
-            result[i] = barrettReduce(toMontgomeryForm(v1[i]))
-
-        return result
-    }
-
-    @JvmSynthetic
-    fun barrettReduce(n: Int): Int {
-        val q = (n * KyberConstants.BARRETT_APPROX) shr 26
-        val result = n - (q * KyberConstants.Q)
-
-        return if(result == KyberConstants.Q) 0 else result
-    }
-
-    /**
-     * Partial Barrett Reduction to check if n is mod of Q.
-     */
-    @JvmSynthetic
-    fun isModuloOfQ(n: Int): Boolean {
-        return ((n * KyberConstants.BARRETT_APPROX) shr 26) == 0 && n >= 0
-    }
-
-    @JvmSynthetic
-    fun montgomeryReduce(t: Int): Int {
-        val m = (t * KyberConstants.Q_INV) and 0xFFFF//((KyberConstants.MONT_R shl 1) - 1) //mod MONT_R
-        val u = (t + (m * KyberConstants.Q)) shr 16
-        return u //Lazy Montgomery Reduction. This assumes that the final operation is a Barrett Reduction.
-    }
-
-    //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
-    @JvmSynthetic
-    fun toMontgomeryForm(a: Int): Int = montgomeryReduce(barrettReduce(a) * KyberConstants.MONT_R2)
 
     @JvmSynthetic
     @Throws(IllegalArgumentException::class)

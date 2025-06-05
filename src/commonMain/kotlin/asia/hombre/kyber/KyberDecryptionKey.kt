@@ -47,7 +47,7 @@ class KyberDecryptionKey internal constructor(
     internal val keyBytes: ByteArray = keyBytes.copyOf()
 
     init {
-        val coefficients = KyberMath.byteDecode(keyBytes, 12)
+        val coefficients = KyberMath.fastByteDecode(keyBytes, 12)
         for(c in coefficients)
             if(!KyberMath.isModuloOfQ(c))
                 throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)

@@ -49,7 +49,7 @@ class KyberEncryptionKey internal constructor(
     internal val nttSeed: ByteArray = nttSeed.copyOf()
 
     init {
-        val coefficients = KyberMath.byteDecode(keyBytes, 12)
+        val coefficients = KyberMath.fastByteDecode(keyBytes, 12)
         for(c in coefficients)
             if(!KyberMath.isModuloOfQ(c))
                 throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)

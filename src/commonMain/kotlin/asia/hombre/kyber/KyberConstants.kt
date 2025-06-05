@@ -55,7 +55,7 @@ object KyberConstants {
     /**
      * Half of Q.
      */
-    const val Q_HALF: Int = Q / 2 //1664
+    const val Q_HALF: Int = Q shr 1 //1664
 
     /**
      * Approximation of Q for Barrett Reduction

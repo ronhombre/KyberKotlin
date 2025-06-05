@@ -18,4 +18,7 @@
 
 package asia.hombre.kyber.exceptions
 
+/**
+ * When the random bit source produces all zeroes.
+ */
 class RandomBitGenerationException: IllegalStateException("Random Bit Generation Failed. Try to generate again.")
