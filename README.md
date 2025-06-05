@@ -1,4 +1,4 @@
-# KyberKotlin (1.2.0)
+# KyberKotlin (2.0.0)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
@@ -31,7 +31,7 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 
 ## Introduction
 
-This is a 100% Kotlin Multiplatform implementation of ML-KEM Final.
+This is a 100% Kotlin Multiplatform implementation of ML-KEM Final with super fast optimizations.
 It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
@@ -43,7 +43,6 @@ Secure Random within the library.
 
 ## Tested Platforms
 * JVM (Java, Kotlin)
-* Javascript (NPM)
 
 ## Supported Targets
 
@@ -77,7 +76,7 @@ NOTE: if _implementation_ does not work, replace with _compile_.
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:1.2.0'
+    implementation 'asia.hombre:kyber:2.0.0'
 }
 ```
 
@@ -87,7 +86,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:1.2.0")
+    implementation("asia.hombre:kyber:2.0.0")
 }
 ```
 
@@ -99,7 +98,7 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
