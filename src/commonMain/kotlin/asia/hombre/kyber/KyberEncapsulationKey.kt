@@ -21,8 +21,9 @@ package asia.hombre.kyber
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
+import asia.hombre.kyber.interfaces.RandomProvider
+import asia.hombre.kyber.internal.DefaultRandomProvider
 import asia.hombre.kyber.internal.KyberAgreement
-import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmName
@@ -79,14 +80,16 @@ class KyberEncapsulationKey internal constructor(
     }
 
     /**
-     * Encapsulates this [KyberEncapsulationKey] into a [KyberCipherText] and generates a Shared Secret Key.
+     * Encapsulates this [KyberEncapsulationKey] into a [KyberCipherText] and generates a Shared Secret Key using the
+     * DefaultRandomProvider.
      *
      * This method is the ML-KEM.Encaps() specified in NIST FIPS 203.
      *
+     * @param randomProvider (Optional) [RandomProvider] to use when generating the plaintext.
      * @return [KyberEncapsulationResult] - Contains the Cipher Text and the generated Shared Secret Key.
      */
-    fun encapsulate(): KyberEncapsulationResult {
-        return KyberAgreement.encapsulate(this, ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) })
+    fun encapsulate(randomProvider: RandomProvider = DefaultRandomProvider): KyberEncapsulationResult {
+        return KyberAgreement.encapsulate(this, ByteArray(KyberConstants.N_BYTES).apply { randomProvider.fillWithRandom(this) })
     }
 
     /**

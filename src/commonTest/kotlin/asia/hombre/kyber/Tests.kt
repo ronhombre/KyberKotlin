@@ -49,7 +49,7 @@ class Tests {
     @Test
     fun montgomeryReturnVerification() {
         for (i in 0 ..Short.MAX_VALUE) {
-            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.montgomeryReduce(KyberMath.toMontgomeryForm(i)), "True Value: $i")
+            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.barrettReduce(KyberMath.montgomeryReduce(KyberMath.toMontgomeryForm(i))), "True Value: $i")
         }
     }
 

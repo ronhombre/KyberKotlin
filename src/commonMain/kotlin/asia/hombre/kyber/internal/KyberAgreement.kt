@@ -150,9 +150,11 @@ internal object KyberAgreement {
         val coefficients = Array(kyberCipherText.parameter.K) { IntArray(KyberConstants.N) }
 
         val secretVector = KyberMath.fastByteDecode(decryptionKey.keyBytes, 12)
+        KyberMath.vectorToMontVector(secretVector)
 
         val constantTerms = KyberMath.fastByteDecode(kyberCipherText.encodedTerms, parameter.DV)
         KyberMath.decompress(constantTerms, parameter.DV)
+        KyberMath.vectorToMontVector(constantTerms)
 
         for (i in 0 until parameter.K) {
             coefficients[i] = KyberMath.fastByteDecode(
@@ -162,6 +164,7 @@ internal object KyberAgreement {
                 KyberConstants.N_BYTES * parameter.DU
             )
             KyberMath.decompress(coefficients[i], parameter.DU)
+            KyberMath.vectorToMontVector(coefficients[i])
             KyberMath.ntt(coefficients[i])
 
             val subtraction = KyberMath.multiplyNTTs(secretVector, coefficients[i], i * KyberConstants.N)

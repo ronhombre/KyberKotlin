@@ -21,8 +21,9 @@ package asia.hombre.kyber
 import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.keccak.api.SHA3_512
 import asia.hombre.kyber.exceptions.RandomBitGenerationException
+import asia.hombre.kyber.interfaces.RandomProvider
+import asia.hombre.kyber.internal.DefaultRandomProvider
 import asia.hombre.kyber.internal.KyberMath
-import org.kotlincrypto.random.CryptoRand
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.jvm.JvmStatic
@@ -39,20 +40,21 @@ import kotlin.jvm.JvmSynthetic
 @JsExport
 object KyberKeyGenerator {
     /**
-     * Generate ML-KEM keys.
+     * Generate ML-KEM keys using the DefaultRandomProvider.
      *
      * This method is the ML-KEM.KeyGen() specified in NIST FIPS 203.
      *
      * @param parameter [KyberParameter] of the keys to be generated.
+     * @param randomProvider (Optional) [RandomProvider] to use when generating the random and pke seed.
      * @return [KyberKEMKeyPair] - Contains the Encapsulation and Decapsulation Key.
      * @throws IllegalStateException when the generated random seed and pke seed are empty/null.
      */
     @JvmStatic
-    fun generate(parameter: KyberParameter): KyberKEMKeyPair {
+    fun generate(parameter: KyberParameter, randomProvider: RandomProvider = DefaultRandomProvider): KyberKEMKeyPair {
         return generate(
             parameter,
-            ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) },
-            ByteArray(KyberConstants.N_BYTES).apply { CryptoRand.Default.nextBytes(this) },
+            ByteArray(KyberConstants.N_BYTES).apply { randomProvider.fillWithRandom(this) },
+            ByteArray(KyberConstants.N_BYTES).apply { randomProvider.fillWithRandom(this) },
         )
     }
 
