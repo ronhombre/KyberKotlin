@@ -16,22 +16,22 @@
  * limitations under the License.
  */
 
-package asia.hombre.kyber.internal
+package asia.hombre.kyber
 
 import asia.hombre.kyber.interfaces.RandomProvider
 import org.kotlincrypto.random.CryptoRand
 
 /**
- * The default [RandomProvider] for use when the [RandomProvider] is not specified.
+ * The default [asia.hombre.kyber.interfaces.RandomProvider] for use when the [asia.hombre.kyber.interfaces.RandomProvider] is not specified.
  *
- * Changing this is not recommended unless you have sufficient motivation to do so. Please read [CryptoRand]'s
+ * Changing this is not recommended unless you have sufficient motivation to do so. Please read [org.kotlincrypto.random.CryptoRand]'s
  * source code before deciding on anything.
  *
  * @author Ron Lauren Hombre
  */
 object DefaultRandomProvider: RandomProvider {
     /**
-     * Uses [CryptoRand.Default] as a random source. This is an external library which wraps each platform's default
+     * Uses [org.kotlincrypto.random.CryptoRand.Default] as a random source. This is an external library which wraps each platform's default
      * random source to a common API.
      */
     override fun fillWithRandom(byteArray: ByteArray) {

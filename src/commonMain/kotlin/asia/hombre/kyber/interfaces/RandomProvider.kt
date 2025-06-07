@@ -26,8 +26,8 @@ interface RandomProvider {
      * Fills the byteArray with random bytes.
      *
      * The cryptographic security of this relies entirely on the function underneath. It is thus important to only use
-     * a custom RandomProvider when [asia.hombre.kyber.internal.DefaultRandomProvider] does not provide sufficient
-     * cryptographic security. In any case, the [asia.hombre.kyber.internal.DefaultRandomProvider] already uses the
+     * a custom RandomProvider when [asia.hombre.kyber.DefaultRandomProvider] does not provide sufficient
+     * cryptographic security. In any case, the [asia.hombre.kyber.DefaultRandomProvider] already uses the
      * strongest random source for each platform since [org.kotlincrypto.random.CryptoRand] wraps the default random
      * source for each platform.
      *

@@ -23,7 +23,7 @@ import asia.hombre.kyber.KyberKeyGenerator
 import asia.hombre.kyber.KyberParameter
 import asia.hombre.kyber.interfaces.MLKEM
 import asia.hombre.kyber.interfaces.RandomProvider
-import asia.hombre.kyber.internal.DefaultRandomProvider
+import asia.hombre.kyber.DefaultRandomProvider
 
 /**
  * ML-KEM-512 (RBG Strength: 128, NIST Security Category: 1)

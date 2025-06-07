@@ -172,6 +172,7 @@ internal object KyberMath {
         val f = IntArray(KyberConstants.N)
         val bits = expandBytesAsBits(bytes)
 
+        //TODO: This can be optimized by counting the number of ones directly from the byte array
         for(i in 0 until KyberConstants.N) {
             val offset = 2 * i * eta
             var x = 0

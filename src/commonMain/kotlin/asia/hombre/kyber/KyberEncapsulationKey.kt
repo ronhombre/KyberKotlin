@@ -22,7 +22,6 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.interfaces.RandomProvider
-import asia.hombre.kyber.internal.DefaultRandomProvider
 import asia.hombre.kyber.internal.KyberAgreement
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport

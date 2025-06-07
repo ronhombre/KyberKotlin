@@ -190,12 +190,10 @@ internal object KyberAgreement {
         if(plainText.fold(true) { acc, it -> acc and (it == 0.toByte()) })
             throw RandomBitGenerationException()
 
-        val sha3512 = SHA3_512()
-
-        sha3512.update(plainText)
-        sha3512.update(SHA3_256().digest(kyberEncapsulationKey.key.fullBytes))
-
-        val sharedKeyAndRandomness = sha3512.digest()
+        val sharedKeyAndRandomness = SHA3_512().apply {
+            update(plainText)
+            update(SHA3_256().digest(kyberEncapsulationKey.key.fullBytes))
+        }.digest()
 
         val cipherText = toCipherText(kyberEncapsulationKey.key, plainText, sharedKeyAndRandomness.copyOfRange(KyberConstants.SECRET_KEY_LENGTH, sharedKeyAndRandomness.size))
         plainText.fill(0) //Security feature

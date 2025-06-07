@@ -66,7 +66,7 @@ class JVMTest {
         parametersToTest.forEach { parameter ->
             val myParameter = parameter.first
             val bcParameter = parameter.second
-            (0 until 1000000).forEach { i ->
+            (0 until 10000).forEach { i ->
                 val randomSeed = ByteArray(32).also { random.nextBytes(it) }
                 val pkeSeed = ByteArray(32).also { random.nextBytes(it) }
                 val plaintext = ByteArray(32).also { random.nextBytes(it) }

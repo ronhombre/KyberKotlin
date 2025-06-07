@@ -22,7 +22,6 @@ import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.keccak.api.SHA3_512
 import asia.hombre.kyber.exceptions.RandomBitGenerationException
 import asia.hombre.kyber.interfaces.RandomProvider
-import asia.hombre.kyber.internal.DefaultRandomProvider
 import asia.hombre.kyber.internal.KyberMath
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
