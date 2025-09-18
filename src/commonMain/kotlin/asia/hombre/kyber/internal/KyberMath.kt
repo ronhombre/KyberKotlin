@@ -29,25 +29,6 @@ import kotlin.math.min
 internal object KyberMath {
 
     @JvmSynthetic
-    fun expandBytesAsBits(bytes: ByteArray): IntArray {
-        val bitArray = IntArray(bytes.size * 8)
-
-        for(i in bytes.indices) {
-            val byte = bytes[i].toInt()
-            bitArray[(8 * i)] = byte and 1
-            bitArray[(8 * i) + 1] = (byte shr 1) and 1
-            bitArray[(8 * i) + 2] = (byte shr 2) and 1
-            bitArray[(8 * i) + 3] = (byte shr 3) and 1
-            bitArray[(8 * i) + 4] = (byte shr 4) and 1
-            bitArray[(8 * i) + 5] = (byte shr 5) and 1
-            bitArray[(8 * i) + 6] = (byte shr 6) and 1
-            bitArray[(8 * i) + 7] = (byte shr 7) and 1
-        }
-
-        return bitArray
-    }
-
-    @JvmSynthetic
     fun decompress(shorts: IntArray, bitSize: Int) {
         for (i in shorts.indices)
             shorts[i] = ((KyberConstants.Q * shorts[i]) + (1 shl (bitSize - 1))) shr bitSize
@@ -169,22 +150,21 @@ internal object KyberMath {
 
     @JvmSynthetic
     fun samplePolyCBD(eta: Int, bytes: ByteArray): IntArray {
-        val f = IntArray(KyberConstants.N)
-        val bits = expandBytesAsBits(bytes)
+        val constants = IntArray(KyberConstants.N)
 
-        //TODO: This can be optimized by counting the number of ones directly from the byte array
-        for(i in 0 until KyberConstants.N) {
+        for (i in 0 until KyberConstants.N) {
             val offset = 2 * i * eta
-            var x = 0
-            var y = 0
-            for(j in 0 until eta) {
-                x += bits[offset + j]
-                y += bits[offset + eta + j]
+            var value = 0
+            for (j in 0 until eta) {
+                var index = offset + j
+                value += (bytes[index shr 3].toInt() ushr (index and 0b111)) and 1
+                index += eta //Move to next eta
+                value -= (bytes[index shr 3].toInt() ushr (index and 0b111)) and 1
             }
-            f[i] = toMontgomeryForm(x - y)
+            constants[i] = toMontgomeryForm(value)
         }
 
-        return f
+        return constants
     }
 
     @JvmSynthetic
@@ -328,6 +308,25 @@ internal object KyberMath {
     /**
      * From here on, these functions are used for testing or to generate constants.
      */
+
+    @JvmSynthetic
+    fun expandBytesAsBits(bytes: ByteArray): IntArray {
+        val bitArray = IntArray(bytes.size * 8)
+
+        for(i in bytes.indices) {
+            val byte = bytes[i].toInt()
+            bitArray[(8 * i)] = byte and 1
+            bitArray[(8 * i) + 1] = (byte shr 1) and 1
+            bitArray[(8 * i) + 2] = (byte shr 2) and 1
+            bitArray[(8 * i) + 3] = (byte shr 3) and 1
+            bitArray[(8 * i) + 4] = (byte shr 4) and 1
+            bitArray[(8 * i) + 5] = (byte shr 5) and 1
+            bitArray[(8 * i) + 6] = (byte shr 6) and 1
+            bitArray[(8 * i) + 7] = (byte shr 7) and 1
+        }
+
+        return bitArray
+    }
 
     @JvmSynthetic
     fun reverseBits(x: Int): UByte {
