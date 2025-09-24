@@ -97,7 +97,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("org.bouncycastle:bcprov-jdk15to18:1.81")
+                implementation("org.bouncycastle:bcprov-jdk15to18:1.82")
             }
         }
     }
