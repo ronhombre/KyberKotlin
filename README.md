@@ -1,4 +1,4 @@
-# KyberKotlin (2.0.0)
+# KyberKotlin (2.0.1)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
@@ -34,6 +34,13 @@ _**Digital security for all, everywhere, no matter who they are, or what they be
 This is a 100% Kotlin Multiplatform implementation of ML-KEM Final with super fast optimizations.
 It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
+
+> [!NOTE]
+> Version 2.0.1 brings astounding performance improvements by updating the underlying KeccakKotlin library to 2.0.1. The
+> memory allocations during JVMBenchmark was initially at 275.57GB(2.0.0) and it brought it down to 53.88GB(2.0.1); All
+> thanks to my full control over KeccakKotlin which gave me the freedom to optimize it ridiculously to bring my
+> implementation closer to native speeds. It also sped up the speed a little bit. Not too much but it's significant for
+> millions of kyber operations. (Profiling done using IntelliJ Profiler on Windows 11)
 
 ## Capabilities
 * Key Generation (512, 768, 1024)
@@ -75,7 +82,7 @@ NOTE: if _implementation_ does not work, replace with _compile_.
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:2.0.0'
+    implementation 'asia.hombre:kyber:2.0.1'
 }
 ```
 
@@ -85,7 +92,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:2.0.0")
+    implementation("asia.hombre:kyber:2.0.1")
 }
 ```
 
@@ -97,7 +104,7 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 

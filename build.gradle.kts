@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "2.0.0"
+version = "2.0.1"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
