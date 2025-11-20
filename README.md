@@ -35,6 +35,8 @@ This is a 100% Kotlin Multiplatform implementation of ML-KEM Final with super fa
 It depends on [KeccakKotlin](https://github.com/ronhombre/KeccakKotlin) and [secure-random](https://github.com/KotlinCrypto/secure-random) Kotlin libraries in order to implement SHA3, SHAKE, and
 Secure Random within the library.
 
+This library is tested against Bouncy Castle's Java ML-KEM implementation 1 million times for each parameter set. For quick testing we also do 10 thousand times (see JVMTest.kt file).
+
 > [!NOTE]
 > Version 2.0.1 brings astounding performance improvements by updating the underlying KeccakKotlin library to 2.0.1. The
 > memory allocations during JVMBenchmark was initially at 275.57GB(2.0.0) and it brought it down to 53.88GB(2.0.1); All
