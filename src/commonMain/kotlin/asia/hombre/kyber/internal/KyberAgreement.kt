@@ -29,8 +29,6 @@ import asia.hombre.kyber.KyberEncapsulationKey
 import asia.hombre.kyber.KyberEncapsulationResult
 import asia.hombre.kyber.KyberEncryptionKey
 import asia.hombre.kyber.exceptions.RandomBitGenerationException
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -41,8 +39,6 @@ import kotlin.jvm.JvmSynthetic
  * @constructor Stores the Decapsulation Key for decapsulating later.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 internal object KyberAgreement {
     /**
      * Private Encryption function.
@@ -66,7 +62,7 @@ internal object KyberAgreement {
         val randomnessVector = Array(parameter.K) { IntArray(KyberConstants.N) }
         val noiseVector = Array(parameter.K) { IntArray(KyberConstants.N) }
 
-        var constantTerm = IntArray(KyberConstants.N)
+        val constantTerm = IntArray(KyberConstants.N)
 
         for(i in 0 until parameter.K) {
             nttKeyVector[i] = KyberMath.fastByteDecode(
@@ -115,7 +111,7 @@ internal object KyberAgreement {
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
         KyberMath.compressAndEncodeInto(encodedTerms, 0, constantTerm, parameter.DV)
 
-        var coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector, true)
+        val coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector, true)
         val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
         for(i in 0 until parameter.K) {
             KyberMath.nttInv(coefficients[i])

@@ -23,8 +23,6 @@ import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.interfaces.RandomProvider
 import asia.hombre.kyber.internal.KyberAgreement
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -36,8 +34,6 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the Encryption Key which is the Encapsulation Key itself.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberEncapsulationKey internal constructor(
     /**
      * The [KyberEncryptionKey].
@@ -45,7 +41,7 @@ class KyberEncapsulationKey internal constructor(
     override val key: KyberEncryptionKey
 ) : KyberKEMKey {
     /**
-     * All the bytes of the Encapsulation Key.
+     * A copy of the Encapsulation Key in bytes.
      *
      * @return [ByteArray]
      */
@@ -55,7 +51,7 @@ class KyberEncapsulationKey internal constructor(
 
     companion object {
         /**
-         * Wrap raw Encapsulation Key bytes into a [KyberEncapsulationKey] object.
+         * Copies raw Encapsulation Key bytes into a [KyberEncapsulationKey] object.
          *
          * @param bytes [ByteArray]
          * @return [KyberEncapsulationKey]
@@ -70,7 +66,7 @@ class KyberEncapsulationKey internal constructor(
     }
 
     /**
-     * Create an independent copy from an untrusted source.
+     * Create an independent deep copy from an untrusted source.
      *
      * @return [KyberEncapsulationKey]
      */

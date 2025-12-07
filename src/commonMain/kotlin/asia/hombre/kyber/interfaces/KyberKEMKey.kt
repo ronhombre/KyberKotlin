@@ -18,15 +18,9 @@
 
 package asia.hombre.kyber.interfaces
 
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
-
 /**
  * ML-KEM key.
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 internal interface KyberKEMKey {
-    @Suppress("NON_EXPORTABLE_TYPE") //This throws a warning which should be a bug in the Kotlin to JS compiler.
     val key: KyberPKEKey
 }

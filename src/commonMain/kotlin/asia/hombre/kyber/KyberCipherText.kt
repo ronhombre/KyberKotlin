@@ -20,8 +20,6 @@ package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.internal.KyberAgreement
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -33,8 +31,6 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the parameter, encoded coefficients, and encoded terms of the Cipher Text.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberCipherText internal constructor(
     /**
      * The [KyberParameter] associated with this [KyberCipherText].
@@ -46,7 +42,7 @@ class KyberCipherText internal constructor(
     internal val encodedCoefficients: ByteArray = encodedCoefficients.copyOf()
     internal val encodedTerms: ByteArray = encodedTerms.copyOf()
     /**
-     * All the bytes of the Cipher Text.
+     * A copy of the Cipher Text in bytes.
      *
      * @return [ByteArray]
      */
@@ -63,7 +59,7 @@ class KyberCipherText internal constructor(
 
     companion object {
         /**
-         * Wrap raw Cipher Text bytes into a [KyberCipherText] object.
+         * Copies raw Cipher Text bytes into a [KyberCipherText] object.
          *
          * @param bytes [ByteArray]
          * @return [KyberCipherText]
@@ -85,7 +81,7 @@ class KyberCipherText internal constructor(
     }
 
     /**
-     * Create an independent copy from an untrusted source.
+     * Create an independent deep copy from an untrusted source.
      *
      * @return [KyberCipherText]
      */

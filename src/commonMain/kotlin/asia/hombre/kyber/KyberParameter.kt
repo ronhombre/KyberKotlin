@@ -19,8 +19,6 @@
 package asia.hombre.kyber
 
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
@@ -31,8 +29,7 @@ import kotlin.jvm.JvmStatic
  *
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
+@Suppress("PropertyName")
 enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int, val DV: Int) {
     /**
      * ML-KEM-512 (RBG Strength: 128, NIST Security Category: 1).
@@ -123,6 +120,7 @@ enum class KyberParameter(val K: Int, val ETA1: Int, val ETA2: Int, val DU: Int,
          * @return [KyberParameter]
          * @throws UnsupportedKyberVariantException when the byte length does not match any parameter set.
          */
+        @Suppress("unused")
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class)
         fun findByEncapsulationKeySize(length: Int): KyberParameter {

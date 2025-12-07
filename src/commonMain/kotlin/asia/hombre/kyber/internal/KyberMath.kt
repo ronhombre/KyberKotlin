@@ -169,17 +169,15 @@ internal object KyberMath {
 
     @JvmSynthetic
     fun ntt(polynomials: IntArray): IntArray {
-        val output = polynomials
-
         var k = 1
         var len = KyberConstants.N shr 1
 
         while(len >= 2) {
             for(start in 0 until KyberConstants.N step (2 * len)) {
                 for(j in start until (start + len)) {
-                    val temp = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len])
-                    output[j + len] = output[j] - temp
-                    output[j] = output[j] + temp
+                    val temp = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], polynomials[j + len])
+                    polynomials[j + len] = polynomials[j] - temp
+                    polynomials[j] = polynomials[j] + temp
                 }
                 k++
             }
@@ -187,22 +185,21 @@ internal object KyberMath {
             len = len shr 1
         }
 
-        return output
+        return polynomials
     }
 
     @JvmSynthetic
     fun nttInv(nttPolynomials: IntArray): IntArray {
-        val output = nttPolynomials
-
         var k = (KyberConstants.N shr 1) - 1
         var len = 2
 
         while(len <= (KyberConstants.N shr 1)) {
             for(start in 0 until KyberConstants.N step (2 * len)) {
                 for(j in start until (start + len)) {
-                    val temp = output[j]
-                    output[j] = temp + output[j + len]
-                    output[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k], output[j + len] - temp)
+                    val temp = nttPolynomials[j]
+                    nttPolynomials[j] = temp + nttPolynomials[j + len]
+                    nttPolynomials[j + len] = productOf(KyberConstants.PRECOMPUTED_ZETAS_TABLE[k],
+                        nttPolynomials[j + len] - temp)
                 }
                 k--
             }
@@ -210,10 +207,10 @@ internal object KyberMath {
             len = len shl 1
         }
 
-        for(i in output.indices)
-            output[i] = productOf(output[i], 512) // toMontgomeryForm(3303) = 512
+        for(i in nttPolynomials.indices)
+            nttPolynomials[i] = productOf(nttPolynomials[i], 512) // toMontgomeryForm(3303) = 512
 
-        return output
+        return nttPolynomials
     }
 
     @JvmSynthetic
@@ -349,8 +346,9 @@ internal object KyberMath {
 
         var c = 1L
 
-        for(i in 0 until e)
+        (0 until e).forEach { _ ->
             c = (b * c) % m
+        }
 
         return c
     }
@@ -359,7 +357,7 @@ internal object KyberMath {
     private fun pow(a: Int, b: Int): Long {
         var out = 1L
 
-        for(i in 0 until b) {
+        (0 until b).forEach { _ ->
             out *= a
         }
 
@@ -390,6 +388,7 @@ internal object KyberMath {
         return oldS
     }
 
+    @Suppress("unused")
     @JvmSynthetic
     @Throws(IllegalArgumentException::class)
     fun decodeHex(string: String): ByteArray {

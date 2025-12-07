@@ -32,6 +32,7 @@ import asia.hombre.kyber.DefaultRandomProvider
  * @author Ron Lauren Hombre
  * @since 2.0.0
  */
+@Suppress("unused", "ClassName")
 class MLKEM_512(private val randomProvider: RandomProvider = DefaultRandomProvider): MLKEM {
     override val parameter: KyberParameter = KyberParameter.ML_KEM_512
     override fun generate(): KyberKEMKeyPair = KyberKeyGenerator.generate(parameter, randomProvider)

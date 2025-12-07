@@ -19,14 +19,10 @@
 package asia.hombre.kyber.interfaces
 
 import asia.hombre.kyber.KyberParameter
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 
 /**
  * K-PKE key.
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 internal interface KyberPKEKey {
     val parameter: KyberParameter
 }

@@ -23,8 +23,6 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.internal.KyberAgreement
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -36,8 +34,6 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the Encryption Key, Decryption Key, Hash, and Random Seed composing the Decapsulation Key.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberDecapsulationKey internal constructor(
     /**
      * The [KyberDecryptionKey].
@@ -66,7 +62,7 @@ class KyberDecapsulationKey internal constructor(
     val parameter = key.parameter
 
     /**
-     * All the bytes of the Cipher Text.
+     * A copy of the Decapsulation Key in bytes.
      *
      * @return [ByteArray]
      */
@@ -85,7 +81,7 @@ class KyberDecapsulationKey internal constructor(
 
     companion object {
         /**
-         * Wrap raw Decapsulation Key bytes into a [KyberDecapsulationKey] object.
+         * Copies raw Decapsulation Key bytes into a [KyberDecapsulationKey] object.
          *
          * @param bytes [ByteArray]
          * @return [KyberDecapsulationKey]
@@ -107,7 +103,7 @@ class KyberDecapsulationKey internal constructor(
     }
 
     /**
-     * Create an independent copy from an untrusted source.
+     * Create an independent deep copy from an untrusted source.
      *
      * @return [KyberDecapsulationKey]
      */

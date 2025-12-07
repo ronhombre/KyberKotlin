@@ -22,8 +22,6 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -35,8 +33,6 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the parameter and raw bytes of the Decryption Key.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberDecryptionKey internal constructor(
     /**
      * The [KyberParameter] associated with this [KyberDecryptionKey].
@@ -54,17 +50,20 @@ class KyberDecryptionKey internal constructor(
     }
 
     /**
-     * All the bytes of the Decryption Key.
+     * A copy of the Decryption Key in bytes.
+     *
+     * Note that this is different from the Decapsulation key.
      *
      * @return [ByteArray]
      */
+    @Suppress("unused")
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
         get() = keyBytes.copyOf()
 
     companion object {
         /**
-         * Wrap raw Decryption Key bytes into a [KyberDecryptionKey] object.
+         * Copies raw Decryption Key bytes into a [KyberDecryptionKey] object.
          *
          * @param bytes [ByteArray]
          * @return [KyberDecryptionKey]
@@ -79,7 +78,7 @@ class KyberDecryptionKey internal constructor(
     }
 
     /**
-     * Create an independent copy from an untrusted source.
+     * Create an independent deep copy from an untrusted source.
      *
      * @return [KyberDecryptionKey]
      */

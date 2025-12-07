@@ -23,8 +23,6 @@ import asia.hombre.keccak.api.SHA3_512
 import asia.hombre.kyber.exceptions.RandomBitGenerationException
 import asia.hombre.kyber.interfaces.RandomProvider
 import asia.hombre.kyber.internal.KyberMath
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmStatic
 import kotlin.jvm.JvmSynthetic
 
@@ -35,8 +33,6 @@ import kotlin.jvm.JvmSynthetic
  *
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 object KyberKeyGenerator {
     /**
      * Generate ML-KEM keys using the DefaultRandomProvider.

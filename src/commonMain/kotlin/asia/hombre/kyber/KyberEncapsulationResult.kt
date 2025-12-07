@@ -18,8 +18,6 @@
 
 package asia.hombre.kyber
 
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 
 /**
@@ -30,8 +28,6 @@ import kotlin.jvm.JvmName
  * @constructor Stores the Shared Secret Key and the Cipher Text.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberEncapsulationResult internal constructor(
     private val sharedSecretKey_: ByteArray,
     private val cipherText_: KyberCipherText

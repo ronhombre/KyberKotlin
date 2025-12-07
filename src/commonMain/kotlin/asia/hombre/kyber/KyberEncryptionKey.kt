@@ -22,8 +22,6 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -35,8 +33,6 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the parameter, raw bytes of the Encryption Key, and the NTT Seed.
  * @author Ron Lauren Hombre
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 class KyberEncryptionKey internal constructor(
     /**
      * The [KyberParameter] associated with this [KyberEncryptionKey].
@@ -56,7 +52,9 @@ class KyberEncryptionKey internal constructor(
     }
 
     /**
-     * All the bytes of the Encryption Key.
+     * A copy of the Encryption Key in bytes.
+     *
+     * Note that this is different from the Encapsulation key but is effectively the same.
      *
      * @return [ByteArray]
      */
@@ -73,7 +71,7 @@ class KyberEncryptionKey internal constructor(
 
     companion object {
         /**
-         * Wrap raw Encryption Key bytes into a [KyberEncryptionKey] object.
+         * Copies raw Encryption Key bytes into a [KyberEncryptionKey] object.
          *
          * @param bytes [ByteArray]
          * @return [KyberEncryptionKey]
@@ -93,7 +91,7 @@ class KyberEncryptionKey internal constructor(
     }
 
     /**
-     * Create an independent copy from an untrusted source.
+     * Create an independent deep copy from an untrusted source.
      *
      * @return [KyberEncryptionKey]
      */
