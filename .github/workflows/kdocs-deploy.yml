@@ -38,7 +38,7 @@ jobs:
         with:
           java-version: 8
       - name: Build KDocs with Dokka
-        run: chmod +x gradlew && ./gradlew dokkaHtml
+        run: chmod +x gradlew && ./gradlew dokkaGenerateHtml
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
