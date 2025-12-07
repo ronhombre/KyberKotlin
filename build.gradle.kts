@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
@@ -254,30 +254,24 @@ tasks.register<Copy>("bundleNPM") {
     }
 }
 
-tasks.dokkaHtml.configure {
-    dokkaSourceSets {
-        named("commonMain") {
-            // Adjust visibility to include internal and private members
-            perPackageOption {
-                matchingRegex.set(".*") // Match all packages
-                includeNonPublic.set(false)
+dokka {
+    pluginsConfiguration.html {
+        @Suppress("UnstableApiUsage")
+        footerMessage = "Copyright (c) 2025 Ron Lauren Hombre"
+    }
+
+    dokkaPublications.html {
+        dokkaSourceSets {
+            named("commonMain") {
+                perPackageOption {
+                    matchingRegex.set(".*")
+                }
+                reportUndocumented.set(true)
+                documentedVisibilities(
+                    VisibilityModifier.Public,
+                    VisibilityModifier.Protected,
+                )
             }
-            // Optionally, report undocumented members
-            reportUndocumented.set(true)
         }
     }
-}
-
-tasks.withType<DokkaTask>().configureEach {
-    val dokkaBaseConfiguration = """
-    {
-      "footerMessage": "(C) 2025 Ron Lauren Hombre"
-    }
-    """
-    pluginsMapConfiguration.set(
-        mapOf(
-            // fully qualified plugin name to json configuration
-            "org.jetbrains.dokka.base.DokkaBase" to dokkaBaseConfiguration
-        )
-    )
 }
