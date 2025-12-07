@@ -47,7 +47,7 @@ repositories {
 
 kotlin {
     jvm {
-        val main by compilations.getting {
+        @Suppress("unused") val main by compilations.getting {
             compileTaskProvider.configure {
                 //Set up the Kotlin compiler options for the 'main' compilation:
                 compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
@@ -57,7 +57,7 @@ kotlin {
             output //Get the main compilation output
         }
 
-        val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+        @Suppress("unused") val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
             val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
@@ -84,18 +84,18 @@ kotlin {
     androidNativeArm64()
     androidNativeX64()
     sourceSets {
-        val commonMain by getting {
+        @Suppress("unused") val commonMain by getting {
             dependencies {
                 implementation("org.kotlincrypto.random:crypto-rand:$random")
                 implementation("asia.hombre:keccak:$keccak")
             }
         }
-        val commonTest by getting {
+        @Suppress("unused") val commonTest by getting {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
             }
         }
-        val jvmTest by getting {
+        @Suppress("unused") val jvmTest by getting {
             dependencies {
                 implementation("org.bouncycastle:bcprov-jdk15to18:1.81")
             }
@@ -179,7 +179,9 @@ for (publication in publishing.publications.asMap) {
         from(mavenDir)
         val mavenDeepDir = artifact.groupId.replace(".", "/") + "/" + artifact.artifactId
         include("$mavenDeepDir/*/*")
+        @Suppress("UnstableApiUsage")
         destinationDirectory = mavenDir
+        @Suppress("UnstableApiUsage")
         archiveFileName = parseArtifactArchiveName(artifact)
     }
 
