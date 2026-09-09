@@ -31,7 +31,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: coretto
+          distribution: corretto
           java-version: '21'
 
       - run: |
