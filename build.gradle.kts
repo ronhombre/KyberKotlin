@@ -1,15 +1,12 @@
-@file:OptIn(ExperimentalWasmDsl::class)
-
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 
-val kmm: String by properties
-val keccak: String by properties
-val random: String by properties
+val kmm: String = providers.gradleProperty("kmm").get()
+val keccak: String = providers.gradleProperty("keccak").get()
+val random: String = providers.gradleProperty("random").get()
 
 plugins {
     kotlin("multiplatform") //Kotlin Multiplatform
@@ -47,7 +44,8 @@ repositories {
 
 kotlin {
     jvm {
-        @Suppress("unused") val main by compilations.getting {
+        @Suppress("unused")
+        compilations.getByName("main") {
             compileTaskProvider.configure {
                 //Set up the Kotlin compiler options for the 'main' compilation:
                 compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
@@ -57,7 +55,8 @@ kotlin {
             output //Get the main compilation output
         }
 
-        @Suppress("unused") val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+        @Suppress("unused")
+        tasks.getByName("jvmJar", org.gradle.jvm.tasks.Jar::class) {
             archiveFileName.set(jarFileName)
 
             val jvmMainCompilation = kotlin.targets.getByName("jvm").compilations.getByName("main") as KotlinJvmCompilation
@@ -84,18 +83,21 @@ kotlin {
     androidNativeArm64()
     androidNativeX64()
     sourceSets {
-        @Suppress("unused") val commonMain by getting {
+        @Suppress("unused")
+        getByName("commonMain") {
             dependencies {
                 implementation("org.kotlincrypto.random:crypto-rand:$random")
                 implementation("asia.hombre:keccak:$keccak")
             }
         }
-        @Suppress("unused") val commonTest by getting {
+        @Suppress("unused")
+        getByName("commonTest") {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
             }
         }
-        @Suppress("unused") val jvmTest by getting {
+        @Suppress("unused")
+        getByName("jvmTest") {
             dependencies {
                 implementation("org.bouncycastle:bcprov-jdk15to18:1.81")
             }
@@ -169,23 +171,23 @@ fun parseArtifactArchiveName(artifact: MavenPublication): String {
     return artifact.artifactId + "-" + artifact.version + "-bundle.zip"
 }
 
-for (publication in publishing.publications.asMap) {
-    val artifact = publication.value as MavenPublication
+for ((_, value) in publishing.publications.asMap) {
+    val artifact = value as MavenPublication
     val parsedArtifactId = parseArtifactId(artifact.artifactId)
     val bundleFileName = parseArtifactArchiveName(artifact)
 
     tasks.register<Zip>("bundle$parsedArtifactId") {
+        description = "Bundles the Maven Artifact"
         group = "Bundle"
         from(mavenDir)
         val mavenDeepDir = artifact.groupId.replace(".", "/") + "/" + artifact.artifactId
         include("$mavenDeepDir/*/*")
-        @Suppress("UnstableApiUsage")
         destinationDirectory = mavenDir
-        @Suppress("UnstableApiUsage")
         archiveFileName = parseArtifactArchiveName(artifact)
     }
 
     tasks.register<Exec>("publish" + parsedArtifactId + "ToMavenCentral") {
+        description = "Publishes and bundles the Maven Artifact to Maven Central"
         mustRunAfter("bundle$parsedArtifactId")
         group = "Publish"
         /*if(!mavenDir.resolve(bundleFileName).exists())
@@ -212,6 +214,7 @@ for (publication in publishing.publications.asMap) {
 }
 
 tasks.register("bundleAll") {
+    description = "Bundles all the buildable Maven Artifacts"
     group = "Bundle"
     dependsOn("publish")
 
@@ -223,6 +226,7 @@ tasks.register("bundleAll") {
 }
 
 tasks.register("publishAllToMavenCentral") {
+    description = "Publishes and bundles all the buildable Maven Artifacts"
     group = "Publish"
     dependsOn("bundleAll")
 
@@ -234,6 +238,7 @@ tasks.register("publishAllToMavenCentral") {
 }
 
 tasks.register("packageNPM") {
+    description = "Generate an NPM Package build directory"
     val packageSourcePath = projectDir.toPath().resolve("npm.json")
     val packagePath = projectDir.toPath().resolve("npm").resolve("package.json")
 
@@ -243,9 +248,10 @@ tasks.register("packageNPM") {
 }
 
 tasks.register<Copy>("bundleNPM") {
+    description = "Bundles the NPM Package for upload to NPM"
     dependsOn("jsBrowserProductionWebpack", "packageNPM")
 
-    from(buildDir.resolve("js").resolve("packages").resolve(project.name).resolve("kotlin"))
+    from(layout.buildDirectory.dir("js/packages/${project.name}/kotlin"))
     into(npmKotlinDir)
 
     doFirst {
@@ -256,7 +262,6 @@ tasks.register<Copy>("bundleNPM") {
 
 dokka {
     pluginsConfiguration.html {
-        @Suppress("UnstableApiUsage")
         footerMessage = "Copyright (c) 2025 Ron Lauren Hombre"
     }
 
