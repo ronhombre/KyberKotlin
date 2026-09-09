@@ -21,13 +21,13 @@ package asia.hombre.kyber.tests
 import asia.hombre.kyber.*
 import asia.hombre.kyber.internal.KyberAgreement
 import asia.hombre.kyber.internal.KyberMath
+import org.bouncycastle.crypto.generators.MLKEMKeyPairGenerator
+import org.bouncycastle.crypto.kems.MLKEMGenerator
+import org.bouncycastle.crypto.params.MLKEMKeyGenerationParameters
+import org.bouncycastle.crypto.params.MLKEMParameters
+import org.bouncycastle.crypto.params.MLKEMPrivateKeyParameters
+import org.bouncycastle.crypto.params.MLKEMPublicKeyParameters
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMGenerator
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMKeyGenerationParameters
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMKeyPairGenerator
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMParameters
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMPrivateKeyParameters
-import org.bouncycastle.pqc.crypto.mlkem.MLKEMPublicKeyParameters
 import org.junit.Ignore
 import org.junit.Test
 import org.kotlincrypto.random.CryptoRand
@@ -67,13 +67,26 @@ class JVMTest {
             val myParameter = parameter.first
             val bcParameter = parameter.second
             (0 until 10000).forEach { i ->
-                val randomSeed = ByteArray(32).also { random.nextBytes(it) }
-                val pkeSeed = ByteArray(32).also { random.nextBytes(it) }
+                val combinedSeed = ByteArray(64).also { random.nextBytes(it) }
+                val pkeSeed = combinedSeed.copyOfRange(0, 32)
+                val randomSeed = combinedSeed.copyOfRange(32, 64)
                 val plaintext = ByteArray(32).also { random.nextBytes(it) }
 
+                val deterministicRandom = object : SecureRandom() {
+                    private var index = 0
+
+                    override fun nextBytes(bytes: ByteArray) {
+                        val copyLength = minOf(bytes.size, combinedSeed.size - index)
+                        if (copyLength > 0) {
+                            combinedSeed.copyInto(bytes, 0, index, index + copyLength)
+                            index += copyLength
+                        }
+                    }
+                }
+
                 val bcKeypair = MLKEMKeyPairGenerator().apply {
-                    init(MLKEMKeyGenerationParameters(random, bcParameter))
-                }.internalGenerateKeyPair(pkeSeed, randomSeed)
+                    init(MLKEMKeyGenerationParameters(deterministicRandom, bcParameter))
+                }.generateKeyPair()
                 val bcDecapsKey = bcKeypair.private as MLKEMPrivateKeyParameters
                 val bcEncapsKey = bcKeypair.public as MLKEMPublicKeyParameters
 
@@ -86,6 +99,7 @@ class JVMTest {
 
                 val generator = MLKEMGenerator(random)
 
+                @Suppress("DEPRECATION")
                 val bcResult = generator.internalGenerateEncapsulated(bcEncapsKey, plaintext)
                 val result = KyberAgreement.encapsulate(encapsKey, plaintext)
 
@@ -99,6 +113,7 @@ class JVMTest {
         }
     }
 
+    @Suppress("unused")
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0
