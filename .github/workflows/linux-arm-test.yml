@@ -8,21 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-arm-test:
-    name: "linuxArm64Test"
-
-    runs-on: 'ubuntu-26.04-arm'
-    timeout-minutes: 360
-    permissions:
-      security-events: write
-
-      actions: read
-      contents: read
-
-    strategy:
-      fail-fast: true
-      matrix:
-        language: [ 'java-kotlin' ]
+  build-linux-arm-test:
+    name: "Build linuxArm64Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -34,5 +23,39 @@ jobs:
           distribution: corretto
           java-version: '21'
 
-      - run: |
-          ./gradlew :linuxArm64Test --tests "asia.hombre.kyber.Tests"
+      - name: Compile Native Test Binary
+        run: |
+          chmod +x gradlew
+          ./gradlew :linuxArm64TestBinaries
+
+      - name: Upload Test Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64-test-binary
+          path: build/bin/linuxArm64/debugTest/
+          retention-days: 1
+
+  linux-arm-test:
+    name: "Run linuxArm64Test"
+    needs: build-linux-arm-test
+    runs-on: 'ubuntu-26.04-arm'
+    timeout-minutes: 60
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Download Test Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-arm64-test-binary
+          path: test-binary-dir
+
+      - name: Execute Tests
+        run: |
+          TEST_BIN=$(find test-binary-dir -name "*.kexe" | head -n 1)
+          
+          chmod +x "$TEST_BIN"
+          
+          "$TEST_BIN" --ktest_filter="asia.hombre.kyber.Tests.*"
