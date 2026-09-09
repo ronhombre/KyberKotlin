@@ -36,4 +36,4 @@ jobs:
 
       - run: |
           echo "Run Tests"
-          ./gradlew --tests "asia.hombre.kyber.Tests"
+          ./gradlew test --tests "asia.hombre.kyber.Tests"
