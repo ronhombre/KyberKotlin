@@ -33,7 +33,7 @@ jobs:
       - name: List keys
         run: gpg -K
 
-      - name: Publish Linux, JVM, JS, Android, and Root Metadata
+      - name: Publish Linux, JVM, Android, and Root Metadata
         env:
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -43,7 +43,6 @@ jobs:
           chmod +x gradlew
           ./gradlew \
           publishJvmPublicationToMavenRepository \
-          publishJsPublicationToMavenRepository \
           publishLinuxX64PublicationToMavenRepository \
           publishLinuxArm64PublicationToMavenRepository \
           publishAndroidNativeArm32PublicationToMavenRepository \
