@@ -1,0 +1,38 @@
+name: "MINGW Test X64 master"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  mingw-x64-test:
+    name: "mingwX64Test"
+
+    runs-on: 'windows-latest'
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: true
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: '21'
+
+      - run: |
+          ./gradlew :mingwX64Test --tests "asia.hombre.kyber.Tests"

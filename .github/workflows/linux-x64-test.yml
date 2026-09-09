@@ -1,0 +1,38 @@
+name: "Linux Test X64 master"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  linux-x64-test:
+    name: "linuxX64Test"
+
+    runs-on: 'ubuntu-26.04'
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: true
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: '21'
+
+      - run: |
+          ./gradlew :linuxX64Test --tests "asia.hombre.kyber.Tests"

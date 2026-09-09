@@ -1,0 +1,67 @@
+name: "iOS Test ARM master"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  ios-arm-test:
+    name: "iosArm64Test"
+
+    runs-on: 'macos-26'
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: true
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: '21'
+
+      - run: |
+          ./gradlew :iosArm64Test --tests "asia.hombre.kyber.Tests"
+
+  ios-arm-sim-test:
+    name: "iosSimulatorArm64Test"
+
+    runs-on: 'macos-26'
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: true
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: '21'
+
+      - run: |
+          ./gradlew :iosSimulatorArm64Test --tests "asia.hombre.kyber.Tests"

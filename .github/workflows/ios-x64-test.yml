@@ -1,4 +1,4 @@
-name: "Linux Test X64 master"
+name: "iOS Test X64 master"
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Test
+  ios-x64-test:
+    name: "iosX64Test"
 
-    runs-on: 'ubuntu-latest'
+    runs-on: 'macos-26-intel'
     timeout-minutes: 360
     permissions:
       security-events: write
@@ -35,5 +35,4 @@ jobs:
           java-version: '21'
 
       - run: |
-          echo "Run Tests"
-          ./gradlew commonTest --tests "asia.hombre.kyber.Tests"
+          ./gradlew :iosX64Test --tests "asia.hombre.kyber.Tests"
