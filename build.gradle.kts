@@ -237,29 +237,6 @@ tasks.register("publishAllToMavenCentral") {
     }
 }
 
-tasks.register("packageNPM") {
-    description = "Generate an NPM Package build directory"
-    val packageSourcePath = projectDir.toPath().resolve("npm.json")
-    val packagePath = projectDir.toPath().resolve("npm").resolve("package.json")
-
-    var packageFile = String(Files.readAllBytes(packageSourcePath))
-    packageFile = packageFile.replace("<VERSION>", version.toString()).replace("<DESCRIPTION>", project.description.toString())
-    Files.write(packagePath, packageFile.toByteArray())
-}
-
-tasks.register<Copy>("bundleNPM") {
-    description = "Bundles the NPM Package for upload to NPM"
-    dependsOn("jsBrowserProductionWebpack", "packageNPM")
-
-    from(layout.buildDirectory.dir("js/packages/${project.name}/kotlin"))
-    into(npmKotlinDir)
-
-    doFirst {
-        delete(npmKotlinDir)
-        mkdir(npmKotlinDir)
-    }
-}
-
 dokka {
     pluginsConfiguration.html {
         footerMessage = "Copyright (c) 2025 Ron Lauren Hombre"
