@@ -2,7 +2,6 @@ import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import java.io.ByteArrayOutputStream
-import java.nio.file.Files
 
 val kmm: String = providers.gradleProperty("kmm").get()
 val keccak: String = providers.gradleProperty("keccak").get()
@@ -16,7 +15,7 @@ plugins {
 }
 
 group = "asia.hombre"
-version = "2.0.1"
+version = "2.1.0"
 description = "ML-KEM (NIST FIPS 203) optimized implementation on 100% Kotlin."
 
 val projectName = "kyber"
@@ -111,17 +110,6 @@ publishing {
             url = mavenDir.toURI()
         }
     }
-    publications {
-        //Dynamically rename all artifacts
-        this.forEach {
-            val mavenPublication = it as MavenPublication
-            mavenPublication.artifactId = projectName +
-                    if(mavenPublication.artifactId.contains("-"))
-                        "-" + mavenPublication.artifactId.split("-").last()
-                    else
-                        ""
-        }
-    }
     publications.withType<MavenPublication> {
         // Stub javadoc.jar artifact
         artifact(tasks.register("${name}JavadocJar", Jar::class) {
@@ -160,79 +148,73 @@ fun parseArtifactId(artifactId: String): String {
     return list.joinToString("")
 }
 
-fun parseArtifactArchiveName(artifact: MavenPublication): String {
-    return artifact.artifactId + "-" + artifact.version + "-bundle.zip"
+fun parseArtifactArchiveName(artifactName: String, version: String): String {
+    return "$artifactName-$version-bundle.zip"
 }
 
-for ((_, value) in publishing.publications.asMap) {
-    val artifact = value as MavenPublication
-    val parsedArtifactId = parseArtifactId(artifact.artifactId)
-    val bundleFileName = parseArtifactArchiveName(artifact)
-
-    tasks.register<Zip>("bundle$parsedArtifactId") {
-        description = "Bundles the Maven Artifact"
-        group = "Bundle"
-        from(mavenDir)
-        val mavenDeepDir = artifact.groupId.replace(".", "/") + "/" + artifact.artifactId
-        include("$mavenDeepDir/*/*")
-        destinationDirectory = mavenDir
-        archiveFileName = parseArtifactArchiveName(artifact)
-    }
-
-    tasks.register<Exec>("publish" + parsedArtifactId + "ToMavenCentral") {
-        description = "Publishes and bundles the Maven Artifact to Maven Central"
-        mustRunAfter("bundle$parsedArtifactId")
-        group = "Publish"
-        /*if(!mavenDir.resolve(bundleFileName).exists())
-            throw RuntimeException("Bundle does not exist! Please run `bundle$parsedArtifactId`")*/
-
-        commandLine(
-            "curl", "-X", "POST",
-            "https://central.sonatype.com/api/v1/publisher/upload?name=${artifact.artifactId}&publishingType=" + if(isAutomated) "AUTOMATED" else "USER_MANAGED",
-            "-H", "accept: text/plain",
-            "-H", "Content-Type: multipart/form-data",
-            "-H", "Authorization: Bearer " + System.getenv("SONATYPE_TOKEN"),
-            "-F", "bundle=@$bundleFileName;type=application/x-zip-compressed"
-        )
-        workingDir(mavenDir.toString())
-        standardOutput = ByteArrayOutputStream()
-        errorOutput = ByteArrayOutputStream()
-
-        // Execute some action with the output
-        doLast {
-            println("$standardOutput")
-            println("$errorOutput")
-        }
-    }
-}
-
-tasks.register("bundleAll") {
+val bundleAllTask = tasks.register("bundleAll") {
     description = "Bundles all the buildable Maven Artifacts"
     group = "Bundle"
-    dependsOn("publish")
-
-    for (publication in publishing.publications.asMap) {
-        val artifact = publication.value as MavenPublication
-
-        dependsOn("bundle" + parseArtifactId(artifact.artifactId))
-    }
+    //dependsOn("publish")
 }
 
-tasks.register("publishAllToMavenCentral") {
+val publishAllTask = tasks.register("publishAllToMavenCentral") {
     description = "Publishes and bundles all the buildable Maven Artifacts"
     group = "Publish"
     dependsOn("bundleAll")
+}
 
-    for (publication in publishing.publications.asMap) {
-        val artifact = publication.value as MavenPublication
+gradle.projectsEvaluated {
+    publishing.publications.withType<MavenPublication>().configureEach {
+        artifactId = projectName + if (artifactId.contains("-")) "-" + artifactId.split("-").last() else ""
+        val artifact = this
+        val pubNameCap = artifact.name.replaceFirstChar { it.uppercase() }
+        val bundleFileName = parseArtifactArchiveName(artifact.artifactId, artifact.version)
+        val bundleTask = tasks.register<Zip>("bundle$pubNameCap") {
+            description = "Bundles the Maven Artifact"
+            group = "Bundle"
+            from(mavenDir)
+            val mavenDeepDir = artifact.groupId.replace(".", "/") + "/" + artifact.artifactId
+            include("$mavenDeepDir/*/*")
+            destinationDirectory.set(mavenDir)
+            archiveFileName.set(bundleFileName)
+        }
 
-        dependsOn("publish" + parseArtifactId(artifact.artifactId) + "ToMavenCentral")
+        val publishTask = tasks.register<Exec>("publish${pubNameCap}ToMavenCentral") {
+            description = "Publish the Maven Artifact to Maven Central"
+            mustRunAfter(bundleTask)
+            group = "Publish"
+
+            commandLine(
+                "curl", "-X", "POST",
+                "https://central.sonatype.com/api/v1/publisher/upload?name=${artifact.artifactId}&publishingType=" + if(isAutomated) "AUTOMATED" else "USER_MANAGED",
+                "-H", "accept: text/plain",
+                "-H", "Content-Type: multipart/form-data",
+                "-H", "Authorization: Bearer " + System.getenv("SONATYPE_TOKEN"),
+                "-F", "bundle=@$bundleFileName;type=application/x-zip-compressed"
+            )
+            workingDir(mavenDir)
+
+            val stdOut = ByteArrayOutputStream()
+            val errOut = ByteArrayOutputStream()
+            standardOutput = stdOut
+            errorOutput = errOut
+
+            doLast {
+                println(stdOut.toString())
+                println(errOut.toString())
+            }
+        }
+
+        // Attach dynamic tasks to root tasks
+        bundleAllTask.configure { dependsOn(bundleTask) }
+        publishAllTask.configure { dependsOn(publishTask) }
     }
 }
 
 dokka {
     pluginsConfiguration.html {
-        footerMessage = "Copyright (c) 2025 Ron Lauren Hombre"
+        footerMessage = "Copyright (c) 2026 Ron Lauren Hombre"
     }
 
     dokkaPublications.html {

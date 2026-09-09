@@ -1,4 +1,4 @@
-# KyberKotlin (2.0.1)
+# KyberKotlin (2.1.0)
 ## _Implements ML-KEM (CRYSTALS-Kyber)_
 _**Digital security for all, everywhere, no matter who they are, or what they believe in.**_
 
@@ -37,6 +37,10 @@ Secure Random within the library.
 This library is tested against Bouncy Castle's Java ML-KEM implementation 1 million times for each parameter set. For quick testing we also do 10 thousand times (see JVMTest.kt file).
 
 > [!NOTE]
+> Version 2.1.0 is a maintenance release. It is essentially 2.0.1 but additionally supports linuxArm64, iosX64,
+> iosArm64, and iosSimulatorArm64 as well as Kotlin 2.4.20 and Gradle 9.7.1. It also uses KeccakKotlin 2.3.0.
+
+> [!NOTE]
 > Version 2.0.1 brings astounding performance improvements by updating the underlying KeccakKotlin library to 2.0.1. The
 > memory allocations during JVMBenchmark was initially at 275.57GB(2.0.0) and it brought it down to 53.88GB(2.0.1); All
 > thanks to my full control over KeccakKotlin which gave me the freedom to optimize it ridiculously to bring my
@@ -49,23 +53,19 @@ This library is tested against Bouncy Castle's Java ML-KEM implementation 1 mill
 * Decapsulation (512, 768, 1024)
 * Convert to or from bytes.
 
-## Tested Platforms
-* JVM (Java, Kotlin)
-
-## Supported Targets
+## Supported and Tested Targets
 
 | Target                    | Arm32              | Arm64              | X64                |
 |---------------------------|--------------------|--------------------|--------------------|
 | JVM (Kotlin & Java)       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Linux                     | :x: *              | :x: **             | :white_check_mark: |
+| JS (Node, Bun, & Browser) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Linux                     | :x: *              | :white_check_mark: | :white_check_mark: |
 | Windows (Mingw)           | :x: *              | :x: *              | :white_check_mark: |
 | Android                   | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| iOS                       | :x: *              | :x: **             | :x: **             |
-| iOS Simulator             | :x: *              | :x: **             | :x: *              |
+| iOS                       | :x: *              | :white_check_mark: | :white_check_mark: |
+| iOS Simulator             | :x: *              | :white_check_mark: | :x: *              |
 
 *Note: Some platforms are unavailable/deprecated as targets in Kotlin Multiplatform. Please send your complaints to Jetbrains.
-
-**These targets are currently available, but I have no ability to compile them **yet**. Once I have more free time, I will setup a publishing server to compile to all targets.
 
 ## Documentation
 * [kyber.hombre.asia](https://kyber.hombre.asia)
@@ -75,15 +75,13 @@ This library is tested against Bouncy Castle's Java ML-KEM implementation 1 mill
 
 **Requirements: JAVA 8+**
 
-NOTE: if _implementation_ does not work, replace with _compile_.
-
 ### Gradle through Maven
 
 `build.gradle`
 
 ```groovy
 dependencies {
-    implementation 'asia.hombre:kyber:2.0.1'
+    implementation 'asia.hombre:kyber:2.1.0'
 }
 ```
 
@@ -93,7 +91,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("asia.hombre:kyber:2.0.1")
+    implementation("asia.hombre:kyber:2.1.0")
 }
 ```
 
@@ -105,7 +103,7 @@ dependencies {
 <dependency>
     <groupId>asia.hombre</groupId>
     <artifactId>kyber</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -140,7 +138,7 @@ Checkout the Wiki or the Documentation for more information.
 ### License
 
 ```
-Copyright 2025 Ron Lauren Hombre
+Copyright 2026 Ron Lauren Hombre
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
