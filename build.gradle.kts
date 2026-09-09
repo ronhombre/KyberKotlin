@@ -66,13 +66,6 @@ kotlin {
 
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
     }
-    js(IR) {
-        nodejs()
-        browser {
-
-        }
-        binaries.executable()
-    }
     linuxX64()
     //linuxArm64()
     mingwX64()
