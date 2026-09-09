@@ -67,11 +67,11 @@ kotlin {
         compilations["test"].runtimeDependencyFiles // get the test runtime classpath
     }
     linuxX64()
-    //linuxArm64()
+    linuxArm64()
     mingwX64()
-    //iosArm64()
-    //iosX64()
-    //iosSimulatorArm64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
     androidNativeArm32()
     androidNativeArm64()
     androidNativeX64()
