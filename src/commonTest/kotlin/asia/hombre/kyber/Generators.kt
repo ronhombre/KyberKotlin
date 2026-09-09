@@ -76,6 +76,7 @@ class Generators {
         println("Generated after: " + time + "ms")
     }
 
+    @Suppress("unused")
     private fun verifyPrecomputed(x: IntArray, xIndex: Int, y: IntArray, yIndex: Int): Boolean {
         return x[xIndex] == y[yIndex]
     }

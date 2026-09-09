@@ -26,7 +26,6 @@ import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.*
 
-@OptIn(ExperimentalStdlibApi::class)
 class Tests {
     @get:JvmSynthetic
     val Boolean.int
@@ -260,6 +259,7 @@ class Tests {
             assertTrue(!KyberMath.isModuloOfQ(i), "Negative Modulus Integrity check failed!")
     }
 
+    @Suppress("unused")
     fun generateRandom256Shorts(seed: Int = 24): IntArray {
         val shorts = IntArray(256)
         val rand = Random(seed)
@@ -270,6 +270,7 @@ class Tests {
         return shorts
     }
 
+    @Suppress("unused")
     fun generateRandom32Bytes(seed: Int = 314): ByteArray {
         val bytes = ByteArray(32)
         val rand = Random(seed)
@@ -287,10 +288,12 @@ class Tests {
         return ((shortedModulo - (abs(shortedValue) % shortedModulo)) * isNegative.int) + ((shortedValue % shortedModulo) * (!isNegative).int)
     }
 
+    @Suppress("unused")
     fun decomposeShort(int: Int): ByteArray {
         return byteArrayOf(int.toByte(), (int shr 8).toByte())
     }
 
+    @Suppress("unused")
     fun bytesToBitString(byteArray: ByteArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0
@@ -311,6 +314,7 @@ class Tests {
         return stringOutput.removeSuffix(joiner.reversed()).reversed()
     }
 
+    @Suppress("unused")
     fun bitsToString(booleanArray: BooleanArray, bitCount: Int, joiner: String): String {
         var stringOutput = ""
         var count = 0
