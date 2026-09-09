@@ -58,7 +58,6 @@ This library is tested against Bouncy Castle's Java ML-KEM implementation 1 mill
 | Target                    | Arm32              | Arm64              | X64                |
 |---------------------------|--------------------|--------------------|--------------------|
 | JVM (Kotlin & Java)       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| JS (Node, Bun, & Browser) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Linux                     | :x: *              | :white_check_mark: | :white_check_mark: |
 | Windows (Mingw)           | :x: *              | :x: *              | :white_check_mark: |
 | Android                   | :white_check_mark: | :white_check_mark: | :white_check_mark: |
