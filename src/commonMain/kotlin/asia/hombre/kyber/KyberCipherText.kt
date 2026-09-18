@@ -36,11 +36,9 @@ class KyberCipherText internal constructor(
      * The [KyberParameter] associated with this [KyberCipherText].
      */
     val parameter: KyberParameter,
-    encodedCoefficients: ByteArray,
-    encodedTerms: ByteArray) {
-
-    internal val encodedCoefficients: ByteArray = encodedCoefficients.copyOf()
-    internal val encodedTerms: ByteArray = encodedTerms.copyOf()
+    internal val encodedCoefficients: ByteArray,
+    internal val encodedTerms: ByteArray
+) {
     /**
      * A copy of the Cipher Text in bytes.
      *
@@ -86,7 +84,7 @@ class KyberCipherText internal constructor(
      * @return [KyberCipherText]
      */
     fun copy(): KyberCipherText {
-        return KyberCipherText(this.parameter, encodedCoefficients, encodedTerms)
+        return KyberCipherText(this.parameter, encodedCoefficients.copyOf(), encodedTerms.copyOf())
     }
 
     /**

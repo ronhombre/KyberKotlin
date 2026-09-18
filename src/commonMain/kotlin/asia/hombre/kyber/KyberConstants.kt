@@ -38,6 +38,11 @@ object KyberConstants {
     const val N: Int = 256
 
     /**
+     * Quarter of the number of coefficients in the polynomial.
+     */
+    const val QUART_N: Int = N shr 2
+
+    /**
      * The byte size of the number of coefficients in bits.
      */
     const val N_BYTES: Int = N shr 3

@@ -38,15 +38,11 @@ class KyberDecryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberDecryptionKey].
      */
     override val parameter: KyberParameter,
-    keyBytes: ByteArray
+    internal val keyBytes: ByteArray
 ) : KyberPKEKey {
-    internal val keyBytes: ByteArray = keyBytes.copyOf()
 
     init {
-        val coefficients = KyberMath.fastByteDecode(keyBytes, 12)
-        for(c in coefficients)
-            if(!KyberMath.isModuloOfQ(c))
-                throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)
+        KyberMath.fastModuloCheck(keyBytes)
     }
 
     /**
@@ -73,7 +69,7 @@ class KyberDecryptionKey internal constructor(
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, InvalidKyberKeyException::class)
         fun fromBytes(bytes: ByteArray): KyberDecryptionKey {
-            return KyberDecryptionKey(KyberParameter.findByDecryptionKeySize(bytes.size), bytes)
+            return KyberDecryptionKey(KyberParameter.findByDecryptionKeySize(bytes.size), bytes.copyOf())
         }
     }
 
@@ -83,7 +79,7 @@ class KyberDecryptionKey internal constructor(
      * @return [KyberDecryptionKey]
      */
     fun copy(): KyberDecryptionKey {
-        return KyberDecryptionKey(parameter, keyBytes)
+        return KyberDecryptionKey(parameter, keyBytes.copyOf())
     }
 
     /**

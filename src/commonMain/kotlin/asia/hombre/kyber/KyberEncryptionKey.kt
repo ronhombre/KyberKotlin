@@ -38,17 +38,12 @@ class KyberEncryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberEncryptionKey].
      */
     override val parameter: KyberParameter,
-    keyBytes: ByteArray,
-    nttSeed: ByteArray
+    internal val keyBytes: ByteArray,
+    internal val nttSeed: ByteArray
 ) : KyberPKEKey {
-    internal val keyBytes: ByteArray = keyBytes.copyOf()
-    internal val nttSeed: ByteArray = nttSeed.copyOf()
 
     init {
-        val coefficients = KyberMath.fastByteDecode(keyBytes, 12)
-        for(c in coefficients)
-            if(!KyberMath.isModuloOfQ(c))
-                throw InvalidKyberKeyException("Not modulus of " + KyberConstants.Q)
+        KyberMath.fastModuloCheck(keyBytes)
     }
 
     /**
@@ -96,7 +91,7 @@ class KyberEncryptionKey internal constructor(
      * @return [KyberEncryptionKey]
      */
     fun copy(): KyberEncryptionKey {
-        return KyberEncryptionKey(parameter, keyBytes, nttSeed)
+        return KyberEncryptionKey(parameter, keyBytes.copyOf(), nttSeed.copyOf())
     }
 
     /**

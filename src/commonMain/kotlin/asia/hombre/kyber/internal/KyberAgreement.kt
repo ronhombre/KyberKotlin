@@ -20,6 +20,7 @@ package asia.hombre.kyber.internal
 
 import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.keccak.api.SHA3_512
+import asia.hombre.keccak.api.SHAKE128
 import asia.hombre.keccak.api.SHAKE256
 import asia.hombre.kyber.KyberCipherText
 import asia.hombre.kyber.KyberConstants
@@ -51,82 +52,105 @@ internal object KyberAgreement {
      * @return [KyberCipherText] - The Cipher Text to send to the second party.
      */
     private fun toCipherText(encryptionKey: KyberEncryptionKey, plainText: ByteArray, randomness: ByteArray): KyberCipherText {
-        //The important thing here is to prevent anything that has touched the plaintext from being left in memory.
-        //Thus, we do not need to zero fill some arrays/matrices.
-        //Since randomness is derived from the plaintext, we also zero fill it.
         val parameter = encryptionKey.parameter
 
-        val nttKeyVector = Array(parameter.K) { IntArray(KyberConstants.N) }
-
-        val matrix = Array(parameter.K) { Array(parameter.K) { IntArray(KyberConstants.N) } }
-        val randomnessVector = Array(parameter.K) { IntArray(KyberConstants.N) }
-        val noiseVector = Array(parameter.K) { IntArray(KyberConstants.N) }
-
         val constantTerm = IntArray(KyberConstants.N)
+        val coefficients = Array(parameter.K) { IntArray(KyberConstants.N) }
+
+        val tempBuffer = IntArray(KyberConstants.N)
+        val randomnessElement = IntArray(KyberConstants.N)
+        val xof = SHAKE128()
+        val prf = SHAKE256()
 
         for(i in 0 until parameter.K) {
-            nttKeyVector[i] = KyberMath.fastByteDecode(
+            KyberMath.fastByteDecodeInto(
+                tempBuffer,
                 encryptionKey.keyBytes,
                 12,
                 i * KyberConstants.ENCODE_SIZE,
                 KyberConstants.ENCODE_SIZE
             )
-            KyberMath.vectorToMontVector(nttKeyVector[i])
-
-            randomnessVector[i] = KyberMath.samplePolyCBD(
+            KyberMath.vectorToMontVector(tempBuffer)
+            KyberMath.samplePolyCBDInto(
+                randomnessElement,
                 parameter.ETA1,
-                KyberMath.prf(parameter.ETA1, randomness, i.toByte())
+                prf.apply {
+                    update(randomness)
+                    update(i.toByte())
+                }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA1)
             )
-            KyberMath.ntt(randomnessVector[i])
+            KyberMath.ntt(randomnessElement)
 
-            KyberMath.vectorToVectorAdd(constantTerm, KyberMath.multiplyNTTs(randomnessVector[i], nttKeyVector[i]))
-
-            noiseVector[i] = KyberMath.samplePolyCBD(
-                parameter.ETA2,
-                KyberMath.prf(parameter.ETA2, randomness, (i + parameter.K).toByte())
-            )
+            KyberMath.multiplyNTTsInto(constantTerm, randomnessElement, tempBuffer)
 
             for(j in 0 until parameter.K) {
-                matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(encryptionKey.nttSeed, j.toByte(), i.toByte()))
+                KyberMath.sampleNTTInto(
+                    tempBuffer,
+                    xof.apply {
+                        update(encryptionKey.nttSeed)
+                        update(j.toByte())
+                        update(i.toByte())
+                    }.stream()
+                )
+                KyberMath.multiplyNTTsInto(coefficients[j], tempBuffer, randomnessElement)
+            }
+
+            randomnessElement.fill(0) //Security Feature
+        }
+
+        for(i in 0 until parameter.K) {
+            for(k in 0 until KyberConstants.N) {
+                coefficients[i][k] = KyberMath.barrettReduce(coefficients[i][k])
             }
         }
 
         KyberMath.nttInv(constantTerm)
 
-        val noiseTerm = KyberMath.samplePolyCBD(
+        KyberMath.samplePolyCBDInto(
+            tempBuffer,
             parameter.ETA2,
-            KyberMath.prf(parameter.ETA2, randomness, (parameter.K * 2).toByte())
+            prf.apply {
+                update(randomness)
+                update((parameter.K * 2).toByte())
+            }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA2)
         )
 
-        KyberMath.vectorToVectorAdd(constantTerm, noiseTerm)
-
-        noiseTerm.fill(0) //Security Feature
+        KyberMath.vectorToVectorAdd(constantTerm, tempBuffer)
 
         val muse = KyberMath.expandMuse(plainText)
+        plainText.fill(0) //Security Feature
 
         KyberMath.vectorToVectorAdd(constantTerm, muse)
-
         muse.fill(0) //Security Feature
 
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
         KyberMath.compressAndEncodeInto(encodedTerms, 0, constantTerm, parameter.DV)
 
-        val coefficients = KyberMath.nttMatrixToVectorDot(matrix, randomnessVector, true)
         val encodedCoefficients = ByteArray(KyberConstants.N_BYTES * (parameter.DU * parameter.K))
         for(i in 0 until parameter.K) {
             KyberMath.nttInv(coefficients[i])
-            KyberMath.vectorToVectorAdd(coefficients[i], noiseVector[i])
+
+            KyberMath.samplePolyCBDInto(
+                tempBuffer,
+                parameter.ETA2,
+                prf.apply {
+                    update(randomness)
+                    update((i + parameter.K).toByte())
+                }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA2)
+            )
+
+            KyberMath.vectorToVectorAdd(coefficients[i], tempBuffer)
+
             KyberMath.compressAndEncodeInto(
                 encodedCoefficients,
                 i * KyberConstants.N_BYTES * parameter.DU,
                 coefficients[i],
                 parameter.DU
             )
-
-            //Security Features
-            noiseVector[i].fill(0)
-            randomnessVector[i].fill(0)
         }
+
+        tempBuffer.fill(0) //Security Feature
+        randomness.fill(0) //Security Feature
 
         return KyberCipherText(parameter, encodedCoefficients, encodedTerms)
     }
@@ -143,33 +167,47 @@ internal object KyberAgreement {
     @JvmSynthetic
     internal fun fromCipherText(decryptionKey: KyberDecryptionKey, kyberCipherText: KyberCipherText): ByteArray {
         val parameter = kyberCipherText.parameter
-        val coefficients = Array(kyberCipherText.parameter.K) { IntArray(KyberConstants.N) }
 
-        val secretVector = KyberMath.fastByteDecode(decryptionKey.keyBytes, 12)
+        val coefficient = IntArray(KyberConstants.N)
+
+        val secretVector = IntArray((decryptionKey.keyBytes.size shl 1) / 3)
+        KyberMath.fastByteDecodeInto(secretVector, decryptionKey.keyBytes, 12)
         KyberMath.vectorToMontVector(secretVector)
 
-        val constantTerms = KyberMath.fastByteDecode(kyberCipherText.encodedTerms, parameter.DV)
-        KyberMath.decompress(constantTerms, parameter.DV)
+        val constantTerms = IntArray((kyberCipherText.encodedTerms.size * 8) / parameter.DV)
+        KyberMath.fastByteDecodeInto(
+            constantTerms,
+            kyberCipherText.encodedTerms,
+            parameter.DV,
+            decompress = true
+        )
         KyberMath.vectorToMontVector(constantTerms)
 
+        val subtraction = IntArray(KyberConstants.N)
         for (i in 0 until parameter.K) {
-            coefficients[i] = KyberMath.fastByteDecode(
+            KyberMath.fastByteDecodeInto(
+                coefficient,
                 kyberCipherText.encodedCoefficients,
                 parameter.DU,
                 i * KyberConstants.N_BYTES * parameter.DU,
-                KyberConstants.N_BYTES * parameter.DU
+                KyberConstants.N_BYTES * parameter.DU,
+                true
             )
-            KyberMath.decompress(coefficients[i], parameter.DU)
-            KyberMath.vectorToMontVector(coefficients[i])
-            KyberMath.ntt(coefficients[i])
+            KyberMath.vectorToMontVector(coefficient)
+            KyberMath.ntt(coefficient)
 
-            val subtraction = KyberMath.multiplyNTTs(secretVector, coefficients[i], i * KyberConstants.N)
-            KyberMath.nttInv(subtraction)
-
-            for (j in 0 until KyberConstants.N) constantTerms[j] -= subtraction[j]
+            KyberMath.multiplyNTTsInto(subtraction, secretVector, coefficient, i * KyberConstants.N)
         }
 
-        return ByteArray(KyberConstants.N_BYTES).also { KyberMath.compressAndEncodeInto(it, 0, constantTerms, 1) }
+        KyberMath.nttInv(subtraction)
+
+        for (j in 0 until KyberConstants.N) {
+            constantTerms[j] -= subtraction[j]
+        }
+
+        return ByteArray(KyberConstants.N_BYTES).also {
+            KyberMath.compressAndEncodeInto(it, 0, constantTerms, 1)
+        }
     }
 
     /**
@@ -228,9 +266,8 @@ internal object KyberAgreement {
             decapsHash.copyOfRange(KyberConstants.SECRET_KEY_LENGTH, decapsHash.size)
         )
 
-        //Security Feature
-        recoveredPlainText.fill(0)
-        decapsHash.fill(0)
+        recoveredPlainText.fill(0) //Security Feature
+        decapsHash.fill(0) //Security Feature
 
         if(!kyberCipherText.fullBytes.contentEquals(regeneratedCipherText.fullBytes))
             secretKeyCandidate = secretKeyRejection //Implicit Rejection

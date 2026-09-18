@@ -20,6 +20,8 @@ package asia.hombre.kyber
 
 import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.keccak.api.SHA3_512
+import asia.hombre.keccak.api.SHAKE128
+import asia.hombre.keccak.api.SHAKE256
 import asia.hombre.kyber.exceptions.RandomBitGenerationException
 import asia.hombre.kyber.interfaces.RandomProvider
 import asia.hombre.kyber.internal.KyberMath
@@ -105,48 +107,67 @@ object KyberKeyGenerator {
                 update(parameter.K.toByte())
             }.digest()
 
-            //Security Feature
-            byteArray.fill(0)
+            byteArray.fill(0) //Security Feature
 
             val nttSeed = seeds.copyOfRange(0, 32)
             val cbdSeed = seeds.copyOfRange(32, 64)
 
             seeds.fill(0) //Security Feature
 
-            val matrix = Array(parameter.K) { Array(parameter.K) { IntArray(KyberConstants.N) } }
             val secretVector = Array(parameter.K) { IntArray(KyberConstants.N) }
-            val noiseVector = Array(parameter.K) { IntArray(KyberConstants.N) }
-
             val decryptionKeyBytes = ByteArray(parameter.DECRYPTION_KEY_LENGTH)
+            val xof = SHAKE128()
+            val prf = SHAKE256()
 
             for(i in 0 until parameter.K) {
-                for(j in 0 until parameter.K)
-                    matrix[i][j] = KyberMath.sampleNTT(KyberMath.xof(nttSeed, j.toByte(), i.toByte()))
-
-                secretVector[i] = KyberMath.samplePolyCBD(
+                KyberMath.samplePolyCBDInto(
+                    secretVector[i],
                     parameter.ETA1,
-                    KyberMath.prf(parameter.ETA1, cbdSeed, i.toByte())
+                    prf.apply {
+                        update(cbdSeed)
+                        update(i.toByte())
+                    }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA1)
                 )
                 KyberMath.ntt(secretVector[i])
                 KyberMath.byteEncodeInto(decryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, secretVector[i], 12)
-
-                noiseVector[i] = KyberMath.samplePolyCBD(
-                    parameter.ETA1,
-                    KyberMath.prf(parameter.ETA1, cbdSeed, (i + parameter.K).toByte())
-                )
-                KyberMath.ntt(noiseVector[i])
             }
 
-            cbdSeed.fill(0) //Security Feature
-
-            val systemVector = KyberMath.nttMatrixToVectorDot(matrix, secretVector, false)
-            KyberMath.vectorAddition(systemVector, noiseVector)
-
-            val encryptionKeyBytes = ByteArray(parameter.ENCRYPTION_KEY_LENGTH - 32) //Excluded nttSeed
+            val encryptionKeyBytes = ByteArray(parameter.ENCRYPTION_KEY_LENGTH - 32)
+            val matrixElement = IntArray(KyberConstants.N)
+            val systemVectorElement = IntArray(KyberConstants.N)
 
             for(i in 0 until parameter.K) {
-                KyberMath.byteEncodeInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, systemVector[i], 12)
+                KyberMath.samplePolyCBDInto(
+                    systemVectorElement,
+                    parameter.ETA1,
+                    prf.apply {
+                        update(cbdSeed)
+                        update((i + parameter.K).toByte())
+                    }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA1)
+                )
+                KyberMath.ntt(systemVectorElement)
+
+                for(j in 0 until parameter.K) {
+                    KyberMath.sampleNTTInto(
+                        matrixElement,
+                        xof.apply {
+                            update(nttSeed)
+                            update(j.toByte())
+                            update(i.toByte())
+                        }.stream()
+                    )
+                    KyberMath.multiplyNTTsInto(systemVectorElement, matrixElement, secretVector[j])
+                }
+
+                for(k in 0 until KyberConstants.N) {
+                    systemVectorElement[k] = KyberMath.barrettReduce(systemVectorElement[k])
+                }
+
+                KyberMath.byteEncodeInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, systemVectorElement, 12)
             }
+
+            systemVectorElement.fill(0) //Security Feature
+            cbdSeed.fill(0) //Security Feature
 
             return KyberPKEKeyPair(
                 KyberEncryptionKey(parameter, encryptionKeyBytes, nttSeed),
