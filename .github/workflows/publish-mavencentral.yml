@@ -2,8 +2,7 @@ name: "Publish To Maven"
 
 on:
   release:
-    types:
-      - published
+    types: [released]
 
 jobs:
   build-and-stage:
