@@ -22,6 +22,7 @@ import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
+import asia.hombre.kyber.internal.constantTimeDifferenceMask
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -94,9 +95,7 @@ class KyberDecryptionKey internal constructor(
         other as KyberDecryptionKey
 
         if (parameter != other.parameter) return false
-        if (!keyBytes.contentEquals(other.keyBytes)) return false
-
-        return true
+        return keyBytes.constantTimeDifferenceMask(other.keyBytes) == 0
     }
 
     override fun hashCode(): Int {
