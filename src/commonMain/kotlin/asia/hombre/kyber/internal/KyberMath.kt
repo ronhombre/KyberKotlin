@@ -397,3 +397,19 @@ internal object KyberMath {
             .toByteArray()
     }
 }
+
+/**
+ * Returns 0 for arrays whose values are all equal and -1 otherwise.
+ * Equal-length arrays are fully compared without branching on their contents.
+ *
+ * Note: This source-level property does not guarantee constant-time machine
+ * code on every target.
+ */
+internal fun ByteArray.constantTimeDifferenceMask(other: ByteArray): Int {
+    if (size != other.size) return -1
+
+    val difference = foldIndexed(0) { i, acc, byte ->
+        acc or (byte.toInt() xor other[i].toInt())
+    }
+    return -((difference or -difference) ushr 31)
+}
