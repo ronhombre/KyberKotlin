@@ -33,4 +33,4 @@ jobs:
           java-version: '21'
 
       - run: |
-          ./gradlew :jvmTest --tests "asia.hombre.kyber.Tests"
+          ./gradlew :jvmTest --tests "asia.hombre.kyber.Tests" --tests "asia.hombre.kyber.MathTests"

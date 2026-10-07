@@ -36,46 +36,6 @@ class Tests {
 
     }
 
-    fun trueModulo(a: Int, b: Int): Int = ((a % b) + b) % b
-
-    @Test
-    fun barrettApproximationVerification() {
-        for (i in Short.MIN_VALUE .. Short.MAX_VALUE) {
-            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.barrettReduce(i), "True Value: $i")
-        }
-    }
-
-    @Test
-    fun montgomeryReturnVerification() {
-        for (i in 0 ..Short.MAX_VALUE) {
-            assertEquals(trueModulo(i, KyberConstants.Q), KyberMath.barrettReduce(KyberMath.montgomeryReduce(KyberMath.toMontgomeryForm(i))), "True Value: $i")
-        }
-    }
-
-    @Test
-    fun nttVerification() {
-        (0 until KyberConstants.Q).forEach { i ->
-            val array = IntArray(256) {
-                return@IntArray i
-            }
-
-            //We are barrett reducing here because barrett reduce is skipped in the function since it's not immediately needed
-            val nttArray = KyberMath.ntt(array).also {
-                it.forEachIndexed { i, value ->
-                    it[i] = KyberMath.barrettReduce(value)
-                }
-            }
-            val result = KyberMath.nttInv(nttArray).also {
-                it.forEachIndexed { i, value ->
-                    it[i] = KyberMath.barrettReduce(value)
-                }
-            }
-
-            assertContentEquals(array, result, "NTT Failure!")
-        }
-    }
-
-
     @Test
     fun bytesTest512() {
         val originalKeyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_512)
@@ -298,7 +258,7 @@ class Tests {
         var stringOutput = ""
         var count = 0
         for(byte in byteArray) {
-            val bits = KyberMath.expandBytesAsBits(byteArrayOf(byte))
+            val bits = TestHelper.expandBytesAsBits(byteArrayOf(byte))
             for(bit in bits) {
                 stringOutput += bit
 
