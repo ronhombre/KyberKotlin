@@ -206,7 +206,7 @@ internal object KyberAgreement {
         }
 
         return ByteArray(KyberConstants.N_BYTES).also {
-            KyberMath.compressAndEncodeInto(it, 0, constantTerms, 1)
+            KyberMath.compressConstants(it, 0, constantTerms)
         }
     }
 

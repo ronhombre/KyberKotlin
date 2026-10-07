@@ -89,24 +89,20 @@ internal object KyberMath {
     }
 
     /**
-     * Reduced memory copy operations compared to byteEncode(vector, bitSize)
+     * Reduced memory copy operations compared to byteEncode(vector, 12)
      */
     @JvmSynthetic
-    fun byteEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
-        var outputIndex = 0
-        var bitIndex = 0
-        var temp = 0
-        for(i in vector.indices) {
-            val value = barrettReduce(montgomeryReduce(vector[i]))
+    fun byteEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray) {
+        require(vector.size and 1 == 0) { "Vector must be of even size" }
+        var destIndex = destIndex
 
-            for(j in 0 until bitSize) {
-                temp = temp or (((value shr j) and 1) shl bitIndex++)
-                if(bitIndex == 8) {
-                    output[destIndex + outputIndex++] = temp.toByte()
-                    bitIndex = 0
-                    temp = 0
-                }
-            }
+        for (i in vector.indices step 2) {
+            val v0 = barrettReduce(montgomeryReduce(vector[i]))
+            val v1 = barrettReduce(montgomeryReduce(vector[i + 1]))
+
+            output[destIndex++] = (v0 and 0xFF).toByte()
+            output[destIndex++] = (((v0 ushr 8) and 0x0F) or ((v1 and 0x0F) shl 4)).toByte()
+            output[destIndex++] = ((v1 ushr 4) and 0xFF).toByte()
         }
     }
 
@@ -115,8 +111,8 @@ internal object KyberMath {
      */
     @JvmSynthetic
     fun compressAndEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
+        var destIndex = destIndex
         val mask = 1 shl bitSize
-        var outputIndex = 0
         var bitIndex = 0
         var temp = 0
         for(i in vector.indices) {
@@ -125,11 +121,28 @@ internal object KyberMath {
             for(j in 0 until bitSize) {
                 temp = temp or (((value shr j) and 1) shl bitIndex++)
                 if(bitIndex == 8) {
-                    output[destIndex + outputIndex++] = temp.toByte()
+                    output[destIndex++] = temp.toByte()
                     bitIndex = 0
                     temp = 0
                 }
             }
+        }
+    }
+
+    /**
+     * Optimized for single bit sizes.
+     */
+    @JvmSynthetic
+    fun compressConstants(output: ByteArray, destIndex: Int, vector: IntArray) {
+        var destIndex = destIndex
+        for (i in vector.indices step 8) {
+            var temp = 0
+            for(j in 0 until 8) {
+                val x = montgomeryReduce(vector[i + j]) * 0b10 // Grab 2nd significant bit
+                val value = (x + KyberConstants.Q_HALF) / KyberConstants.Q
+                temp = temp or ((value and 1) shl j)
+            }
+            output[destIndex++] = temp.toByte()
         }
     }
 
@@ -165,7 +178,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun samplePolyCBDInto(constants:IntArray, eta: Int, bytes: ByteArray): IntArray {
+    fun samplePolyCBDInto(constants: IntArray, eta: Int, bytes: ByteArray): IntArray {
         for (i in 0 until KyberConstants.N) {
             val offset = 2 * i * eta
             var value = 0
@@ -231,7 +244,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
+    inline fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
 
     @JvmSynthetic
     fun multiplyNTTsInto(dest: IntArray, ntt1: IntArray, ntt2: IntArray, offset: Int = 0) {
@@ -239,7 +252,7 @@ internal object KyberMath {
             val a = i shl 1
             val b = a + 1
 
-            //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
+            //Karatsuba Multiplication from 5 multiplication operations to 4, which also helps with reducing Montgomery Reductions.
             val a0 = ntt1[a + offset]
             val a1 = ntt1[b + offset]
             val b0 = ntt2[a]
