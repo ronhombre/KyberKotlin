@@ -117,11 +117,8 @@ internal object KyberAgreement {
 
         KyberMath.vectorToVectorAdd(constantTerm, tempBuffer)
 
-        val muse = KyberMath.expandMuse(plainText)
+        KyberMath.expandAndAddMuseInto(plainText, constantTerm)
         plainText.fill(0) //Security Feature
-
-        KyberMath.vectorToVectorAdd(constantTerm, muse)
-        muse.fill(0) //Security Feature
 
         val encodedTerms = ByteArray(KyberConstants.N_BYTES * parameter.DV)
         KyberMath.compressAndEncodeInto(encodedTerms, 0, constantTerm, parameter.DV)

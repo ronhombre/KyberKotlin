@@ -147,16 +147,13 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun expandMuse(bytes: ByteArray): IntArray {
-        val shorts = IntArray(bytes.size * 8)
+    fun expandAndAddMuseInto(bytes: ByteArray, vector: IntArray) {
         val decompressConstant = toMontgomeryForm(KyberConstants.Q_HALF + 1)
 
         for(i in bytes.indices) {
             val byte = bytes[i].toInt()
-            for(j in 0 until 8) shorts[(i * 8) + j] = ((byte shr j) and 1) * decompressConstant
+            for(j in 0 until 8) vector[(i * 8) + j] += ((byte shr j) and 1) * decompressConstant
         }
-
-        return shorts
     }
 
     @JvmSynthetic
