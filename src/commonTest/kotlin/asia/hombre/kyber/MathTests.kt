@@ -59,23 +59,28 @@ class MathTests {
     @Test
     fun nttVerification() {
         (0 until KyberConstants.Q).forEach { i ->
+            val referenceArray = IntArray(256) {
+                return@IntArray i
+            }
             val array = IntArray(256) {
                 return@IntArray i
             }
 
             //We are barrett reducing here because barrett reduce is skipped in the function since it's not immediately needed
-            val nttArray = KyberMath.ntt(array).also {
+            KyberMath.ntt(array)
+            array.also {
                 it.forEachIndexed { i, value ->
                     it[i] = KyberMath.barrettReduce(value)
                 }
             }
-            val result = KyberMath.nttInv(nttArray).also {
+            KyberMath.nttInv(array)
+            array.also {
                 it.forEachIndexed { i, value ->
                     it[i] = KyberMath.barrettReduce(value)
                 }
             }
 
-            assertContentEquals(array, result, "NTT Failure!")
+            assertContentEquals(referenceArray, array, "NTT Failure!")
         }
     }
 

@@ -22,7 +22,6 @@ import asia.hombre.keccak.streams.HashOutputStream
 import asia.hombre.kyber.KyberConstants
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import kotlin.jvm.JvmSynthetic
-import kotlin.math.absoluteValue
 import kotlin.math.min
 
 @Suppress("NOTHING_TO_INLINE")
@@ -192,7 +191,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun ntt(polynomials: IntArray): IntArray {
+    fun ntt(polynomials: IntArray) {
         var k = 1
         var len = KyberConstants.N shr 1
 
@@ -210,12 +209,10 @@ internal object KyberMath {
 
             len = len shr 1
         }
-
-        return polynomials
     }
 
     @JvmSynthetic
-    fun nttInv(nttPolynomials: IntArray): IntArray {
+    fun nttInv(nttPolynomials: IntArray) {
         var k = (KyberConstants.N shr 1) - 1
         var len = 2
 
@@ -236,8 +233,6 @@ internal object KyberMath {
 
         for(i in nttPolynomials.indices)
             nttPolynomials[i] = productOf(nttPolynomials[i], 512) // toMontgomeryForm(3303) = 512
-
-        return nttPolynomials
     }
 
     @JvmSynthetic
