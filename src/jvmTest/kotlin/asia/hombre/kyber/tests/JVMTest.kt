@@ -119,7 +119,7 @@ class JVMTest {
         var count = 0
         var temp = ""
         for(byte in byteArray) {
-            val bits = KyberMath.expandBytesAsBits(byteArrayOf(byte))
+            val bits = TestHelper.expandBytesAsBits(byteArrayOf(byte))
             var tempString = ""
             for(bit in bits) {
                 temp += bit

@@ -22,7 +22,6 @@ import asia.hombre.keccak.streams.HashOutputStream
 import asia.hombre.kyber.KyberConstants
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import kotlin.jvm.JvmSynthetic
-import kotlin.math.absoluteValue
 import kotlin.math.min
 
 @Suppress("NOTHING_TO_INLINE")
@@ -89,24 +88,20 @@ internal object KyberMath {
     }
 
     /**
-     * Reduced memory copy operations compared to byteEncode(vector, bitSize)
+     * Reduced memory copy operations compared to byteEncode(vector, 12)
      */
     @JvmSynthetic
-    fun byteEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
-        var outputIndex = 0
-        var bitIndex = 0
-        var temp = 0
-        for(i in vector.indices) {
-            val value = barrettReduce(montgomeryReduce(vector[i]))
+    fun byteEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray) {
+        require(vector.size and 1 == 0) { "Vector must be of even size" }
+        var destIndex = destIndex
 
-            for(j in 0 until bitSize) {
-                temp = temp or (((value shr j) and 1) shl bitIndex++)
-                if(bitIndex == 8) {
-                    output[destIndex + outputIndex++] = temp.toByte()
-                    bitIndex = 0
-                    temp = 0
-                }
-            }
+        for (i in vector.indices step 2) {
+            val v0 = barrettReduce(montgomeryReduce(vector[i]))
+            val v1 = barrettReduce(montgomeryReduce(vector[i + 1]))
+
+            output[destIndex++] = (v0 and 0xFF).toByte()
+            output[destIndex++] = (((v0 ushr 8) and 0x0F) or ((v1 and 0x0F) shl 4)).toByte()
+            output[destIndex++] = ((v1 ushr 4) and 0xFF).toByte()
         }
     }
 
@@ -115,8 +110,8 @@ internal object KyberMath {
      */
     @JvmSynthetic
     fun compressAndEncodeInto(output: ByteArray, destIndex: Int, vector: IntArray, bitSize: Int) {
+        var destIndex = destIndex
         val mask = 1 shl bitSize
-        var outputIndex = 0
         var bitIndex = 0
         var temp = 0
         for(i in vector.indices) {
@@ -125,7 +120,7 @@ internal object KyberMath {
             for(j in 0 until bitSize) {
                 temp = temp or (((value shr j) and 1) shl bitIndex++)
                 if(bitIndex == 8) {
-                    output[destIndex + outputIndex++] = temp.toByte()
+                    output[destIndex++] = temp.toByte()
                     bitIndex = 0
                     temp = 0
                 }
@@ -133,17 +128,31 @@ internal object KyberMath {
         }
     }
 
+    /**
+     * Optimized for single bit sizes.
+     */
     @JvmSynthetic
-    fun expandMuse(bytes: ByteArray): IntArray {
-        val shorts = IntArray(bytes.size * 8)
+    fun compressConstants(output: ByteArray, destIndex: Int, vector: IntArray) {
+        var destIndex = destIndex
+        for (i in vector.indices step 8) {
+            var temp = 0
+            for(j in 0 until 8) {
+                val x = montgomeryReduce(vector[i + j]) * 0b10 // Grab 2nd significant bit
+                val value = (x + KyberConstants.Q_HALF) / KyberConstants.Q
+                temp = temp or ((value and 1) shl j)
+            }
+            output[destIndex++] = temp.toByte()
+        }
+    }
+
+    @JvmSynthetic
+    fun expandAndAddMuseInto(bytes: ByteArray, vector: IntArray) {
         val decompressConstant = toMontgomeryForm(KyberConstants.Q_HALF + 1)
 
         for(i in bytes.indices) {
             val byte = bytes[i].toInt()
-            for(j in 0 until 8) shorts[(i * 8) + j] = ((byte shr j) and 1) * decompressConstant
+            for(j in 0 until 8) vector[(i * 8) + j] += ((byte shr j) and 1) * decompressConstant
         }
-
-        return shorts
     }
 
     @JvmSynthetic
@@ -165,7 +174,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun samplePolyCBDInto(constants:IntArray, eta: Int, bytes: ByteArray): IntArray {
+    fun samplePolyCBDInto(constants: IntArray, eta: Int, bytes: ByteArray): IntArray {
         for (i in 0 until KyberConstants.N) {
             val offset = 2 * i * eta
             var value = 0
@@ -182,7 +191,7 @@ internal object KyberMath {
     }
 
     @JvmSynthetic
-    fun ntt(polynomials: IntArray): IntArray {
+    fun ntt(polynomials: IntArray) {
         var k = 1
         var len = KyberConstants.N shr 1
 
@@ -200,12 +209,10 @@ internal object KyberMath {
 
             len = len shr 1
         }
-
-        return polynomials
     }
 
     @JvmSynthetic
-    fun nttInv(nttPolynomials: IntArray): IntArray {
+    fun nttInv(nttPolynomials: IntArray) {
         var k = (KyberConstants.N shr 1) - 1
         var len = 2
 
@@ -226,12 +233,10 @@ internal object KyberMath {
 
         for(i in nttPolynomials.indices)
             nttPolynomials[i] = productOf(nttPolynomials[i], 512) // toMontgomeryForm(3303) = 512
-
-        return nttPolynomials
     }
 
     @JvmSynthetic
-    fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
+    inline fun productOf(a: Int, b: Int): Int = montgomeryReduce(a * b)
 
     @JvmSynthetic
     fun multiplyNTTsInto(dest: IntArray, ntt1: IntArray, ntt2: IntArray, offset: Int = 0) {
@@ -239,7 +244,7 @@ internal object KyberMath {
             val a = i shl 1
             val b = a + 1
 
-            //Karatsuba Multiplication from 5 multiplication operations to 4 which also helps with reducing Montgomery Reductions.
+            //Karatsuba Multiplication from 5 multiplication operations to 4, which also helps with reducing Montgomery Reductions.
             val a0 = ntt1[a + offset]
             val a1 = ntt1[b + offset]
             val b0 = ntt2[a]
@@ -295,121 +300,19 @@ internal object KyberMath {
     inline fun toMontgomeryForm(a: Int): Int = montgomeryReduce(a * KyberConstants.MONT_R2)
 
     /**
-     * From here on, these functions are used for testing or to generate constants.
+     * Returns 0 for arrays whose values are all equal and -1 otherwise.
+     * Equal-length arrays are fully compared without branching on their contents.
+     *
+     * Note: This source-level property does not guarantee constant-time machine
+     * code on every target.
      */
-
     @JvmSynthetic
-    fun expandBytesAsBits(bytes: ByteArray): IntArray {
-        val bitArray = IntArray(bytes.size * 8)
+    fun ByteArray.constantTimeDifferenceMask(other: ByteArray): Int {
+        if (size != other.size) return -1
 
-        for(i in bytes.indices) {
-            val byte = bytes[i].toInt()
-            bitArray[(8 * i)] = byte and 1
-            bitArray[(8 * i) + 1] = (byte shr 1) and 1
-            bitArray[(8 * i) + 2] = (byte shr 2) and 1
-            bitArray[(8 * i) + 3] = (byte shr 3) and 1
-            bitArray[(8 * i) + 4] = (byte shr 4) and 1
-            bitArray[(8 * i) + 5] = (byte shr 5) and 1
-            bitArray[(8 * i) + 6] = (byte shr 6) and 1
-            bitArray[(8 * i) + 7] = (byte shr 7) and 1
+        val difference = foldIndexed(0) { i, acc, byte ->
+            acc or (byte.toInt() xor other[i].toInt())
         }
-
-        return bitArray
+        return -((difference or -difference) ushr 31)
     }
-
-    @JvmSynthetic
-    fun reverseBits(x: Int): UByte {
-        return (((1 and x) shl 6) or
-                (((1 shl 1) and x) shl 4) or
-                (((1 shl 2) and x) shl 2) or
-                (((1 shl 3) and x)) or
-                (((1 shl 4) and x) ushr 2) or
-                (((1 shl 5) and x) ushr 4) or
-                (((1 shl 6) and x) ushr 6)).toUByte()
-    }
-
-    //Functionally equivalent to pow_mod(b, e, mod) in Python, except values are kept positive
-    @JvmSynthetic
-    fun powMod(b: Int, e: Int, m: Int): Long {
-        if(e == 0) //b^0 = 1
-            return 1L
-        else if(e < 0) //Inverse
-            return modMulInv(b, e.absoluteValue, m)
-
-        var c = 1L
-
-        (0 until e).forEach { _ ->
-            c = (b * c) % m
-        }
-
-        return c
-    }
-
-    @JvmSynthetic
-    private fun pow(a: Int, b: Int): Long {
-        var out = 1L
-
-        (0 until b).forEach { _ ->
-            out *= a
-        }
-
-        return out
-    }
-
-    //Modified Extended Euclidean Algorithm
-    @JvmSynthetic
-    private fun modMulInv(b: Int, e: Int, m: Int): Long {
-        var s = 0L
-        var r: Long = m.toLong()
-        var oldS = 1L
-        var oldR = pow(b, e)
-
-        while(r != 0L) {
-            val quotient = oldR / r
-            val tempR = r
-            r = oldR - (quotient * r)
-            oldR = tempR
-            val tempS = s
-            s = oldS - (quotient * s)
-            oldS = tempS
-        }
-
-        if(oldS < 0)
-            oldS += m
-
-        return oldS
-    }
-
-    @Suppress("unused")
-    @JvmSynthetic
-    @Throws(IllegalArgumentException::class)
-    fun decodeHex(string: String): ByteArray {
-        var hexString = string
-
-        if(string.length % 2 == 1)
-            hexString += '0' //Append a 0 if the hex is not even to fit into a byte.
-
-        if(string.contains(Regex("[^A-Fa-f0-9]")))
-            throw IllegalArgumentException("String cannot contain characters that is not hex characters.")
-
-        return hexString.chunked(2)
-            .map { it.toInt(16).toByte() }
-            .toByteArray()
-    }
-}
-
-/**
- * Returns 0 for arrays whose values are all equal and -1 otherwise.
- * Equal-length arrays are fully compared without branching on their contents.
- *
- * Note: This source-level property does not guarantee constant-time machine
- * code on every target.
- */
-internal fun ByteArray.constantTimeDifferenceMask(other: ByteArray): Int {
-    if (size != other.size) return -1
-
-    val difference = foldIndexed(0) { i, acc, byte ->
-        acc or (byte.toInt() xor other[i].toInt())
-    }
-    return -((difference or -difference) ushr 31)
 }

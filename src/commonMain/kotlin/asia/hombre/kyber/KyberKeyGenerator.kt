@@ -129,7 +129,7 @@ object KyberKeyGenerator {
                     }.stream().nextBytes(KyberConstants.QUART_N * parameter.ETA1)
                 )
                 KyberMath.ntt(secretVector[i])
-                KyberMath.byteEncodeInto(decryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, secretVector[i], 12)
+                KyberMath.byteEncodeInto(decryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, secretVector[i])
             }
 
             val encryptionKeyBytes = ByteArray(parameter.ENCRYPTION_KEY_LENGTH - 32)
@@ -163,7 +163,7 @@ object KyberKeyGenerator {
                     systemVectorElement[k] = KyberMath.barrettReduce(systemVectorElement[k])
                 }
 
-                KyberMath.byteEncodeInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, systemVectorElement, 12)
+                KyberMath.byteEncodeInto(encryptionKeyBytes, i * KyberConstants.ENCODE_SIZE, systemVectorElement)
             }
 
             systemVectorElement.fill(0) //Security Feature

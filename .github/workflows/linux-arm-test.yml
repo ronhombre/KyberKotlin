@@ -56,4 +56,4 @@ jobs:
           
           chmod +x "$TEST_BIN"
           
-          "$TEST_BIN" --ktest_filter="asia.hombre.kyber.Tests.*"
+          "$TEST_BIN" --ktest_filter="asia.hombre.kyber.Tests.*,asia.hombre.kyber.MathTests.*"
