@@ -298,4 +298,21 @@ internal object KyberMath {
     //Since a is ALWAYS a Short(16 bits) then it will always fit in Int(32 bits), and it will be modulo Q too.
     @JvmSynthetic
     inline fun toMontgomeryForm(a: Int): Int = montgomeryReduce(a * KyberConstants.MONT_R2)
+
+    /**
+     * Returns 0 for arrays whose values are all equal and -1 otherwise.
+     * Equal-length arrays are fully compared without branching on their contents.
+     *
+     * Note: This source-level property does not guarantee constant-time machine
+     * code on every target.
+     */
+    @JvmSynthetic
+    fun ByteArray.constantTimeDifferenceMask(other: ByteArray): Int {
+        if (size != other.size) return -1
+
+        val difference = foldIndexed(0) { i, acc, byte ->
+            acc or (byte.toInt() xor other[i].toInt())
+        }
+        return -((difference or -difference) ushr 31)
+    }
 }
