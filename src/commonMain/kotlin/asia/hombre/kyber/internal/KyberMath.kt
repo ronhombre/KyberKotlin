@@ -71,9 +71,18 @@ internal object KyberMath {
         }
     }
 
+    fun fastByteDecodeInto(
+        result: IntArray,
+        bytes: ByteBuffer,
+        bitSize: Int,
+        offset: Int = 0,
+        length: Int = bytes.size - offset,
+        decompress: Boolean = false,
+    ) = fastByteDecodeInto(result, bytes.array, bitSize, bytes.offset + offset, length, decompress)
+
     @JvmSynthetic
-    fun fastModuloCheck(bytes: ByteArray) {
-        for (i in 0 until (bytes.size - 2) step 3) {
+    fun fastModuloCheck(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size - offset) {
+        for (i in offset until (offset + length - 2) step 3) {
             val b0 = bytes[i].toInt() and 0xFF
             val b1 = bytes[i + 1].toInt() and 0xFF
             val b2 = bytes[i + 2].toInt() and 0xFF

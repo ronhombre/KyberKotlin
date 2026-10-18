@@ -18,10 +18,15 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.internal.ByteBuffer
+
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
+import asia.hombre.kyber.internal.asBuffer
+import asia.hombre.kyber.internal.sliceOfKeyBytes
+import asia.hombre.kyber.internal.sliceOfNTTSeed
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -38,12 +43,14 @@ class KyberEncryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberEncryptionKey].
      */
     override val parameter: KyberParameter,
-    internal val keyBytes: ByteArray,
-    internal val nttSeed: ByteArray
+    internal val bytes: ByteBuffer
 ) : KyberPKEKey {
 
+    internal val keyBytes = bytes.sliceOfKeyBytes(parameter)
+    internal val nttSeed = bytes.sliceOfNTTSeed(parameter)
+
     init {
-        KyberMath.fastModuloCheck(keyBytes)
+        require(bytes.size == parameter.ENCRYPTION_KEY_LENGTH)
     }
 
     /**
@@ -55,14 +62,7 @@ class KyberEncryptionKey internal constructor(
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() {
-            val output = ByteArray(parameter.ENCAPSULATION_KEY_LENGTH)
-
-            keyBytes.copyInto(output)
-            nttSeed.copyInto(output, keyBytes.size)
-
-            return output
-        }
+        get() = bytes.copyOf()
 
     companion object {
         /**
@@ -76,12 +76,13 @@ class KyberEncryptionKey internal constructor(
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, InvalidKyberKeyException::class)
         fun fromBytes(bytes: ByteArray): KyberEncryptionKey {
-            val keyLength = bytes.size - KyberConstants.N_BYTES
-            return KyberEncryptionKey(
-                KyberParameter.findByEncryptionKeySize(bytes.size),
-                bytes.copyOfRange(0, keyLength),
-                bytes.copyOfRange(keyLength, bytes.size)
-            )
+            val parameter = KyberParameter.findByEncryptionKeySize(bytes.size)
+
+            val buffer = bytes.copyOf().asBuffer()
+            val encryptionKeyBytes = buffer.sliceOfKeyBytes(parameter)
+            KyberMath.fastModuloCheck(encryptionKeyBytes.array, encryptionKeyBytes.offset, encryptionKeyBytes.size)
+
+            return KyberEncryptionKey(parameter, ByteBuffer(bytes.copyOf()))
         }
     }
 
@@ -91,7 +92,7 @@ class KyberEncryptionKey internal constructor(
      * @return [KyberEncryptionKey]
      */
     fun copy(): KyberEncryptionKey {
-        return KyberEncryptionKey(parameter, keyBytes.copyOf(), nttSeed.copyOf())
+        return KyberEncryptionKey(parameter, ByteBuffer(bytes.copyOf()))
     }
 
     /**

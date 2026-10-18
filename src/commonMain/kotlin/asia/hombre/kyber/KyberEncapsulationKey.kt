@@ -47,7 +47,7 @@ class KyberEncapsulationKey internal constructor(
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() = key.fullBytes.copyOf()
+        get() = key.fullBytes
 
     companion object {
         /**

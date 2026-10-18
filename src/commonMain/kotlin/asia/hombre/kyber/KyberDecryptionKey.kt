@@ -18,10 +18,13 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.internal.ByteBuffer
+
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberPKEKey
 import asia.hombre.kyber.internal.KyberMath
+import asia.hombre.kyber.internal.asBuffer
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -38,11 +41,11 @@ class KyberDecryptionKey internal constructor(
      * The [KyberParameter] associated with this [KyberDecryptionKey].
      */
     override val parameter: KyberParameter,
-    internal val keyBytes: ByteArray
+    internal val keyBytes: ByteBuffer
 ) : KyberPKEKey {
 
     init {
-        KyberMath.fastModuloCheck(keyBytes)
+        require(keyBytes.size == parameter.DECRYPTION_KEY_LENGTH)
     }
 
     /**
@@ -69,7 +72,12 @@ class KyberDecryptionKey internal constructor(
         @JvmStatic
         @Throws(UnsupportedKyberVariantException::class, InvalidKyberKeyException::class)
         fun fromBytes(bytes: ByteArray): KyberDecryptionKey {
-            return KyberDecryptionKey(KyberParameter.findByDecryptionKeySize(bytes.size), bytes.copyOf())
+            val parameter = KyberParameter.findByDecryptionKeySize(bytes.size)
+
+            val keyBytes = bytes.copyOf()
+            KyberMath.fastModuloCheck(keyBytes, 0, keyBytes.size)
+
+            return KyberDecryptionKey(parameter, keyBytes.asBuffer())
         }
     }
 
@@ -79,7 +87,7 @@ class KyberDecryptionKey internal constructor(
      * @return [KyberDecryptionKey]
      */
     fun copy(): KyberDecryptionKey {
-        return KyberDecryptionKey(parameter, keyBytes.copyOf())
+        return KyberDecryptionKey(parameter, ByteBuffer(keyBytes.copyOf()))
     }
 
     /**

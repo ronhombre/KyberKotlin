@@ -1,0 +1,6 @@
+[submodule "kyberrust"]
+	path = kyberrust
+	url = https://github.com/ronhombre/KyberRust.git
+[submodule "keccakrust"]
+	path = keccakrust
+	url = https://github.com/ronhombre/KeccakRust.git

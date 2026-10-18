@@ -18,13 +18,22 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.internal.ByteBuffer
+
 import asia.hombre.keccak.api.SHA3_256
 import asia.hombre.kyber.exceptions.InvalidKyberKeyException
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.interfaces.KyberKEMKey
 import asia.hombre.kyber.internal.KyberAgreement
+import asia.hombre.kyber.internal.asBuffer
+import asia.hombre.kyber.internal.sliceOfDecryptionKey
+import asia.hombre.kyber.internal.sliceOfEncryptionKey
+import asia.hombre.kyber.internal.sliceOfHash
+import asia.hombre.kyber.internal.sliceOfRandomSeed
+import asia.hombre.kyber.internal.update
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A class for ML-KEM Decapsulation Keys.
@@ -34,27 +43,17 @@ import kotlin.jvm.JvmStatic
  * @constructor Stores the Encryption Key, Decryption Key, Hash, and Random Seed composing the Decapsulation Key.
  * @author Ron Lauren Hombre
  */
-class KyberDecapsulationKey internal constructor(
-    /**
-     * The [KyberDecryptionKey].
-     */
-    override val key: KyberDecryptionKey,
-    /**
-     * The [KyberEncryptionKey].
-     */
-    val encryptionKey: KyberEncryptionKey,
-    hash: ByteArray,
-    randomSeed: ByteArray
-) : KyberKEMKey {
-    internal val hash: ByteArray = hash.copyOf()
-    internal val randomSeed: ByteArray = randomSeed.copyOf()
-
+class KyberDecapsulationKey internal constructor(parameter: KyberParameter, internal val bytes: ByteBuffer) : KyberKEMKey {
     init {
-        val ekHash = SHA3_256().digest(encryptionKey.fullBytes)
-
-        if(!ekHash.contentEquals(hash))
-            throw InvalidKyberKeyException("Hash Check failed! This is not a valid Decapsulation Key.")
+        require(bytes.size == parameter.DECAPSULATION_KEY_LENGTH)
     }
+
+    /** The K-PKE decryption key. */
+    override val key = KyberDecryptionKey(parameter, bytes.sliceOfDecryptionKey(parameter))
+    /** The embedded K-PKE encryption key. */
+    val encryptionKey = KyberEncryptionKey(parameter, bytes.sliceOfEncryptionKey(parameter))
+    internal val hash = bytes.sliceOfHash()
+    internal val randomSeed = bytes.sliceOfRandomSeed()
 
     /**
      * The [KyberParameter] associated with this [KyberDecapsulationKey].
@@ -68,16 +67,7 @@ class KyberDecapsulationKey internal constructor(
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() {
-            val output = ByteArray(key.parameter.DECAPSULATION_KEY_LENGTH)
-
-            key.keyBytes.copyInto(output)
-            encryptionKey.fullBytes.copyInto(output, key.keyBytes.size)
-            hash.copyInto(output, key.keyBytes.size + encryptionKey.fullBytes.size)
-            randomSeed.copyInto(output, output.size - randomSeed.size)
-
-            return output
-        }
+        get() = bytes.copyOf()
 
     companion object {
         /**
@@ -93,12 +83,14 @@ class KyberDecapsulationKey internal constructor(
         fun fromBytes(bytes: ByteArray): KyberDecapsulationKey {
             val parameter = KyberParameter.findByDecapsulationKeySize(bytes.size)
 
-            val decryptionKey = KyberDecryptionKey.fromBytes(bytes.copyOfRange(0, parameter.DECRYPTION_KEY_LENGTH))
-            val encryptionKey = KyberEncryptionKey.fromBytes(bytes.copyOfRange(parameter.DECRYPTION_KEY_LENGTH, parameter.DECRYPTION_KEY_LENGTH + parameter.ENCRYPTION_KEY_LENGTH))
-            val hash = bytes.copyOfRange(bytes.size - (2 * KyberConstants.N_BYTES), bytes.size - KyberConstants.N_BYTES)
-            val randomSeed = bytes.copyOfRange(bytes.size - KyberConstants.N_BYTES, bytes.size)
+            val buffer = bytes.copyOf().asBuffer()
+            val encryptionKey = buffer.sliceOfEncryptionKey(parameter)
+            val hash = buffer.sliceOfHash()
+            val ekHash = SHA3_256().apply { update(encryptionKey) }.digest()
+            if (!hash.contentEquals(ByteBuffer(ekHash)))
+                throw InvalidKyberKeyException("Hash Check failed! This is not a valid Decapsulation Key.")
 
-            return KyberDecapsulationKey(decryptionKey, encryptionKey, hash, randomSeed)
+            return KyberDecapsulationKey(parameter, ByteBuffer(bytes.copyOf()))
         }
     }
 
@@ -108,7 +100,7 @@ class KyberDecapsulationKey internal constructor(
      * @return [KyberDecapsulationKey]
      */
     fun copy(): KyberDecapsulationKey {
-        return KyberDecapsulationKey(key.copy(), encryptionKey, hash, randomSeed)
+        return KyberDecapsulationKey(parameter, ByteBuffer(bytes.copyOf()))
     }
 
     /**

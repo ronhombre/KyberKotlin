@@ -1,0 +1,4 @@
+headers = kyberrust.h
+headerFilter = kyberrust.h
+package = asia.hombre.kyber.rust
+staticLibraries = libkyberkotlinffi.a

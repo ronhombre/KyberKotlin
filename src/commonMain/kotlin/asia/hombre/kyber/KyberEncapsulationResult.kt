@@ -18,6 +18,8 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.internal.ByteBuffer
+
 import kotlin.jvm.JvmName
 
 /**
@@ -29,7 +31,7 @@ import kotlin.jvm.JvmName
  * @author Ron Lauren Hombre
  */
 class KyberEncapsulationResult internal constructor(
-    private val sharedSecretKey_: ByteArray,
+    private val sharedSecretKey_: ByteBuffer,
     private val cipherText_: KyberCipherText
 ) {
     /**
@@ -60,5 +62,5 @@ class KyberEncapsulationResult internal constructor(
      */
     @get:JvmName("getCipherText")
     val cipherText: KyberCipherText
-        get() = cipherText_.copy()
+        get() = cipherText_
 }

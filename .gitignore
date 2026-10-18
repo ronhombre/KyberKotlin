@@ -49,3 +49,10 @@ gradle.properties
 /.idea/
 /npm/kotlin/
 /npm/package.json
+
+### Exclude Kotlin Generated Artifacts ###
+.kotlin/
+kotlin-js-store/
+
+### Exclude Local Experimental Patches ###
+*.patch

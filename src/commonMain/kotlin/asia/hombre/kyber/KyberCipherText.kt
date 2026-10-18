@@ -18,8 +18,12 @@
 
 package asia.hombre.kyber
 
+import asia.hombre.kyber.internal.ByteBuffer
+
 import asia.hombre.kyber.exceptions.UnsupportedKyberVariantException
 import asia.hombre.kyber.internal.KyberAgreement
+import asia.hombre.kyber.internal.sliceOfEncodedCoefficients
+import asia.hombre.kyber.internal.sliceOfEncodedTerms
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
@@ -36,9 +40,15 @@ class KyberCipherText internal constructor(
      * The [KyberParameter] associated with this [KyberCipherText].
      */
     val parameter: KyberParameter,
-    internal val encodedCoefficients: ByteArray,
-    internal val encodedTerms: ByteArray
+    internal val bytes: ByteBuffer
 ) {
+    init {
+        require(bytes.size == parameter.CIPHERTEXT_LENGTH)
+    }
+
+    internal val encodedCoefficients = bytes.sliceOfEncodedCoefficients(parameter)
+    internal val encodedTerms = bytes.sliceOfEncodedTerms(parameter)
+
     /**
      * A copy of the Cipher Text in bytes.
      *
@@ -46,14 +56,7 @@ class KyberCipherText internal constructor(
      */
     @get:JvmName("getFullBytes")
     val fullBytes: ByteArray
-        get() {
-            val output = ByteArray(parameter.CIPHERTEXT_LENGTH)
-
-            encodedCoefficients.copyInto(output, 0)
-            encodedTerms.copyInto(output, encodedCoefficients.size)
-
-            return output
-        }
+        get() = bytes.copyOf()
 
     companion object {
         /**
@@ -68,13 +71,7 @@ class KyberCipherText internal constructor(
         fun fromBytes(bytes: ByteArray): KyberCipherText {
             val parameter = KyberParameter.findByCipherTextSize(bytes.size)
 
-            val encodedCoefficientsSize = KyberConstants.N_BYTES * (parameter.DU * parameter.K)
-
-            return KyberCipherText(
-                KyberParameter.findByCipherTextSize(bytes.size),
-                bytes.copyOfRange(0, encodedCoefficientsSize),
-                bytes.copyOfRange(encodedCoefficientsSize, bytes.size)
-            )
+            return KyberCipherText(parameter, ByteBuffer(bytes.copyOf()))
         }
     }
 
@@ -84,7 +81,7 @@ class KyberCipherText internal constructor(
      * @return [KyberCipherText]
      */
     fun copy(): KyberCipherText {
-        return KyberCipherText(this.parameter, encodedCoefficients.copyOf(), encodedTerms.copyOf())
+        return KyberCipherText(parameter, ByteBuffer(bytes.copyOf()))
     }
 
     /**
