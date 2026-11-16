@@ -131,7 +131,7 @@ kotlin {
         @Suppress("unused")
         getByName("jvmTest") {
             dependencies {
-                implementation("org.bouncycastle:bcprov-jdk15to18:1.86")
+                implementation("org.bouncycastle:bcprov-jdk15to18:1.87")
             }
         }
     }
